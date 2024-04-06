@@ -1,0 +1,85 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card.astro";
+import Badge from "../components/Badge.astro";
+import SocialPill from "../components/icons/SocialPill.astro";
+import Linkedin from "../components/icons/Linkedin.astro";
+import Github from "../components/icons/Github.astro";
+import Mail from "../components/icons/Mail.astro";
+import Experience from "../components/Experience.astro";
+import Container from "../components/Container.astro";
+import BriefCase from "../components/icons/BriefCase.astro";
+import BrainIcon from "../components/icons/BrainIcon.astro";
+import Projects from "../components/Projects.astro";
+import Footer from "../components/Footer.astro"
+---
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<Layout title="Stiven Portfolio">
+	<main class="px-4">
+		<Container class="py-44 pb-24">
+			<img
+				class="rounded-full size-12 mb-4"
+				src="https://i.pinimg.com/564x/fb/c2/18/fbc21803d22fd6ef78533b57fb9f5212.jpg"
+				alt="Stiven photo"
+			/>
+
+			<h1
+				class="text-white text-3xl md:text-4xl lg:text-5xl font-bold flex flex-row gap-x-4 pb-6 lg:pb-10 justify-start"
+			>
+				Hola! soy Stiven
+				<a
+					href="https://www.linkedin.com/in/stiven-colorado-370028220/"
+					target="_blank"
+					class="flex justify-start items-center"
+				>
+					<span class="flex justify-start"
+						><Badge>Disponbile para trabajar</Badge></span
+					>
+				</a>
+			</h1>
+			<h2 class="text-xl lg:text-xl text-wrap max-w-[700px]">
+				<span>+3 años de experiencia.</span>
+				<span class="opacity-80 text-purple-400"
+					>Desarrollador Backend.</span
+				>
+				<span class="text-red-100/90">De Palmira, Colombia.</span>
+				<span class="opacity-85"
+					>Entusiasta de la tecnología & Creacion de aplicaciones</span
+				>
+			</h2>
+
+			<nav class="flex gap-4 mt-8 flex-wrap">
+				<SocialPill
+					href="https://www.linkedin.com/in/stiven-colorado-370028220/"
+				>
+					<Linkedin class="size-4 md:size-6" />
+					Linkedin
+				</SocialPill>
+				<SocialPill href="https://github.com/StivenColorado">
+					<Github class="size-4 md:size-6" />
+					Github
+				</SocialPill>
+				<SocialPill href="https://github.com/StivenColorado">
+					<Mail class="size-4 md:size-6" />
+					stivenchoo@gmail.com
+				</SocialPill>
+			</nav>
+		</Container>
+
+		<Container id="experiencia">
+			<h2 class="text-2xl font-semibold mb-6 flex gap-x-3 items-center">
+				<BriefCase class="size-7" />
+				Experiencia Laboral
+			</h2>
+			<Experience />
+		</Container>
+		<Container id="proyectos">
+			<h2 class="text-2xl font-semibold mb-6 flex gap-x-3 items-center">
+				<BrainIcon class="size-6" />
+				Proyectos
+			</h2>
+			<Projects />
+		</Container>
+		<Footer />
+	</main>
+</Layout>

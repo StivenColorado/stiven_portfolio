@@ -1,0 +1,13 @@
+---
+import Linkedin from "./Linkedin.astro";
+---
+
+<a
+    href={Astro.props.href}
+    class={`
+    rounded-full border border-white/10 flex justify-center items-center gap-x-2 py-1 px-2 text-xs md:text-base md:py-3 md:px-2 bg-white/10 hover:scale-110 hover:bg-white/10
+    `}
+    target="_blank"
+>
+    <slot />
+</a>

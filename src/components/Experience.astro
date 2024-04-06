@@ -1,0 +1,45 @@
+---
+import Cube from "./Cube.astro";
+import ExperienceItem from "./ExperienceItem.astro";
+import QrIcon from "./QrIcon.astro";
+import KeyboardIcon from "./icons/KeyboardIcon.astro";
+const items = [
+    {
+        date: "Actualmente",
+        title: "Pasante Desarrollador de Software - Accedo Tech",
+        description:
+            "Actualmente me encuentro como pasante en accedo tech con el rol de desarrollador de software",
+        link: "#",
+    },
+    {
+        date: "Diciembre 2023",
+        title: "Desarrollador Backend",
+        contact: "+57 317 5404432",
+        description:
+            "Colorabore en un proyecto para el registro de asistencia de eventos. agregacion de contactos, lectura de QR",
+        link: "#",
+    },
+    {
+        date: "Abril 2021",
+        title: "Desarrollador en Isilab Foundation",
+        description:
+            "Hice parte en el Desarrollo de juegos logico-matematicos para niños con discapacidades cognitivas.",
+        link: "#",
+    },
+];
+---
+
+<ol class="relative border-s border-gray-200 dark:border-gray-700 pl-3">
+    {
+        items.map((item, index) => (
+            <li class="mb-10 ms-6">
+                <ExperienceItem {...item}>
+                    {console.log(index)}
+                    {index === 0 && <KeyboardIcon />}
+                    {index === 1 && <QrIcon />}
+                    {index === 2 && <Cube />}
+                </ExperienceItem>
+            </li>
+        ))
+    }
+</ol>

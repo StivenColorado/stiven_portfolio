@@ -1,0 +1,82 @@
+---
+import PythonIcon from "./icons/PythonIcon.astro"
+import DjangoIcon from "./icons/DjangoIcon.astro"
+import JsIcon from "./icons/JsIcon.astro"
+import 'flowbite'
+const TAGS = {
+    PYTHON:{
+        name:"python",
+        class:"text-yellow-500",
+        icon: PythonIcon,
+    },
+    DJANGO:{
+        name:"django",
+        class:" text-lime-500",
+        icon: DjangoIcon,
+    },
+    JAVASCRIPT:{
+        name:"Javascript",
+        class:"text-yellow-300",
+        icon: JsIcon,
+    }
+}
+
+const PROJECTS = [
+    {
+        title: "SAAD - Eye Tracking",
+        description:
+            "Sistema de automatizacion de analisis de datos, este software reduce el tiempo de organizacion y analisis que tomarian semanas de trabajo por parte de un analista, reduciendo tiempo y esfuerzo considerablemente",
+        link: "#",
+        github: "",
+        images: ["/projects/eyetracking_mockup.webp","/projects/eyetracking_p2.webp","/projects/eyetracking_p3.webp",],
+        tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.JAVASCRIPT],
+    },
+];
+---
+
+{
+    PROJECTS.map(({ title, description, tags , images}) => (
+        <article>
+            <h1 class="text-2xl font-semibold text-purple-300">{title}</h1>
+            <p class="text-xl  mb-4 text-pretty">{description}</p>
+            <ul class="flex gap-x-4 flex-row">
+                {tags.map((tag) => (
+                    <li >
+                      <span class=`flex gap-x-2 text-xs font-bold rounded-sm ${tag.class} py-1 px-2 items-center`>
+                        <tag.icon class="size-6 rounded-sm object-contain"/>
+                         { tag.name}
+                        </span>
+                    </li>
+                ))}
+            </ul>
+
+            <div id="animation-carousel" class="relative w-full" data-carousel="static">
+                <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
+                    {
+                        images.map((image) => (
+                            <div class="hidden duration-200 ease-linear" data-carousel-item>
+                                <img src={image} class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="...">
+                            </div>  
+                        ))
+                    }
+                </div>
+                <button type="button" class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+                        <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+                        </svg>
+                        <span class="sr-only">Previous</span>
+                    </span>
+                </button>
+                <button type="button" class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+                        <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                        </svg>
+                        <span class="sr-only">Next</span>
+                    </span>
+                </button>
+            </div>
+        </article>
+    ))
+}
