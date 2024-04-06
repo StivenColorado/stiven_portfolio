@@ -14,11 +14,11 @@ const { title } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="description" content="Astro description" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
+		<link rel="shorcut icon" href="icon.png" />
 		<title>{title}</title>
 	</head>
-	<body >
+	<body>
 		<div
 			class="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"
 		>
@@ -34,11 +34,13 @@ const { title } = Astro.props;
 	html {
 		font-family: "Onest Variable", sans-serif;
 		scroll-behavior: smooth;
+		min-width: 100vw;
 	}
 	body {
 		display: flex;
 		flex-direction: column;
 		background-color: #050505;
+		height: auto;
 		min-height: 100vh;
 	}
 	@media (prefers-reduced-motion: reduce) {

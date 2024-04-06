@@ -2,7 +2,18 @@
 import PythonIcon from "./icons/PythonIcon.astro"
 import DjangoIcon from "./icons/DjangoIcon.astro"
 import JsIcon from "./icons/JsIcon.astro"
+//icons jackets
+import PhpIcon from "./icons/PhpIcon.astro"
+import CssIcon from "./icons/CssIcon.astro"
+import HtmlIcon from "./icons/HtmlIcon.astro"
+import TailwindIcon from "./icons/TailwindIcon.astro"
+//icons vector
+import NodejsIcon from "./icons/NodejsIcon.astro"
+import ScssIcon from "./icons/ScssIcon.astro"
+import ReactIcon from "./icons/ReactIcon.astro"
+
 import 'flowbite'
+import Github from "./icons/Github.astro"
 const TAGS = {
     PYTHON:{
         name:"python",
@@ -18,28 +29,101 @@ const TAGS = {
         name:"Javascript",
         class:"text-yellow-300",
         icon: JsIcon,
-    }
+    },
+    PHP:{
+        name:"PHP",
+        class:"text-white",
+        icon: PhpIcon,
+    },
+    CSS:{
+        name:"css",
+        class:"text-white",
+        icon: CssIcon,
+    },
+    HTML:{
+        name:"HTML",
+        class:"text-white",
+        icon: HtmlIcon,
+    },
+    TAILWIND:{
+        name:"Tailwind",
+        class:"text-white",
+        icon: TailwindIcon,
+    },
+    NODEJS:{
+        name:"NodeJs",
+        class:"text-white",
+        icon: NodejsIcon,
+    },
+    SASS:{
+        name:"SASS",
+        class:"text-white",
+        icon: ScssIcon,
+    },
+    REACT:{
+        name:"React",
+        class:"text-white",
+        icon: ReactIcon,
+    },
 }
 
 const PROJECTS = [
     {
         title: "SAAD - Eye Tracking",
         description:
-            "Sistema de automatizacion de analisis de datos, este software reduce el tiempo de organizacion y analisis que tomarian semanas de trabajo por parte de un analista, reduciendo tiempo y esfuerzo considerablemente",
-        link: "#",
+            "Sistema de automatizacion de analisis de datos, este software reduce el tiempo de organizacion y analisis que tomarian semanas de trabajo por parte de un analista, reduciendo considerablemente el tiempo y esfuerzo.",
+        link: "",
         github: "",
-        images: ["/projects/eyetracking_mockup.webp","/projects/eyetracking_p2.webp","/projects/eyetracking_p3.webp",],
-        tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.JAVASCRIPT],
+        images: ["/projects/eyetracking/eyetracking_mockup.webp","/projects/eyetracking/eyetracking_p2.webp","/projects/eyetracking/eyetracking_p3.webp",],
+        videos:["/projects/eyetracking/eyetrackingVideo.mp4"],
+        tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.JAVASCRIPT, TAGS.CSS],
+    },
+    {
+        title: "Simulacion de Tienda de sacos",
+        description:
+            "Proyecto de simulación de una tienda online especializada en la venta de sacos de diferentes estilos, materiales y tamaños. Esta plataforma ofrece a los usuarios una experiencia realista para explorar y comprar sacos desde la comodidad de sus hogares.",
+        link: "",
+        github: "",
+        images: ["/projects/jacket/jacket_p3.png","/projects/jacket/jacket_p1.png","/projects/jacket/jacket_p2.png","/projects/jacket/jacket_p4.png","/projects/jacket/jacket_p5.png"],
+        videos:[],
+        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.HTML, TAGS.CSS],
+    },
+    {
+        title: "Pokemon consumer API",
+        description: "Este proyecto consiste en un consumidor de la API de Pokémon. Permite mostrar todos los Pokémon disponibles y al seleccionar uno, muestra información detallada sobre su tipo y habilidades. Además, la visualización de las habilidades está restringida a usuarios autenticados. Los usuarios pueden registrarse y al hacerlo, podrán ver la información detallada del Pokémon que deseen.",
+         link: "https://pokeapi.sweetmym.com",
+        github: "https://github.com/StivenColorado/pokemon-api-consumer",
+        images: ["/projects/pokemon/pokemon_p4.webp","/projects/pokemon/pokemon_p1.webp","/projects/pokemon/pokemon_p2.webp","/projects/pokemon/pokemon_p3.webp",],
+        videos:[],
+        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.TAILWIND],
+    },
+    {
+        title: "Typing Exercise ( Building )",
+        description: "Te gusta practicar mecanografia?, esta mini aplicacion es para ti!. ⌨️",
+         link: "",
+        github: "https://github.com/StivenColorado/typing-exercise",
+        images: ["/projects/typing/typing_p3.webp","/projects/typing/typing_p2.webp","/projects/typing/typing_p1.webp",],
+        videos:[],
+        tags: [TAGS.JAVASCRIPT, TAGS.CSS],
+    },
+    {
+        title: "Vector Randy ( Building )",
+        description: "Vector_randy es una aplicación móvil diseñada específicamente para un artista profesional de dibujos vectoriales. Esta aplicación permite al artista administrar y mostrar su colección de dibujos de forma segura y accesible para que las personas puedan disfrutar de su arte sin modificar las imágenes originales.",
+         link: "",
+        github: "",
+        images: ["/projects/vector/vector_p3.webp","/projects/vector/vector_p2.webp","/projects/vector/vector_p1.webp",],
+        videos:[],
+        tags: [TAGS.NODEJS, TAGS.REACT, TAGS.JAVASCRIPT, TAGS.SASS, TAGS.HTML ],
     },
 ];
 ---
 
 {
-    PROJECTS.map(({ title, description, tags , images}) => (
-        <article>
-            <h1 class="text-2xl font-semibold text-purple-300">{title}</h1>
-            <p class="text-xl  mb-4 text-pretty">{description}</p>
-            <ul class="flex gap-x-4 flex-row">
+    PROJECTS.map(({ title, description, tags , images, videos, link, github}) => (
+        <article class="mb-10">
+            <h1 class="text-xl font-semibold text-purple-400 mb-2">{title}</h1>
+            <p class="text-sm mb-4 text-pretty">{description}</p>
+            <ul class="flex gap-x-4 flex-row py-4 flex-wrap">
                 {tags.map((tag) => (
                     <li >
                       <span class=`flex gap-x-2 text-xs font-bold rounded-sm ${tag.class} py-1 px-2 items-center`>
@@ -49,14 +133,35 @@ const PROJECTS = [
                     </li>
                 ))}
             </ul>
-
+            <div class="w-full flex flex-row justify-start items-center mb-2 flex-wrap">
+            {
+                link && (
+                    <a href={link} class="flex underline text-sm text-sky-200 p-2 w-auto" target="_blank">{link}</a>
+                )
+            }
+            {
+                github && (
+                    <span class="h-full flex items-center bg-purple-950/50 rounded-full p-1">
+                        <Github class="size-4"/>   
+                        <a href={github} class="flex underline text-xs text-sky-200 p-1 w-auto" target="_blank">{github}</a>
+                    </span>
+                    )
+            }
+            </div>
             <div id="animation-carousel" class="relative w-full" data-carousel="static">
                 <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
                     {
                         images.map((image) => (
                             <div class="hidden duration-200 ease-linear" data-carousel-item>
-                                <img src={image} class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="...">
+                                <img src={image} class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..." />
                             </div>  
+                        ))
+                    }
+                    {
+                        videos.map((video) => (
+                            <div class="hidden duration-200 ease-linear z-0" data-carousel-item>
+                                <video autoplay muted controls src={video} class="absolute block w-full h-full object-contain -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" />
+                            </div>
                         ))
                     }
                 </div>

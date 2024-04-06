@@ -22,9 +22,10 @@ const { title, description, link, date, contact } = Astro.props;
     {title}
     {
         contact && (
-            <span class="bg-orange-200 text-blue-950 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-white ms-3 cursor-default">
-                Contacto: {contact}
-            </span>
+            
+        <a href="https://api.whatsapp.com/send?phone=573175404432" target="_blank" class="bg-orange-200 text-blue-950 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-white ms-3 cursor-pointer" title="Contactar a Alejandro">
+                {contact}
+            </a>
         )
     }
 </h3>
