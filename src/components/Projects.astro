@@ -99,7 +99,7 @@ const PROJECTS = [
     },
     {
         title: "Typing Exercise ( Building )",
-        description: "Te gusta practicar mecanografia?, esta mini aplicacion es para ti!. ⌨️",
+        description: "Diseñada para aquellos que disfrutan practicar mecanografía y mejorar su velocidad y precisión al escribir. Esta aplicación ofrece ejercicios de mecanografía divertidos y desafiantes para ayudar a los usuarios a perfeccionar sus habilidades de escritura. esta mini aplicacion es para ti!. ⌨️",
          link: "",
         github: "https://github.com/StivenColorado/typing-exercise",
         images: ["/projects/typing/typing_p3.webp","/projects/typing/typing_p2.webp","/projects/typing/typing_p1.webp",],
@@ -122,7 +122,7 @@ const PROJECTS = [
     PROJECTS.map(({ title, description, tags , images, videos, link, github}) => (
         <article class="mb-10">
             <h1 class="text-xl font-semibold text-purple-400 mb-2">{title}</h1>
-            <p class="text-sm mb-4 text-pretty">{description}</p>
+            <p class="text-sm mb-4 text-pretty text-white">{description}</p>
             <ul class="flex gap-x-4 flex-row py-4 flex-wrap">
                 {tags.map((tag) => (
                     <li >
