@@ -11,6 +11,7 @@ import TailwindIcon from "./icons/TailwindIcon.astro"
 import NodejsIcon from "./icons/NodejsIcon.astro"
 import ScssIcon from "./icons/ScssIcon.astro"
 import ReactIcon from "./icons/ReactIcon.astro"
+import AstroIcon from "./icons/AstroIcon.astro"
 
 import 'flowbite'
 import Github from "./icons/Github.astro"
@@ -65,6 +66,11 @@ const TAGS = {
         class:"text-white",
         icon: ReactIcon,
     },
+    ASTRO:{
+        name:"Astro",
+        class:"text-white",
+        icon:AstroIcon,
+    }
 }
 
 const PROJECTS = [
@@ -95,16 +101,16 @@ const PROJECTS = [
         github: "https://github.com/StivenColorado/pokemon-api-consumer",
         images: ["/projects/pokemon/pokemon_p4.webp","/projects/pokemon/pokemon_p1.webp","/projects/pokemon/pokemon_p2.webp","/projects/pokemon/pokemon_p3.webp",],
         videos:[],
-        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.TAILWIND],
+        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.TAILWIND, TAGS.ASTRO],
     },
     {
-        title: "Typing Exercise ( Building )",
-        description: "Diseñada para aquellos que disfrutan practicar mecanografía y mejorar su velocidad y precisión al escribir. Esta aplicación ofrece ejercicios de mecanografía divertidos y desafiantes para ayudar a los usuarios a perfeccionar sus habilidades de escritura. esta mini aplicacion es para ti!. ⌨️",
-         link: "",
-        github: "https://github.com/StivenColorado/typing-exercise",
-        images: ["/projects/typing/typing_p3.webp","/projects/typing/typing_p2.webp","/projects/typing/typing_p1.webp",],
+        title: "Banco de proyectos Soft-PAC",
+        description: "El Banco de Proyectos es una plataforma para el Centro de Biotecnología Industrial (CBI) de Palmira, que vincula las necesidades de proyectos formativos con las habilidades de los aprendices. Abierto a clientes externos, garantiza la calidad de los proyectos mediante la colaboración del equipo del Servicio Nacional de Aprendizaje (SENA). Promueve la colaboración interdisciplinaria y la certificación a través de proyectos relevantes y de alta calidad. ",
+        link: "https://sweetmym.com",
+        github: "",
+        images: ["/projects/pac/pac_2.webp","/projects/pac/pac.webp","/projects/pac/pac_3.webp"],
         videos:[],
-        tags: [TAGS.JAVASCRIPT, TAGS.CSS],
+        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.TAILWIND, TAGS.ASTRO],
     },
     {
         title: "Vector Randy ( Building )",
@@ -114,6 +120,15 @@ const PROJECTS = [
         images: ["/projects/vector/vector_p3.webp","/projects/vector/vector_p2.webp","/projects/vector/vector_p1.webp",],
         videos:[],
         tags: [TAGS.NODEJS, TAGS.REACT, TAGS.JAVASCRIPT, TAGS.SASS, TAGS.HTML ],
+    },
+    {
+        title: "Typing Exercise ( Building )",
+        description: "Diseñada para aquellos que disfrutan practicar mecanografía y mejorar su velocidad y precisión al escribir. Esta aplicación ofrece ejercicios de mecanografía divertidos y desafiantes para ayudar a los usuarios a perfeccionar sus habilidades de escritura. esta mini aplicacion es para ti!. ⌨️",
+         link: "",
+        github: "https://github.com/StivenColorado/typing-exercise",
+        images: ["/projects/typing/typing_p3.webp","/projects/typing/typing_p2.webp","/projects/typing/typing_p1.webp",],
+        videos:[],
+        tags: [TAGS.JAVASCRIPT, TAGS.CSS],
     },
 ];
 ---
