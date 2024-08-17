@@ -2,13 +2,21 @@
 import Cube from "./Cube.astro";
 import ExperienceItem from "./ExperienceItem.astro";
 import QrIcon from "./QrIcon.astro";
+import BrainIcon from "./icons/BrainIcon.astro";
 import KeyboardIcon from "./icons/KeyboardIcon.astro";
 const items = [
     {
-        date: "Actualmente",
+        date: "Agosto 1 - Actualmente",
+        title: "Practicante Desarrollador de Software - Sena sennova",
+        description:
+            "Actualmente hago parte del equipo sennova brindando apoyo en el area digital | Python | Javascript",
+        link: "#",
+    },
+    {
+        date: "Abril 2024 - Junio 2024",
         title: "Practicante Desarrollador de Software - Accedo Technologies",
         description:
-            "Actualmente estoy participando como practicante en Accedo Technologies con el rol de desarrollador de software.",
+            "Participe como practicante en Accedo Technologies con el rol de desarrollador de software. uso de Laravel - php | VueJs",
         link: "#",
     },
     {
@@ -35,9 +43,10 @@ const items = [
             <li class="mb-10 ms-6">
                 <ExperienceItem {...item}>
                     {console.log(index)}
-                    {index === 0 && <KeyboardIcon />}
-                    {index === 1 && <QrIcon />}
-                    {index === 2 && <Cube />}
+                    {index === 0 && <BrainIcon />}
+                    {index === 1 && <KeyboardIcon />}
+                    {index === 2 && <QrIcon />}
+                    {index === 3 && <Cube />}
                 </ExperienceItem>
             </li>
         ))
