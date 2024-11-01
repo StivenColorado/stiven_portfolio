@@ -12,82 +12,112 @@ import ScssIcon from "./icons/ScssIcon.astro";
 import ReactIcon from "./icons/ReactIcon.astro";
 import AstroIcon from "./icons/AstroIcon.astro";
 import MysqlIcon from "./icons/MysqlIcon.astro";
-import 'flowbite';
+import "flowbite";
 import Github from "./icons/Github.astro";
 
 const TAGS = {
-    PYTHON:{
-        name:"python",
-        class:"text-yellow-500",
+    PYTHON: {
+        name: "python",
+        class: "text-yellow-500",
         icon: PythonIcon,
     },
-    DJANGO:{
-        name:"django",
-        class:" text-lime-500",
+    DJANGO: {
+        name: "django",
+        class: " text-lime-500",
         icon: DjangoIcon,
     },
-    JAVASCRIPT:{
-        name:"Javascript",
-        class:"text-yellow-300",
+    JAVASCRIPT: {
+        name: "Javascript",
+        class: "text-yellow-300",
         icon: JsIcon,
     },
-    PHP:{
-        name:"PHP",
-        class:"text-white",
+    PHP: {
+        name: "PHP",
+        class: "text-white",
         icon: PhpIcon,
     },
-    CSS:{
-        name:"css",
-        class:"text-white",
+    CSS: {
+        name: "css",
+        class: "text-white",
         icon: CssIcon,
     },
-    HTML:{
-        name:"HTML",
-        class:"text-white",
+    HTML: {
+        name: "HTML",
+        class: "text-white",
         icon: HtmlIcon,
     },
-    TAILWIND:{
-        name:"Tailwind",
-        class:"text-white",
+    TAILWIND: {
+        name: "Tailwind",
+        class: "text-white",
         icon: TailwindIcon,
     },
-    NODEJS:{
-        name:"NodeJs",
-        class:"text-white",
+    NODEJS: {
+        name: "NodeJs",
+        class: "text-white",
         icon: NodejsIcon,
     },
-    SASS:{
-        name:"SASS",
-        class:"text-white",
+    SASS: {
+        name: "SASS",
+        class: "text-white",
         icon: ScssIcon,
     },
-    REACT:{
-        name:"React",
-        class:"text-white",
+    REACT: {
+        name: "React",
+        class: "text-white",
         icon: ReactIcon,
     },
-    ASTRO:{
-        name:"Astro",
-        class:"text-white",
-        icon:AstroIcon,
+    ASTRO: {
+        name: "Astro",
+        class: "text-white",
+        icon: AstroIcon,
     },
-    MYSQL:{
-        name:"Mysql",
-        class:"text-white",
-        icon:MysqlIcon,
-    }
-    
-}
+    MYSQL: {
+        name: "Mysql",
+        class: "text-white",
+        icon: MysqlIcon,
+    },
+};
 
 const PROJECTS = [
-{
+    {
+        title: "App generador de codigos QR",
+        description:
+            "Con el principal objetivo de generar codigos qr sin anuncios se Desarrollo la aplicacion para generar codigos sin limites 🚀.",
+        link: "",
+        github: "",
+        images: [
+            "/projects/qrcodegenerator/qrcode1.png",
+            "/projects/qrcodegenerator/qrcode2.png"
+        ],
+        videos: [],
+        tags: [TAGS.ASTRO,TAGS.NODEJS,TAGS.MYSQL, TAGS.TAILWIND],
+    },
+    {
+        title: "App de asistencia, generacion de informe para Foro economico - Economias populares en la ciudad de Palmira",
+        description:
+            "Aplicacion web para envio de correos masivos, cada correo contiene un codigo qr para los usuarios registrados con el fin de registrar asistencia el dia del evento, esta aplicacion permite monitorear a quien se envio el correo, escaneo y lectura de codigos QR y generacion de informe de asistentes",
+        link: "",
+        github: "",
+        images: [
+            "/projects/foroeconomico/foro1.png",
+            "/projects/foroeconomico/foro2.png",
+            "/projects/foroeconomico/foro3.png",
+        ],
+        videos: [],
+        tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.MYSQL, TAGS.TAILWIND],
+    },
+    {
         title: "EmprendeAgenda",
         description:
             "Con el fin de llevar un registro y organizacion de agenda en un estudio fotografico, nace emprendeAgenda, el cual permite a cada participante del estudio registrarse y agendar una cita en los dias disponibles.",
         link: "",
         github: "",
-        images: ["/projects/emprendeagenda/agenda1.png","/projects/emprendeagenda/agenda2.png","/projects/emprendeagenda/agenda3.png"],
-        videos:[],
+        images: [
+            "/projects/emprendeagenda/agenda1.png",
+            "/projects/emprendeagenda/agenda2.png",
+            "/projects/emprendeagenda/agenda3.png",
+        ],
+        videos: [],
         tags: [TAGS.PHP, TAGS.TAILWIND, TAGS.MYSQL],
     },
     {
@@ -96,8 +126,12 @@ const PROJECTS = [
             "Sistema de automatizacion de analisis de datos, este software reduce el tiempo de organizacion y analisis que tomarian semanas de trabajo por parte de un analista, reduciendo considerablemente el tiempo y esfuerzo.",
         link: "",
         github: "",
-        images: ["/projects/eyetracking/eyetracking_mockup.webp","/projects/eyetracking/eyetracking_p2.webp","/projects/eyetracking/eyetracking_p3.webp",],
-        videos:["/projects/eyetracking/eyetrackingVideo.mp4"],
+        images: [
+            "/projects/eyetracking/eyetracking_mockup.webp",
+            "/projects/eyetracking/eyetracking_p2.webp",
+            "/projects/eyetracking/eyetracking_p3.webp",
+        ],
+        videos: ["/projects/eyetracking/eyetrackingVideo.mp4"],
         tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.JAVASCRIPT, TAGS.CSS],
     },
     {
@@ -106,36 +140,58 @@ const PROJECTS = [
             "Proyecto de simulación de una tienda online especializada en la venta de sacos de diferentes estilos, materiales y tamaños. Esta plataforma ofrece a los usuarios una experiencia realista para explorar y comprar sacos desde la comodidad de sus hogares.",
         link: "",
         github: "https://github.com/StivenColorado/jackets_online_store",
-        images: ["/projects/jacket/jacket_p3.png","/projects/jacket/jacket_p1.png","/projects/jacket/jacket_p2.png","/projects/jacket/jacket_p4.png","/projects/jacket/jacket_p5.png"],
-        videos:[],
-        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.HTML, TAGS.CSS],
+        images: [
+            "/projects/jacket/jacket_p3.png",
+            "/projects/jacket/jacket_p1.png",
+            "/projects/jacket/jacket_p2.png",
+            "/projects/jacket/jacket_p4.png",
+            "/projects/jacket/jacket_p5.png",
+        ],
+        videos: [],
+        tags: [TAGS.PHP, TAGS.JAVASCRIPT, TAGS.HTML, TAGS.CSS],
     },
     {
         title: "Pokemon consumer API",
-        description: "Este proyecto consiste en un consumidor de la API de Pokémon. Permite mostrar todos los Pokémon disponibles y al seleccionar uno, muestra información detallada sobre su tipo y habilidades. Además, la visualización de las habilidades está restringida a usuarios autenticados. Los usuarios pueden registrarse y al hacerlo, podrán ver la información detallada del Pokémon que deseen.",
-         link: "https://pokeapi.sweetmym.com",
+        description:
+            "Este proyecto consiste en un consumidor de la API de Pokémon. Permite mostrar todos los Pokémon disponibles y al seleccionar uno, muestra información detallada sobre su tipo y habilidades. Además, la visualización de las habilidades está restringida a usuarios autenticados. Los usuarios pueden registrarse y al hacerlo, podrán ver la información detallada del Pokémon que deseen.",
+        link: "https://pokeapi.sweetmym.com",
         github: "https://github.com/StivenColorado/pokemon-api-consumer",
-        images: ["/projects/pokemon/pokemon_p4.webp","/projects/pokemon/pokemon_p1.webp","/projects/pokemon/pokemon_p2.webp","/projects/pokemon/pokemon_p3.webp",],
-        videos:[],
-        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.TAILWIND, TAGS.ASTRO],
+        images: [
+            "/projects/pokemon/pokemon_p4.webp",
+            "/projects/pokemon/pokemon_p1.webp",
+            "/projects/pokemon/pokemon_p2.webp",
+            "/projects/pokemon/pokemon_p3.webp",
+        ],
+        videos: [],
+        tags: [TAGS.PHP, TAGS.JAVASCRIPT, TAGS.TAILWIND, TAGS.ASTRO],
     },
     {
         title: "Banco de proyectos Soft-PAC",
-        description: "El Banco de Proyectos es una plataforma para el Centro de Biotecnología Industrial (CBI) de Palmira, que vincula las necesidades de proyectos formativos con las habilidades de los aprendices. Abierto a clientes externos, garantiza la calidad de los proyectos mediante la colaboración del equipo del Servicio Nacional de Aprendizaje (SENA). Promueve la colaboración interdisciplinaria y la certificación a través de proyectos relevantes y de alta calidad. ",
+        description:
+            "El Banco de Proyectos es una plataforma para el Centro de Biotecnología Industrial (CBI) de Palmira, que vincula las necesidades de proyectos formativos con las habilidades de los aprendices. Abierto a clientes externos, garantiza la calidad de los proyectos mediante la colaboración del equipo del Servicio Nacional de Aprendizaje (SENA). Promueve la colaboración interdisciplinaria y la certificación a través de proyectos relevantes y de alta calidad. ",
         link: "https://sweetmym.com",
         github: "https://github.com/frankalessandro/Soft_PAC",
-        images: ["/projects/pac/pac_2.webp","/projects/pac/pac.webp","/projects/pac/pac_3.webp"],
-        videos:[],
-        tags: [TAGS.PHP,TAGS.JAVASCRIPT, TAGS.TAILWIND, TAGS.ASTRO],
+        images: [
+            "/projects/pac/pac_2.webp",
+            "/projects/pac/pac.webp",
+            "/projects/pac/pac_3.webp",
+        ],
+        videos: [],
+        tags: [TAGS.PHP, TAGS.JAVASCRIPT, TAGS.TAILWIND, TAGS.ASTRO],
     },
     {
         title: "Vector Randy ( Building )",
-        description: "Vector_randy es una aplicación móvil diseñada específicamente para un artista profesional de dibujos vectoriales. Esta aplicación permite al artista administrar y mostrar su colección de dibujos de forma segura y accesible para que las personas puedan disfrutar de su arte sin modificar las imágenes originales.",
-         link: "https://vector-randy.vercel.app",
+        description:
+            "Vector_randy es una aplicación móvil diseñada específicamente para un artista profesional de dibujos vectoriales. Esta aplicación permite al artista administrar y mostrar su colección de dibujos de forma segura y accesible para que las personas puedan disfrutar de su arte sin modificar las imágenes originales.",
+        link: "https://vector-randy.vercel.app",
         github: "https://github.com/StivenColorado/vector_randy",
-        images: ["/projects/vector/vector_p3.webp","/projects/vector/vector_p2.webp","/projects/vector/vector_p1.webp",],
-        videos:[],
-        tags: [TAGS.NODEJS, TAGS.REACT, TAGS.JAVASCRIPT, TAGS.SASS, TAGS.HTML ],
+        images: [
+            "/projects/vector/vector_p3.webp",
+            "/projects/vector/vector_p2.webp",
+            "/projects/vector/vector_p1.webp",
+        ],
+        videos: [],
+        tags: [TAGS.NODEJS, TAGS.REACT, TAGS.JAVASCRIPT, TAGS.SASS, TAGS.HTML],
     },
     // {
     //     title: "Typing Exercise ( Building )",
@@ -149,67 +205,145 @@ const PROJECTS = [
 ];
 ---
 
-{PROJECTS.map(({ title, description, tags, images, videos, link, github }, index: number) => (
-    <article class="mb-10 mx-auto w-full max-w-[1200px] p-4 bg-gray-900 rounded-lg shadow-lg">
-        <div class={`flex flex-col md:flex-row gap-4 md:gap-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-            {/* Slider Container */}
-            <div class="w-full md:w-1/2 h-[300px] md:h-[400px] relative">
-                <div id="animation-carousel" class="relative w-full h-full" data-carousel="static">
-                    <div class="relative h-full overflow-hidden rounded-lg">
-                        {images.map((image: string, imgIndex: number) => (
-                            <div class={`absolute inset-0 duration-200 ease-linear ${imgIndex === 0 ? "block" : "hidden"}`} data-carousel-item>
-                                <img src={image} class="block w-full h-full object-cover rounded-lg" alt="Proyecto imagen" />
+{
+    PROJECTS.map(
+        (
+            { title, description, tags, images, videos, link, github },
+            index: number,
+        ) => (
+            <article class="mb-10 mx-auto w-full max-w-[1200px] p-4 bg-gray-900 rounded-lg shadow-lg">
+                <div
+                    class={`flex flex-col md:flex-row gap-4 md:gap-8 ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}
+                >
+                    {/* Slider Container */}
+                    <div class="w-full md:w-1/2 h-[300px] md:h-[400px] relative">
+                        <div
+                            id="animation-carousel"
+                            class="relative w-full h-full"
+                            data-carousel="static"
+                        >
+                            <div class="relative h-full overflow-hidden rounded-lg">
+                                {images.map(
+                                    (image: string, imgIndex: number) => (
+                                        <div
+                                            class={`absolute inset-0 duration-200 ease-linear ${imgIndex === 0 ? "block" : "hidden"}`}
+                                            data-carousel-item
+                                        >
+                                            <img
+                                                src={image}
+                                                class="block w-full h-full object-cover rounded-lg"
+                                                alt="Proyecto imagen"
+                                            />
+                                        </div>
+                                    ),
+                                )}
+                                {videos.map(
+                                    (video: string, vidIndex: number) => (
+                                        <div
+                                            class={`absolute inset-0 duration-200 ease-linear ${images.length === 0 && vidIndex === 0 ? "block" : "hidden"}`}
+                                            data-carousel-item
+                                        >
+                                            <video
+                                                autoplay
+                                                muted
+                                                controls
+                                                src={video}
+                                                class="block w-full h-full object-contain rounded-lg"
+                                            />
+                                        </div>
+                                    ),
+                                )}
                             </div>
-                        ))}
-                        {videos.map((video: string, vidIndex: number) => (
-                            <div class={`absolute inset-0 duration-200 ease-linear ${images.length === 0 && vidIndex === 0 ? "block" : "hidden"}`} data-carousel-item>
-                                <video autoplay muted controls src={video} class="block w-full h-full object-contain rounded-lg" />
-                            </div>
-                        ))}
+                            {/* Slider Controls */}
+                            <button
+                                type="button"
+                                class="absolute top-1/2 left-2 transform -translate-y-1/2 z-30 p-2 bg-white/30 hover:bg-white/50 rounded-full"
+                                data-carousel-prev
+                            >
+                                <svg
+                                    class="w-4 h-4 text-white"
+                                    aria-hidden="true"
+                                    fill="none"
+                                    viewBox="0 0 6 10"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 1 1 5l4 4"
+                                    />
+                                </svg>
+                            </button>
+                            <button
+                                type="button"
+                                class="absolute top-1/2 right-2 transform -translate-y-1/2 z-30 p-2 bg-white/30 hover:bg-white/50 rounded-full"
+                                data-carousel-next
+                            >
+                                <svg
+                                    class="w-4 h-4 text-white"
+                                    aria-hidden="true"
+                                    fill="none"
+                                    viewBox="0 0 6 10"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M1 9 5 5 1 1"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    {/* Slider Controls */}
-                    <button type="button" class="absolute top-1/2 left-2 transform -translate-y-1/2 z-30 p-2 bg-white/30 hover:bg-white/50 rounded-full" data-carousel-prev>
-                        <svg class="w-4 h-4 text-white" aria-hidden="true" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
-                        </svg>
-                    </button>
-                    <button type="button" class="absolute top-1/2 right-2 transform -translate-y-1/2 z-30 p-2 bg-white/30 hover:bg-white/50 rounded-full" data-carousel-next>
-                        <svg class="w-4 h-4 text-white" aria-hidden="true" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 9 5 5 1 1" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
 
-            {/* Project Information */}
-            <div class="w-full md:w-1/2 flex flex-col justify-between space-y-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-purple-400 mb-4">{title}</h1>
-                    <p class="text-base mb-4 text-gray-200">{description}</p>
-                </div>
-                
-                {/* Technology Icons */}
-                <ul class="flex flex-wrap gap-2 mb-4">
-                    {tags.map((tag, tagIndex: number) => (
-                        <li class={`flex items-center gap-x-2 text-xs font-semibold rounded-lg ${tag.class} py-1 px-3`}>
-                            <tag.icon class="w-5 h-5" /> {tag.name}
-                        </li>
-                    ))}
-                </ul>
+                    {/* Project Information */}
+                    <div class="w-full md:w-1/2 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-purple-400 mb-4">
+                                {title}
+                            </h1>
+                            <p class="text-base mb-4 text-gray-200">
+                                {description}
+                            </p>
+                        </div>
 
-                {/* Links */}
-                <div class="flex gap-4 flex-wrap">
-                    {link && (
-                        <a href={link} class="underline text-sky-400 text-sm hover:text-sky-300" target="_blank">{link}</a>
-                    )}
-                    {github && (
-                        <a href={github} class="flex items-center gap-2 bg-purple-950/50 rounded-full px-3 py-1 text-sky-400 hover:text-sky-300 text-sm" target="_blank">
-                            <Github class="w-5 h-5" /> GitHub
-                        </a>
-                    )}
-                </div>
-            </div>
-        </div>
-    </article>
-))}
+                        {/* Technology Icons */}
+                        <ul class="flex flex-wrap gap-2 mb-4">
+                            {tags.map((tag, tagIndex: number) => (
+                                <li
+                                    class={`flex items-center gap-x-2 text-xs font-semibold rounded-lg ${tag.class} py-1 px-3`}
+                                >
+                                    <tag.icon class="w-5 h-5" /> {tag.name}
+                                </li>
+                            ))}
+                        </ul>
 
+                        {/* Links */}
+                        <div class="flex gap-4 flex-wrap">
+                            {link && (
+                                <a
+                                    href={link}
+                                    class="underline text-sky-400 text-sm hover:text-sky-300"
+                                    target="_blank"
+                                >
+                                    {link}
+                                </a>
+                            )}
+                            {github && (
+                                <a
+                                    href={github}
+                                    class="flex items-center gap-2 bg-purple-950/50 rounded-full px-3 py-1 text-sky-400 hover:text-sky-300 text-sm"
+                                    target="_blank"
+                                >
+                                    <Github class="w-5 h-5" /> GitHub
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </article>
+        ),
+    )
+}
