@@ -1,2 +1,3 @@
 # stiven_portfolio
-![image](https://github.com/StivenColorado/stiven_portfolio/assets/90488682/ca8f5bdc-c97f-4b09-9851-43fdad535e6e)
+<img width="2560" alt="image" src="https://github.com/user-attachments/assets/092fe8b4-f333-4da0-be6f-4d048c7d2587">
+
