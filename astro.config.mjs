@@ -5,11 +5,7 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
-  output: 'server', // Importante para el despliegue en Vercel
-  adapter: vercel(),
+  routes:[],
   integrations: [tailwind()],
-  redirects: {
-    '/Portfolio': '/Portfolio'
-  }
 });
 

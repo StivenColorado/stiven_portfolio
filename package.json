@@ -12,11 +12,11 @@
   "dependencies": {
     "@astrojs/check": "^0.5.10",
     "@astrojs/tailwind": "^5.1.0",
-    "@astrojs/vercel": "^7.8.2",
+    "@astrojs/vercel": "^8.0.1",
     "@fontsource-variable/onest": "^5.0.3",
     "@fontsource/onest": "^5.0.3",
-    "astro": "^4.5.16",
-    "flowbite": "^2.3.0",
+    "astro": "^5.0.9",
+    "flowbite": "^2.5.2",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.4"
   }
