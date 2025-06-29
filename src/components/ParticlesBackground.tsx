@@ -184,7 +184,7 @@ const ParticlesBackground: React.FC = () => {
         className="block w-full h-full"
         style={{
           display: 'block',
-          width: '100vw',
+          width: '99vw',
           height: '100vh',
           backgroundColor: 'transparent',
           position: 'absolute',
