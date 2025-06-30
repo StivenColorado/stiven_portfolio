@@ -12,7 +12,7 @@ export const EXPERIENCE: ExperienceItemType[] = [
     title: "Desarrollador de Software FullStack - Unlimitech Cloud",
     description:
       "Desarrollo y mantenimiento de funcionalidades frontend con React y MobX. Implementación de servicios backend en Node.js, PHP y WordPress (temas, plugins, APIs). Integración de APIs REST, manejo de estados complejos, trabajo con bases de datos (MySQL, PostgreSQL, MongoDB) y apoyo en infraestructura y despliegue. Uso de Git y metodologías ágiles SCRUM para garantizar la calidad del software.",
-    link: "#",
+    link: "https://unlimitech.cloud/",
   }
   ,
   {
@@ -20,7 +20,7 @@ export const EXPERIENCE: ExperienceItemType[] = [
     title: "Desarrollador de Software FullStack - GS PRO MASTER MOVING",
     description:
       "Desarrollador Full Stack con enfoque en Python/Django para backend y JavaScript/Tailwind en frontend. APIs REST con DDD, JWT, MySQL y S3. Diseño de interfaces responsivas y documentación con DRF Spectacular.",
-    link: "#",
+    link: "https://www.gs-pro-master-moving.com/",
   },
   {
     date: "Noviembre 2024 - Diciembre 2025",

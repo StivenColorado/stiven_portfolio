@@ -11,5 +11,6 @@ export interface ProjectType {
     github: string,
     images: string[],
     videos: string[],
-    tags: TagType[]
+    tags: TagType[],
+    gist?: string
 }

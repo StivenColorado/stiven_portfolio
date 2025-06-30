@@ -28,6 +28,7 @@ export const PROJECTS: ProjectType[] = [
     ],
     videos: [],
     tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.MYSQL, TAGS.TAILWIND],
+    gist: "https://gist.github.com/StivenColorado/ad53b430f65e8fbcbed1cb64283b15dc"
   },
   {
     title: "EmprendeAgenda",
@@ -42,6 +43,7 @@ export const PROJECTS: ProjectType[] = [
     ],
     videos: [],
     tags: [TAGS.PHP, TAGS.TAILWIND, TAGS.MYSQL],
+    gist: "https://gist.github.com/StivenColorado/46e56e4562cf6a694b67652b9ec8f5ee"
   },
   {
     title: "SAAD - Eye Tracking",
@@ -56,6 +58,7 @@ export const PROJECTS: ProjectType[] = [
     ],
     videos: ["/projects/eyetracking/eyetrackingVideo.mp4"],
     tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.JAVASCRIPT, TAGS.CSS],
+    gist: "https://gist.github.com/StivenColorado/ffa97ea66f19877153ee914d700ae9c3.js"
   },
   {
     title: "Simulación tienda de sacos",
@@ -77,7 +80,7 @@ export const PROJECTS: ProjectType[] = [
     title: "Pokémon API Consumer",
     description:
       "Consume la API de Pokémon. Autenticación para detalles.",
-    link: "https://pokeapi.sweetmym.com",
+    link: "https://pokemon-api-consumer.vercel.app/",
     github: "https://github.com/StivenColorado/pokemon-api-consumer",
     images: [
       "/projects/pokemon/pokemon_p4.webp",
@@ -92,7 +95,7 @@ export const PROJECTS: ProjectType[] = [
     title: "Banco de proyectos Soft-PAC",
     description:
       "Plataforma de vinculación de proyectos del SENA Palmira.",
-    link: "https://sweetmym.com",
+    link: "",
     github: "https://github.com/frankalessandro/Soft_PAC",
     images: [
       "/projects/pac/pac_2.webp",

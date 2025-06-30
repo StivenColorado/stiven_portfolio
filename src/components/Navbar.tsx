@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
                     {/* Footer del menú móvil */}
                     <div className="pt-6 mt-6 border-t border-gray-700">
                         <p className="text-xs text-gray-400 text-center">
-                            © 2025 MiApp. Todos los derechos reservados.
+                            © 2025 Stiven Colorado. Todos los derechos reservados.
                         </p>
                     </div>
                 </div>

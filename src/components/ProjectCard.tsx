@@ -2,8 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { type ProjectType } from "../types/types";
 import Tag from "./Tag";
-
-
+import Github from "./icons/Github";
 
 interface MediaItem {
     type: 'image' | 'video';
@@ -105,7 +104,10 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick }) => {
                             rel="noopener noreferrer"
                             className="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-center py-2 px-4 rounded-lg transition-colors text-sm font-medium"
                         >
-                            Código
+ <div className="flex items-center justify-center gap-2">
+                                <Github className="w-4 h-4" />
+                                <span>Repositorio</span>
+                            </div>
                         </a>
                     )}
                 </div>
