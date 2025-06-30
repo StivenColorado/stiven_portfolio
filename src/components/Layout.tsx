@@ -8,7 +8,7 @@ interface Props {
 
 const Layout: React.FC<Props> = ({ children }) => {
     return (
-        <div className="relative min-h-screen overflow-hidden">
+        <div className="relative h-screen flex flex-col overflow-hidden">
             {/* Fondo negro base */}
             <div className="fixed inset-0 bg-black -z-10" />
             
@@ -18,9 +18,9 @@ const Layout: React.FC<Props> = ({ children }) => {
             </div>
             
             {/* Contenido principal */}
-            <div className="relative z-10 min-h-screen flex flex-col">
+            <div className="relative z-10 flex flex-col h-full">
                 <Navbar />
-                <main className="flex-grow">{children}</main>
+                <main className="flex-1 overflow-y-auto">{children}</main>
             </div>
         </div>
     );

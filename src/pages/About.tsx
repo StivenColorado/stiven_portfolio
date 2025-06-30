@@ -14,11 +14,10 @@ const About: React.FC = () => {
     return (
         <Layout>
             <motion.div
-                className="md:pt-80 lg:pt-0 py-16 px-4 sm:px-6 lg:px-8 h-full overflow-y-auto"
+                className="w-full py-12 px-4 sm:px-6 lg:px-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8 }}
-                style={{ WebkitOverflowScrolling: 'touch' }}
             >
                 <div className="max-w-7xl mx-auto">
                     <motion.div
