@@ -7,7 +7,7 @@ import ExperienceTimeline from "../components/ExperienceItemTimeline"
 const Home: React.FC = () => {
   return (
     <Layout>
-      <div className="min-h-screen  py-16 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen  py-16 px-4 sm:px-6 lg:px-8 select-none">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -42,7 +42,7 @@ export const EXPERIENCE: ExperienceItemType[] = [
     title: "Practicante Desarrollador de Software - Accedo Technologies",
     description:
       "PHP, Laravel, migraciones, entidades y DataTables con Vue.js. Simulación de tienda con autenticación y base de datos.",
-    link: "#",
+    link: "https://www.linkedin.com/company/accedo-technologies/",
   },
   {
     date: "Diciembre 2023",

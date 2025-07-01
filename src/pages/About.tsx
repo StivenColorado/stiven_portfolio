@@ -14,7 +14,7 @@ const About: React.FC = () => {
     return (
         <Layout>
             <motion.div
-                className="w-full py-12 px-4 sm:px-6 lg:px-8"
+                className="w-full py-12 px-4 sm:px-6 lg:px-8 select-none"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8 }}
