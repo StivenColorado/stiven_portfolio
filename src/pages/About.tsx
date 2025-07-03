@@ -70,7 +70,7 @@ const About: React.FC = () => {
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         'Python', 'PHP', 'Node.js', 'Django', 'MySQL', 'MongoDB',
-                                        'RESTful APIs', 'JWT', 'OAuth', 'AWS S3', 'Docker', 'Git'
+                                        'RESTful APIs', 'JWT', 'OAuth', 'AWS S3 EC2 - EBS', 'Docker', 'Git'
                                     ].map((skill, index) => (
                                         <span
                                             key={index}
