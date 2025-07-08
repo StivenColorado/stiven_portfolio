@@ -5,7 +5,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "App generador de códigos QR",
     description:
-      "Genera códigos QR ilimitados sin anuncios 🚀.",
+      "Desarrollé un generador de códigos QR ilimitados con Astro y Node.js: procesamiento en tiempo real, almacenamiento en MySQL, interfaz responsiva con Tailwind CSS, opciones de personalización de color y logo, y exportación en múltiples formatos sin anuncios.",
     link: "",
     github: "",
     images: [
@@ -18,7 +18,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "Foro económico Palmira",
     description:
-      "Envío de correos masivos con QR y control de asistencia.",
+      "Implementé un sistema en Django para envíos masivos de correos con QR para registro de asistentes, gestión de inscripciones y generación automática de reportes en EXCEL, con diseño responsive usando Tailwind CSS y base de datos MySQL.",
     link: "",
     github: "",
     images: [
@@ -33,7 +33,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "EmprendeAgenda",
     description:
-      "Sistema de agendamiento para estudios fotográficos.",
+      "Desarrollé un sistema de agendamiento en PHP con MySQL y Tailwind CSS para la Cámara de Comercio de Palmira, incluyendo CRUD de citas, validación de disponibilidad, panel de administración intuitivo.",
     link: "",
     github: "",
     images: [
@@ -48,7 +48,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "SAAD - Eye Tracking",
     description:
-      "Automatiza análisis de datos de Eye Tracking.",
+      "Automatización de migración de millones de registros con Python y Django: procesamiento en batch de archivos Excel con Pandas, almacenamiento eficiente en MySQL, y panel interactivo en JavaScript para análisis y visualización de datos de Eye Tracking en tiempo récord.",
     link: "",
     github: "https://github.com/StivenColorado/eyetracking",
     images: [
@@ -63,7 +63,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "Simulación tienda de sacos",
     description:
-      "Tienda online simulada para venta de sacos.",
+      "Creé una tienda online simulada en PHP y JavaScript para venta de sacos, con catálogo dinámico, carrito de compras, simulación de pasarela de pago y diseño responsive en HTML/CSS.",
     link: "",
     github: "https://github.com/StivenColorado/jackets_online_store",
     images: [
@@ -79,7 +79,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "Pokémon API Consumer",
     description:
-      "Consume la API de Pokémon. Autenticación para detalles.",
+      "Desarrollé un cliente en Astro y JavaScript para consumir la PokéAPI: autenticación, paginación, filtrado por tipo y detalles, cache local con IndexedDB y diseño modular en PHP y Tailwind CSS.",
     link: "https://pokemon-api-consumer.vercel.app/",
     github: "https://github.com/StivenColorado/pokemon-api-consumer",
     images: [
@@ -94,7 +94,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "Banco de proyectos Soft-PAC",
     description:
-      "Plataforma de vinculación de proyectos del SENA Palmira.",
+      "Implementé una plataforma en Astro y PHP para vincular proyectos del SENA Palmira: gestión de proyectos, roles de usuario, búsqueda avanzada, subida de documentos y diseño responsive con Tailwind CSS.",
     link: "",
     github: "https://github.com/frankalessandro/Soft_PAC",
     images: [
@@ -108,7 +108,7 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "Vector Randy (Building)",
     description:
-      "App móvil para artista de vectores. Muestra su obra.",
+      "Desarrollé una PWA mobile-first en React y Node.js para mostrar obras de arte vectorial: galería interactiva, filtros dinámicos, navegación offline y estilos con SASS.",
     link: "https://vector-randy.vercel.app",
     github: "https://github.com/StivenColorado/vector_randy",
     images: [
