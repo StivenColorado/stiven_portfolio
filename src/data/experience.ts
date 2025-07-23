@@ -18,15 +18,14 @@ export const EXPERIENCE: ExperienceItemType[] = [
   {
     date: "Marzo 2025 - Junio 2025",
     title: "Desarrollador de Software FullStack - GS PRO MASTER MOVING",
-    description:
-      "Desarrollador Full Stack con enfoque en Python/Django para backend y JavaScript/Tailwind en frontend. APIs REST con DDD, JWT, MySQL y S3. Diseño de interfaces responsivas y documentación con DRF Spectacular.",
+    description: "Desarrollador Full Stack con experiencia en Python/Django para el backend y JavaScript/Tailwind CSS en el frontend. Implementación de APIs RESTful aplicando Domain-Driven Design (DDD), autenticación con JWT y persistencia en MySQL. Despliegue en DigitalOcean, utilizando Spaces (compatibles con S3) para almacenamiento de archivos. Diseño de interfaces responsivas y documentación automatizada con DRF Spectacular.",
     link: "https://www.gs-pro-master-moving.com/",
   },
   {
     date: "Noviembre 2024 - Diciembre 2025",
     title: "Contratista Desarrollador en Comercializadora la rocka SAS.",
     description:
-      "Automatización de procesos manuales mediante Python, OpenCV, OpenPyXL y Pandas. Generación de informes desde archivos Excel. GUI con Tkinter para mejor usabilidad.",
+      "Automatización de procesos manuales mediante Python, OpenCV, OCR (tesseract), OpenPyXL y Pandas. Generación de informes desde archivos Excel. GUI con Tkinter para mejor usabilidad.",
     link: "#",
     contact: "+57 324 2818821",
   },
@@ -34,7 +33,8 @@ export const EXPERIENCE: ExperienceItemType[] = [
     date: "Agosto 2024 - Enero 2025",
     title: "Practicante Desarrollador de Software - SENA Sennova",
     description:
-      "Sistema de agendamiento con React.js y NodeJs para CámaraStudio. Automatización de asistencias con Python, QR, Django y Pandas.",
+      "Sistema de agendamiento desarrollado con React.js y Node.js para CámaraStudio. Se implementó automatización de asistencias mediante Python, utilizando códigos QR, Django y Pandas. El sistema fue desplegado en un VPS con Debian como sistema operativo, utilizando Nginx para servir archivos estáticos y Gunicorn como servidor de aplicaciones."
+    ,
     link: "#",
   },
   {
