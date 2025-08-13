@@ -261,8 +261,7 @@ const ParticlesBackground: React.FC = () => {
         className="absolute bottom-2 right-2 text-xs text-blue-400 opacity-10 pointer-events-none select-none"
         style={{ fontFamily: 'monospace' }}
       >
-        🚀 Optimized for speed
-      </div>
+      </div>  
     </div>
   );
 };
