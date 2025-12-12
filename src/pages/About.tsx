@@ -107,7 +107,7 @@ const About: React.FC = () => {
                                     {[
                                         'Patrones de Diseño', 'Principios SOLID', 'Domain-Driven Design (DDD)',
                                         'Arquitectura Hexagonal', 'Arquitectura de Software', 
-                                        'Levantamiento de Información', 'Análisis de Requerimientos'
+                                        'Levantamiento de Información', 'Análisis de Requerimientos','Patron Backend for Frontend','IaC'
                                     ].map((skill, index) => (
                                         <span
                                             key={index}
