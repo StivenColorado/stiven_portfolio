@@ -11,6 +11,27 @@ const About: React.FC = () => {
         window.location.href = 'mailto:steven17cc@hotmail.com?subject=Contacto desde Portfolio&body=Hola Stiven,%0D%0A%0D%0A';
     };
 
+    const backendNotes: Record<string, string> = {
+        Python: 'FastAPI, Django, asincronía, typing, testing (pytest).',
+        PHP: 'Laravel (Eloquent, Queues, Events), Composer, PSR-12.',
+        'Node.js': 'Express/NestJS, middlewares, streams, PM2.',
+        Django: 'DRF, ORM avanzado, signals, admin, config por entornos.',
+        MySQL: 'Índices, EXPLAIN, migraciones, transacciones y locks.',
+        MongoDB: 'Agregaciones, índices compuestos, TTL, diseño de esquemas.',
+        'RESTful APIs': 'Versionado, paginación, validación, OpenAPI/Swagger.',
+        JWT: 'Auth stateless, refresh, rotación segura, expiración.',
+        OAuth: 'Authorization Code/PKCE, scopes, permisos granulares.',
+        AWS: 'IAM, CloudWatch, costos, mejores prácticas de seguridad.',
+        S3: 'Multipart upload, políticas de acceso, pre-signed URLs, lifecycle, Conciliate S3.',
+        'API Gateway': 'Diseño de APIs con etapas y despliegues, rate limiting, API keys, autorizadores (JWT/Lambda), integración con Lambda/ALB.',
+        DynamoDB: 'Modelado single-table, particiones/throughput, GSIs/LSIs, streams, patrones de acceso y consultas eficientes.',
+        'EC2 - EBS': 'Provisionamiento, SG, volúmenes, backups, escalabilidad.',
+        Redis: 'Caches, locks distribuidos, pub/sub, expiración y eviction.',
+        Docker: 'Dockerfiles multi-stage, compose, optimización de layers.',
+        Git: 'Git flow, Branching, PRs, code review, tagging y releases.',
+        Vps: 'Nginx/Apache, SSL Let’s Encrypt, deploys y CI/CD básico.'
+    };
+
     return (
         <Layout>
             <motion.div
@@ -69,10 +90,11 @@ const About: React.FC = () => {
                                 <h3 className="text-xl font-semibold text-white mb-4">Stack Backend</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {[
-                                        'Python', 'PHP', 'Node.js', 'Django', 'MySQL', 'MongoDB',
-                                        'RESTful APIs', 'JWT', 'OAuth', 'AWS S3 EC2 - EBS', 'Docker', 'Git'
+                                        'Python', 'PHP', 'Node.js', 'Django', 'MySQL', 'MongoDB', 'DynamoDB',
+                                        'RESTful APIs', 'JWT', 'OAuth', 'AWS', 'API Gateway', 'S3', 'EC2 - EBS', 'Redis', 'Docker', 'Git', 'Vps',
                                     ].map((skill, index) => (
                                         <span
+                                            title={backendNotes[skill] ?? skill}
                                             key={index}
                                             className="px-3 py-1 bg-green-800/30 text-green-400 text-sm rounded-full border border-green-400/20"
                                         >
@@ -106,8 +128,8 @@ const About: React.FC = () => {
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         'Patrones de Diseño', 'Principios SOLID', 'Domain-Driven Design (DDD)',
-                                        'Arquitectura Hexagonal', 'Arquitectura de Software', 
-                                        'Levantamiento de Información', 'Análisis de Requerimientos','Patron Backend for Frontend','IaC'
+                                        'Arquitectura Hexagonal', 'Arquitectura de Software',
+                                        'Levantamiento de Información', 'Análisis de Requerimientos', 'Patron Backend for Frontend', 'IaC'
                                     ].map((skill, index) => (
                                         <span
                                             key={index}
