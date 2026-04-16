@@ -8,7 +8,14 @@ export interface ExperienceItemType {
 
 export const EXPERIENCE: ExperienceItemType[] = [
   {
-    date: "Julio 2025 - Actualmente",
+    date: "Abril 2026 - Actualmente",
+    title: "Desarrollador de Software FullStack - fuldei - Corprevenir",
+    description:
+      "Diseño, desarrollo y mantenimiento de soluciones frontend y backend. Construcción de interfaces modernas y escalables, implementación de servicios en Node.js y PHP, e integración de APIs REST. Gestión de estados complejos en aplicaciones web, modelado y administración de bases de datos (PostgreSQL, MongoDB), y desarrollo de funcionalidades relacionadas con visualización de mapas y planos 3D. Participación en procesos de despliegue e infraestructura. Trabajo colaborativo bajo metodologías ágiles (SCRUM) y control de versiones con Bitbucket para asegurar calidad, trazabilidad y mejora continua.",
+    link: "https://www.corprevenir.com/",
+  },
+  {
+    date: "Julio 2025 - marzo 2026",
     title: "Desarrollador de Software FullStack - Unlimitech Cloud",
     description:
       "Desarrollo y mantenimiento de funcionalidades frontend con React y MobX. Implementación de servicios backend en Node.js, PHP y WordPress (temas, plugins, APIs). Integración de APIs REST, manejo de estados complejos, trabajo con bases de datos (MySQL, PostgreSQL, MongoDB) y apoyo en infraestructura y despliegue. Uso de Git y metodologías ágiles SCRUM para garantizar la calidad del software.",
