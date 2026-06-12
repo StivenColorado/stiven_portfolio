@@ -12,9 +12,10 @@ interface MediaItem {
 interface Props {
     project: ProjectType;
     onImageClick?: (mediaItems: MediaItem[], index: number) => void;
+    onDetailsClick?: (project: ProjectType) => void;
 }
 
-const ProjectCard: React.FC<Props> = ({ project, onImageClick }) => {
+const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick }) => {
     const mediaItems: MediaItem[] = [
         ...(project.images?.map(src => ({ type: 'image' as const, src })) || []),
         ...(project.videos?.map(src => ({ type: 'video' as const, src })) || [])
@@ -77,7 +78,13 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick }) => {
 
             {/* Content */}
             <div className="p-5">
-                <h3 className="text-xl font-bold text-white mb-2 line-clamp-1">{project.title}</h3>
+                <h3
+                    className="text-xl font-bold text-white mb-2 line-clamp-1 cursor-pointer hover:text-blue-400 transition-colors"
+                    onClick={() => onDetailsClick?.(project)}
+                    title={project.title}
+                >
+                    {project.title}
+                </h3>
                 <p className="text-gray-300 text-sm mb-4 line-clamp-2">{project.description}</p>
                 
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -87,6 +94,12 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick }) => {
                 </div>
 
                 <div className="flex gap-3 mt-4">
+                    <button
+                        onClick={() => onDetailsClick?.(project)}
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-center py-2 px-4 rounded-lg transition-colors text-sm font-medium"
+                    >
+                        Detalles
+                    </button>
                     {project.link && (
                         <a
                             href={project.link}

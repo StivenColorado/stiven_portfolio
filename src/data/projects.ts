@@ -3,6 +3,21 @@ import type { ProjectType } from "../types/types"
 
 export const PROJECTS: ProjectType[] = [
   {
+    title: "TrashGame — survival 2D (en desarrollo)",
+    description:
+      "Videojuego survival 2D top-down que estoy desarrollando con Python y Pygame: mundo infinito generado proceduralmente por chunks (ruido OpenSimplex), arquitectura ECS propia, ciclo día/noche con iluminación dinámica, tormentas, sistema de crafteo con estaciones (mesa de trabajo, fogata con asador), agricultura, jefes y multijugador LAN con servidor relay TCP propio. Incluye creador de personaje por capas y pixel-art propio hecho en Pixelorama. Los GIFs muestran animaciones reales del juego.",
+    link: "",
+    github: "https://github.com/StivenColorado/TrashGame",
+    images: [
+      "/projects/trashgame/trash_cover.gif",
+      "/projects/trashgame/trash_fogata.gif",
+      "/projects/trashgame/trash_player.gif",
+      "/projects/trashgame/trash_slime.gif",
+    ],
+    videos: [],
+    tags: [TAGS.PYTHON, TAGS.PYGAME],
+  },
+  {
     title: "App generador de códigos QR",
     description:
       "Desarrollé un generador de códigos QR ilimitados con Astro y Node.js: procesamiento en tiempo real, almacenamiento en MySQL, interfaz responsiva con Tailwind CSS, opciones de personalización de color y logo, y exportación en múltiples formatos sin anuncios.",

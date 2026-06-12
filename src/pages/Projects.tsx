@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "../context/StoreContext";
 import Layout from "../components/Layout";
 import ProjectCard from "../components/ProjectCard";
+import ProjectDetailModal from "../components/ProjectDetailModal";
 import { type ProjectType } from "../types/types";
 
 interface MediaItem {
@@ -48,6 +49,9 @@ const Projects: React.FC = () => {
     
     const [[page, direction], setPage] = useState([0, 0]);
 
+    // Proyecto abierto en el modal de DETALLE (descripción completa + galería).
+    const [detailProject, setDetailProject] = useState<ProjectType | null>(null);
+
     useEffect(() => {
         setIsVisible(true);
     }, []);
@@ -64,8 +68,9 @@ const Projects: React.FC = () => {
 
     const closeGallery = useCallback(() => {
         setGalleryState(prev => ({ ...prev, isOpen: false }));
-        document.body.style.overflow = 'unset';
-    }, []);
+        // Si el modal de detalle sigue abierto debajo, el fondo no debe scrollear.
+        document.body.style.overflow = detailProject ? 'hidden' : 'unset';
+    }, [detailProject]);
 
     const paginate = useCallback((newDirection: number) => {
         const newIndex = galleryState.currentIndex + newDirection;
@@ -78,8 +83,12 @@ const Projects: React.FC = () => {
     useEffect(() => {
         // Handle keyboard navigation
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (!galleryState.isOpen) return;
-            
+            if (!galleryState.isOpen) {
+                // La galería tiene prioridad; sin ella, Esc cierra el detalle.
+                if (e.key === 'Escape') setDetailProject(null);
+                return;
+            }
+
             switch (e.key) {
                 case 'ArrowLeft':
                     paginate(-1);
@@ -140,10 +149,11 @@ const Projects: React.FC = () => {
                 >
                     {portfolioStore.projects.map((project: ProjectType) => (
                         <motion.div key={project.title} variants={item}>
-                            <ProjectCard 
-                                key={project.title} 
-                                project={project} 
+                            <ProjectCard
+                                key={project.title}
+                                project={project}
                                 onImageClick={openGallery}
+                                onDetailsClick={setDetailProject}
                             />
                         </motion.div>
                     ))}
@@ -157,6 +167,17 @@ const Projects: React.FC = () => {
                 >
                     <p>Mostrando {portfolioStore.totalProjects} proyectos</p>
                 </motion.div>
+
+                {/* Detail Modal (descripción completa; la galería abre encima) */}
+                <AnimatePresence>
+                    {detailProject && (
+                        <ProjectDetailModal
+                            project={detailProject}
+                            onClose={() => setDetailProject(null)}
+                            onMediaClick={openGallery}
+                        />
+                    )}
+                </AnimatePresence>
 
                 {/* Gallery Modal */}
                 <AnimatePresence custom={direction} initial={false}>

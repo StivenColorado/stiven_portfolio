@@ -74,4 +74,9 @@ export const TAGS: Record<string, TagType> = {
     class: "text-white",
     icon: MysqlIcon,
   },
+  PYGAME: {
+    name: "Pygame",
+    class: "text-emerald-400",
+    icon: PythonIcon,
+  },
 }
