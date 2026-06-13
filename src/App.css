@@ -3,13 +3,15 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background-color: #000;
-  color: white;
+  background-color: var(--bg);
+  color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Transición suave al alternar tema (no afecta rendimiento de scroll) */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Asegurar que los elementos de bloque ocupen todo el ancho */
@@ -25,14 +27,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: var(--text-muted);
 }

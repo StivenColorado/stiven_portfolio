@@ -36,16 +36,26 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
     }
 
     return (
-        <motion.div 
-            className="bg-gray-800 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-            whileHover={{ scale: 1.02 }}
+        <motion.div
+            className="bg-white dark:bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-900 dark:border-zinc-100 shadow-[5px_5px_0_0_#18181b] dark:shadow-[5px_5px_0_0_#fafafa] hover:shadow-[7px_7px_0_0_#18181b] dark:hover:shadow-[7px_7px_0_0_#fafafa] transition-all duration-200 transform hover:-translate-x-0.5 hover:-translate-y-0.5"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             layout
         >
+            {/* Barra superior estilo "ventana" retro */}
+            <div className="flex items-center justify-between px-3 py-2 border-b-2 border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800">
+                <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full border border-zinc-900 dark:border-zinc-100" />
+                    <span className="w-2.5 h-2.5 rounded-full border border-zinc-900 dark:border-zinc-100" />
+                </div>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                    {project.tags[0]?.name ?? "project"}
+                </span>
+            </div>
+
             {/* Thumbnail */}
-            <div 
-                className="relative h-48 bg-gray-700 cursor-pointer overflow-hidden group"
+            <div
+                className="relative h-48 bg-zinc-200 dark:bg-zinc-700 cursor-pointer overflow-hidden group border-b-2 border-zinc-900 dark:border-zinc-100"
                 onClick={(e) => handleImageClick(e, 0)}
             >
                 {mediaItems[0]?.type === 'image' ? (
@@ -79,14 +89,14 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
             {/* Content */}
             <div className="p-5">
                 <h3
-                    className="text-xl font-bold text-white mb-2 line-clamp-1 cursor-pointer hover:text-blue-400 transition-colors"
+                    className="text-xl font-bold text-zinc-900 dark:text-white mb-2 line-clamp-1 cursor-pointer hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                     onClick={() => onDetailsClick?.(project)}
                     title={project.title}
                 >
                     {project.title}
                 </h3>
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2">{project.description}</p>
-                
+                <p className="text-zinc-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{project.description}</p>
+
                 <div className="flex flex-wrap gap-2 mb-4">
                     {project.tags.map((tag) => (
                         <Tag key={tag.name} tag={tag} />
@@ -96,7 +106,7 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
                 <div className="flex gap-3 mt-4">
                     <button
                         onClick={() => onDetailsClick?.(project)}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-center py-2 px-4 rounded-lg transition-colors text-sm font-medium"
+                        className="flex-1 border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-center py-2 px-4 rounded-md transition-colors text-sm font-semibold hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100"
                     >
                         Detalles
                     </button>
@@ -105,7 +115,7 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
                             href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors text-sm font-medium"
+                            className="flex-1 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-4 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
                         >
                             Ver Proyecto
                         </a>
@@ -115,9 +125,9 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
                             href={project.github}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-center py-2 px-4 rounded-lg transition-colors text-sm font-medium"
+                            className="flex-1 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-4 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
                         >
- <div className="flex items-center justify-center gap-2">
+                            <div className="flex items-center justify-center gap-2">
                                 <Github className="w-4 h-4" />
                                 <span>Repositorio</span>
                             </div>

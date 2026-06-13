@@ -3,6 +3,32 @@ import type { ProjectType } from "../types/types"
 
 export const PROJECTS: ProjectType[] = [
   {
+    title: "Paraty — Sangrías & Tablas de queso",
+    description:
+      "Tienda online de charcutería gourmet (cups, cajas y tablas de queso) construida con React, Vite y Tailwind CSS. Incluye catálogo con búsqueda en tiempo real, filtrado por categorías, carrito de compras, valoraciones de productos e interfaz responsive con un diseño limpio y elegante orientado a la conversión.",
+    link: "https://paraty-pink.vercel.app/",
+    github: "",
+    images: [
+      "/projects/paraty-pink/paraty1.jpg",
+      "/projects/paraty-pink/paraty2.jpg",
+    ],
+    videos: [],
+    tags: [TAGS.REACT, TAGS.TAILWIND, TAGS.JAVASCRIPT],
+  },
+  {
+    title: "Cindy Fast Food — landing de comida rápida",
+    description:
+      "Landing page para un restaurante de comida rápida a la parrilla, desarrollada con React, Vite y Tailwind CSS. Cuenta con hero de alto impacto, menú interactivo filtrable por categorías (hamburguesas, salchipapas, perros, combos), tarjetas de producto con precios y sección de contacto/pedidos. Diseño responsive con tema oscuro y acentos naranja.",
+    link: "https://cindy-fast-food.vercel.app/",
+    github: "",
+    images: [
+      "/projects/cindy-fast-food/cindy1.jpg",
+      "/projects/cindy-fast-food/cindy2.jpg",
+    ],
+    videos: [],
+    tags: [TAGS.REACT, TAGS.TAILWIND, TAGS.JAVASCRIPT],
+  },
+  {
     title: "TrashGame — survival 2D (en desarrollo)",
     description:
       "Videojuego survival 2D top-down que estoy desarrollando con Python y Pygame: mundo infinito generado proceduralmente por chunks (ruido OpenSimplex), arquitectura ECS propia, ciclo día/noche con iluminación dinámica, tormentas, sistema de crafteo con estaciones (mesa de trabajo, fogata con asador), agricultura, jefes y multijugador LAN con servidor relay TCP propio. Incluye creador de personaje por capas y pixel-art propio hecho en Pixelorama. Los GIFs muestran animaciones reales del juego.",

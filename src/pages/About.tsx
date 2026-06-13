@@ -3,13 +3,9 @@ import { motion } from 'framer-motion';
 import { Mail } from 'lucide-react';
 import GithubIcon from '../components/icons/Github';
 import LinkedinIcon from '../components/icons/Linkedin';
-import Layout from '../components/Layout';
+import ContactForm from '../components/ContactForm';
 
 const About: React.FC = () => {
-    const handleEmailClick = () => {
-        // Para que funcione en todos los dispositivos y abra la app de correo nativa
-        window.location.href = 'mailto:steven17cc@hotmail.com?subject=Contacto desde Portfolio&body=Hola Stiven,%0D%0A%0D%0A';
-    };
 
     const backendNotes: Record<string, string> = {
         Python: 'FastAPI, Django, asincronía, typing, testing (pytest).',
@@ -33,7 +29,6 @@ const About: React.FC = () => {
     };
 
     return (
-        <Layout>
             <motion.div
                 className="w-full py-12 px-4 sm:px-6 lg:px-8 select-none"
                 initial={{ opacity: 0 }}
@@ -47,10 +42,13 @@ const About: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                     >
-                        <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600 mb-4">
+                        <span className="inline-block font-mono text-xs sm:text-sm uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-300 border-2 border-zinc-900 dark:border-zinc-100 rounded-md px-3 py-1 mb-5">
+                            // Acerca de mí
+                        </span>
+                        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
                             Sobre Mí
                         </h1>
-                        <div className="w-24 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mt-6 rounded-full"></div>
+                        <div className="w-24 h-1 bg-zinc-900 dark:bg-zinc-100 mx-auto mt-6"></div>
                     </motion.div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -61,11 +59,11 @@ const About: React.FC = () => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.6 }}
                         >
-                            <h2 className="text-3xl font-bold text-white">
-                                Hola, soy <span className="bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">Stiven Colorado</span>
+                            <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+                                Hola, soy <span className="underline decoration-2 underline-offset-4 decoration-zinc-900 dark:decoration-zinc-100">Stiven Colorado</span>
                             </h2>
 
-                            <div className="space-y-4 text-gray-300">
+                            <div className="space-y-4 text-zinc-600 dark:text-gray-300">
                                 <p>
                                     Soy analista y desarrollador de software con sólida experiencia en desarrollo Full Stack,
                                     utilizando tecnologías como Python, PHP, JavaScript, TailwindCSS y Node.js.
@@ -87,7 +85,7 @@ const About: React.FC = () => {
 
                             {/* Stack Tecnológico Backend */}
                             <div className="pt-4">
-                                <h3 className="text-xl font-semibold text-white mb-4">Stack Backend</h3>
+                                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4">Stack Backend</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         'Python', 'PHP', 'Node.js', 'Django', 'MySQL', 'MongoDB', 'DynamoDB',
@@ -96,7 +94,7 @@ const About: React.FC = () => {
                                         <span
                                             title={backendNotes[skill] ?? skill}
                                             key={index}
-                                            className="px-3 py-1 bg-green-800/30 text-green-400 text-sm rounded-full border border-green-400/20"
+                                            className="px-3 py-1 text-sm font-mono rounded-full border-2 border-zinc-900 dark:border-zinc-100 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors"
                                         >
                                             {skill}
                                         </span>
@@ -106,7 +104,7 @@ const About: React.FC = () => {
 
                             {/* Stack Tecnológico Frontend */}
                             <div className="pt-4">
-                                <h3 className="text-xl font-semibold text-white mb-4">Stack Frontend</h3>
+                                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4">Stack Frontend</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         'JavaScript', 'TypeScript', 'React', 'React Native',
@@ -114,7 +112,7 @@ const About: React.FC = () => {
                                     ].map((skill, index) => (
                                         <span
                                             key={index}
-                                            className="px-3 py-1 bg-blue-800/30 text-blue-400 text-sm rounded-full border border-blue-400/20"
+                                            className="px-3 py-1 text-sm font-mono rounded-full border-2 border-zinc-900 dark:border-zinc-100 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors"
                                         >
                                             {skill}
                                         </span>
@@ -124,7 +122,7 @@ const About: React.FC = () => {
 
                             {/* Arquitectura y Patrones */}
                             <div className="pt-4">
-                                <h3 className="text-xl font-semibold text-white mb-4">Arquitectura y Patrones</h3>
+                                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4">Arquitectura y Patrones</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         'Patrones de Diseño', 'Principios SOLID', 'Domain-Driven Design (DDD)',
@@ -133,7 +131,7 @@ const About: React.FC = () => {
                                     ].map((skill, index) => (
                                         <span
                                             key={index}
-                                            className="px-3 py-1 bg-purple-800/30 text-purple-400 text-sm rounded-full border border-purple-400/20"
+                                            className="px-3 py-1 text-sm font-mono rounded-full border-2 border-zinc-900 dark:border-zinc-100 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors"
                                         >
                                             {skill}
                                         </span>
@@ -143,7 +141,7 @@ const About: React.FC = () => {
 
                             {/* Habilidades Blandas */}
                             <div className="pt-4">
-                                <h3 className="text-xl font-semibold text-white mb-4">Habilidades Blandas</h3>
+                                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4">Habilidades Blandas</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         'Trabajo en Equipo', 'Comunicación Efectiva', 'Resolución de Problemas',
@@ -152,7 +150,7 @@ const About: React.FC = () => {
                                     ].map((skill, index) => (
                                         <span
                                             key={index}
-                                            className="px-3 py-1 bg-orange-800/30 text-orange-400 text-sm rounded-full border border-orange-400/20"
+                                            className="px-3 py-1 text-sm font-mono rounded-full border-2 border-zinc-900 dark:border-zinc-100 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors"
                                         >
                                             {skill}
                                         </span>
@@ -165,7 +163,7 @@ const About: React.FC = () => {
                                     href="https://github.com/StivenColorado"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center space-x-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-700/70 text-white rounded-lg transition-all duration-300 group"
+                                    className="flex items-center space-x-2 px-6 py-3 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 rounded-md font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors duration-200 group"
                                 >
                                     <GithubIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                     <span>GitHub</span>
@@ -174,18 +172,18 @@ const About: React.FC = () => {
                                     href="https://www.linkedin.com/in/stiven-colorado-370028220/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white rounded-lg transition-all duration-300 group"
+                                    className="flex items-center space-x-2 px-6 py-3 border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md font-semibold hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100 transition-colors duration-200 group"
                                 >
                                     <LinkedinIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                     <span>LinkedIn</span>
                                 </a>
-                                <button
-                                    onClick={handleEmailClick}
-                                    className="flex items-center space-x-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-700/70 text-white rounded-lg transition-all duration-300 group cursor-pointer"
+                                <a
+                                    href="#contacto"
+                                    className="flex items-center space-x-2 px-6 py-3 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 rounded-md font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors duration-200 group cursor-pointer"
                                 >
                                     <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                     <span>Email</span>
-                                </button>
+                                </a>
                             </div>
                         </motion.div>
 
@@ -195,20 +193,40 @@ const About: React.FC = () => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
                         >
-                            <div className="relative z-10 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl aspect-[3/4] w-full max-w-xs mx-auto lg:max-w-none lg:mx-0">
+                            <div className="relative z-10 rounded-lg overflow-hidden border-2 border-zinc-900 dark:border-zinc-100 aspect-[3/4] w-full max-w-xs mx-auto lg:max-w-none lg:mx-0 grayscale hover:grayscale-0 transition-all duration-500">
                                 <img
                                     src="/pic.jpg"
-                                    alt="Steven Córdova"
+                                    alt="Stiven Colorado"
                                     className="w-full h-full object-cover object-top"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                             </div>
-                            <div className="absolute -bottom-4 -right-4 w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl -z-10 hidden lg:block"></div>
+                            <div className="absolute -bottom-4 -right-4 w-full h-full border-2 border-zinc-900 dark:border-zinc-100 rounded-lg -z-10 hidden lg:block"></div>
                         </motion.div>
                     </div>
+
+                    {/* Sección de contacto */}
+                    <motion.div
+                        id="contacto"
+                        className="mt-24 max-w-2xl mx-auto scroll-mt-24"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-center mb-3 text-zinc-900 dark:text-white">
+                            Contáctame
+                        </h2>
+                        <div className="h-1 w-20 bg-zinc-900 dark:bg-zinc-100 mx-auto mb-4" />
+                        <p className="text-center text-zinc-600 dark:text-gray-300 mb-10">
+                            Escribe tu correo y tu mensaje; te respondo directo a tu bandeja.
+                        </p>
+                        <div className="rounded-lg border-2 border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-8 shadow-[6px_6px_0_0_#18181b] dark:shadow-[6px_6px_0_0_#fafafa]">
+                            <ContactForm />
+                        </div>
+                    </motion.div>
                 </div>
             </motion.div>
-        </Layout>
     );
 };
 

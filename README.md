@@ -1,6 +1,49 @@
-# React + TypeScript + Vite
+# Portfolio — React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Portfolio de Stiven Colorado. React 19 + Vite 7 + Tailwind CSS v4 + MobX.
+
+## Requisitos
+
+Este proyecto usa **pnpm** como gestor de paquetes (ver campo `packageManager` en `package.json`).
+
+```bash
+# Instalar pnpm (si no lo tienes)
+corepack enable
+
+# Instalar dependencias
+pnpm install
+
+# La primera vez, aprobar los build scripts nativos (oxide/esbuild)
+pnpm approve-builds --all   # solo si pnpm los marca como "ignored"
+
+# Desarrollo
+pnpm dev
+
+# Build de producción
+pnpm build
+
+# Preview del build
+pnpm preview
+
+# Lint
+pnpm lint
+```
+
+> Nota: `pnpm-workspace.yaml` declara `onlyBuiltDependencies` para que `@tailwindcss/oxide` y `esbuild` compilen sus binarios nativos en CI/Vercel sin intervención manual.
+
+## Variables de entorno
+
+Crea un archivo `.env` (ver `.env.example`):
+
+```
+VITE_WEB3FORMS_KEY=tu-access-key-de-web3forms
+```
+
+La key gratuita se obtiene en https://web3forms.com (solo pide tu correo de destino).
+
+---
+
+## Sobre la plantilla base (Vite)
 
 Currently, two official plugins are available:
 

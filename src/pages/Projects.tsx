@@ -2,7 +2,6 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "../context/StoreContext";
-import Layout from "../components/Layout";
 import ProjectCard from "../components/ProjectCard";
 import ProjectDetailModal from "../components/ProjectDetailModal";
 import { type ProjectType } from "../types/types";
@@ -124,7 +123,6 @@ const Projects: React.FC = () => {
     };
 
     return (
-        <Layout>
             <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 select-none">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -132,13 +130,16 @@ const Projects: React.FC = () => {
                     transition={{ duration: 0.8 }}
                     className="max-w-7xl mx-auto text-center mb-16"
                 >
-                    <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
+                    <span className="inline-block font-mono text-xs sm:text-sm uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-300 border-2 border-zinc-900 dark:border-zinc-100 rounded-md px-3 py-1 mb-5">
+                        // Portfolio
+                    </span>
+                    <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
                         Mis Proyectos
                     </h1>
-                    <p className="text-xl text-gray-300">
+                    <p className="text-xl text-zinc-600 dark:text-gray-300">
                         Explora mi colección de proyectos desarrollados con las últimas tecnologías
                     </p>
-                    <div className="mt-8 h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full" />
+                    <div className="mt-8 h-1 w-24 bg-zinc-900 dark:bg-zinc-100 mx-auto" />
                 </motion.div>
 
                 <motion.div
@@ -190,7 +191,7 @@ const Projects: React.FC = () => {
                             onClick={closeGallery}
                         >
                             <button 
-                                className="absolute top-4 right-6 text-white text-4xl z-10 hover:text-blue-400 transition-colors"
+                                className="absolute top-4 right-6 text-white text-4xl z-10 hover:text-zinc-400 transition-colors"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     closeGallery();
@@ -202,7 +203,7 @@ const Projects: React.FC = () => {
 
                             <div className="relative w-full max-w-6xl h-[80vh] flex items-center">
                                 <button 
-                                    className="absolute left-4 z-10 p-2 text-white text-2xl hover:text-blue-400 transition-colors"
+                                    className="absolute left-4 z-10 p-2 text-white text-2xl hover:text-zinc-400 transition-colors"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         paginate(-1);
@@ -262,7 +263,7 @@ const Projects: React.FC = () => {
                                 </div>
 
                                 <button 
-                                    className="absolute right-4 z-10 p-2 text-white text-2xl hover:text-blue-400 transition-colors"
+                                    className="absolute right-4 z-10 p-2 text-white text-2xl hover:text-zinc-400 transition-colors"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         paginate(1);
@@ -281,7 +282,6 @@ const Projects: React.FC = () => {
                     )}
                 </AnimatePresence>
             </div>
-        </Layout>
     );
 };
 
