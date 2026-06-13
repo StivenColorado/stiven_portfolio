@@ -45,13 +45,13 @@ const ExperienceTimeline: React.FC = () => {
         transition={{ duration: 0.8 }}
         className="text-center mb-16"
       >
-        <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
+        <h2 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
           Experiencia Profesional
         </h2>
-        <p className="text-xl text-gray-300">
+        <p className="text-xl text-zinc-600 dark:text-gray-300">
           Mi trayectoria y crecimiento profesional a lo largo de los años
         </p>
-        <div className="mt-4 h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full" />
+        <div className="mt-4 h-1 w-24 bg-zinc-900 dark:bg-zinc-100 mx-auto" />
       </motion.div>
       
       <div className="relative">
@@ -60,7 +60,7 @@ const ExperienceTimeline: React.FC = () => {
           initial={{ height: 0 }}
           animate={{ height: '100%' }}
           transition={{ duration: 1.5, delay: 0.5 }}
-          className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-purple-500 to-blue-500 ml-4 md:ml-6"
+          className="absolute left-0 top-0 bottom-0 w-0.5 bg-zinc-900 dark:bg-zinc-100 ml-4 md:ml-6"
         />
         
         {/* Lista de experiencias */}
@@ -92,18 +92,18 @@ const ExperienceTimeline: React.FC = () => {
                   <motion.div
                     whileHover={{ scale: 1.2, rotate: 10 }}
                     whileTap={{ scale: 0.9 }}
-                    className="absolute left-0 top-0 flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg"
+                    className="absolute left-0 top-0 flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 border-2 border-zinc-900 dark:border-zinc-100"
                   >
                     {index === 0 ? (
-                      <Brain className="w-4 h-4 text-white" />
+                      <Brain className="w-4 h-4 text-white dark:text-zinc-900" />
                     ) : index === 1 ? (
-                      <Keyboard className="w-4 h-4 text-white" />
+                      <Keyboard className="w-4 h-4 text-white dark:text-zinc-900" />
                     ) : index === 2 ? (
-                      <QrCode className="w-4 h-4 text-white" />
+                      <QrCode className="w-4 h-4 text-white dark:text-zinc-900" />
                     ) : index === 3 ? (
-                      <Box className="w-4 h-4 text-white" />
+                      <Box className="w-4 h-4 text-white dark:text-zinc-900" />
                     ) : (
-                      <WorkIcon className="w-4 h-4 text-white" />
+                      <WorkIcon className="w-4 h-4 text-white dark:text-zinc-900" />
                     )}
                   </motion.div>
                 </ExperienceItem>
@@ -122,10 +122,9 @@ const ExperienceTimeline: React.FC = () => {
         className="flex justify-center mt-16"
       >
         <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-300 group-hover:duration-200 animate-tilt"></div>
-          <div className="relative px-6 py-2 bg-gray-800 rounded-lg leading-none flex items-center">
-            <span className="text-blue-400 font-mono">Desplázate para ver más</span>
-            <svg className="w-4 h-4 ml-2 text-purple-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div className="relative px-6 py-2 border-2 border-zinc-900 dark:border-zinc-100 rounded-md leading-none flex items-center bg-white dark:bg-zinc-900">
+            <span className="text-zinc-900 dark:text-zinc-100 font-mono text-sm uppercase tracking-wider">Desplázate para ver más</span>
+            <svg className="w-4 h-4 ml-2 text-zinc-900 dark:text-zinc-100 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           </div>

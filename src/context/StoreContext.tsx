@@ -1,7 +1,9 @@
 import React, { createContext, useContext } from "react";
 import { PortfolioStore } from "../stores/PortfolioStore";
+import { ThemeStore } from "../stores/ThemeStore";
 const store = {
     portfolioStore: new PortfolioStore(),
+    themeStore: new ThemeStore(),
 }
 
 const StoreContext = createContext(store);

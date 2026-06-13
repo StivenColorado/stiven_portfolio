@@ -1,1 +1,48 @@
 @import "tailwindcss";
+
+/* Activa el modo oscuro por CLASE (.dark en <html>) en vez de prefers-color-scheme,
+   para poder alternarlo manualmente con el botón del navbar. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* === Sistema de diseño: BLANCO & NEGRO editorial ===
+   Paleta monocroma estricta. Sin colores de acento: la jerarquía se logra
+   con peso tipográfico, bordes duros y grises. */
+:root {
+  --bg: #ffffff;          /* fondo base claro */
+  --surface: #ffffff;     /* tarjetas/superficies */
+  --text: #0a0a0a;        /* texto principal (casi negro) */
+  --text-muted: #6b7280;  /* texto secundario */
+  --border: #0a0a0a;      /* bordes duros negros */
+  --accent: #0a0a0a;      /* "acento" = tinta */
+  --particle: 0, 0, 0;    /* partículas negras (sutiles) */
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --text: #fafafa;
+  --text-muted: #a1a1aa;
+  --border: #fafafa;      /* bordes duros blancos */
+  --accent: #fafafa;
+  --particle: 255, 255, 255; /* partículas blancas (sutiles) */
+}
+
+/* Tipografía display para titulares (más carácter, menos "plantilla") */
+h1, h2, h3, .font-display {
+  letter-spacing: -0.02em;
+}
+
+/* Respeta a quien prefiere menos movimiento (accesibilidad + rendimiento) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Selección monocroma */
+::selection {
+  background: var(--text);
+  color: var(--bg);
+}
