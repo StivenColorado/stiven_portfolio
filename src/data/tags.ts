@@ -10,6 +10,8 @@ import ScssIcon from "../components/icons/ScssIcon"
 import ReactIcon from "../components/icons/ReactIcon"
 import AstroIcon from "../components/icons/AstroIcon"
 import MysqlIcon from "../components/icons/MysqlIcon"
+import TypeScriptIcon from "../components/icons/TypeScriptIcon"
+import GraphQLIcon from "../components/icons/GraphQLIcon"
 
 import type { TagType } from "../types/types"
 
@@ -78,5 +80,15 @@ export const TAGS: Record<string, TagType> = {
     name: "Pygame",
     class: "text-emerald-400",
     icon: PythonIcon,
+  },
+  TYPESCRIPT: {
+    name: "TypeScript",
+    class: "text-blue-400",
+    icon: TypeScriptIcon,
+  },
+  GRAPHQL: {
+    name: "GraphQL",
+    class: "text-pink-500",
+    icon: GraphQLIcon,
   },
 }

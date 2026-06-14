@@ -3,6 +3,21 @@ import type { ProjectType } from "../types/types"
 
 export const PROJECTS: ProjectType[] = [
   {
+    title: "Rick & Morty Explorer",
+    description:
+      "Explorador del universo de Rick & Morty construido con React 19, TypeScript y Vite, consumiendo la API vía GraphQL (graphql-request + TanStack Query). Incluye filtros avanzados con búsqueda en vivo (debounce), estado en la URL, modales de detalle que traen residentes/reparto/episodios anidados en una sola query (sin N+1), favoritos y comparador de personajes persistentes con Zustand, un dashboard de estadísticas con Recharts que agrega todos los personajes mediante una query multi-alias, skeleton loaders, animaciones y diseño totalmente responsive con Tailwind CSS.",
+    link: "",
+    github: "https://github.com/StivenColorado/rickAndMorty",
+    images: [
+      "/projects/rickandmorty/rickandmorty_p1.jpeg",
+      "/projects/rickandmorty/rickandmorty_p2.jpeg",
+      "/projects/rickandmorty/rickandmorty_p3.jpeg",
+      "/projects/rickandmorty/rickandmorty_p4.jpeg",
+    ],
+    videos: [],
+    tags: [TAGS.REACT, TAGS.TYPESCRIPT, TAGS.GRAPHQL, TAGS.TAILWIND],
+  },
+  {
     title: "Paraty — Sangrías & Tablas de queso",
     description:
       "Tienda online de charcutería gourmet (cups, cajas y tablas de queso) construida con React, Vite y Tailwind CSS. Incluye catálogo con búsqueda en tiempo real, filtrado por categorías, carrito de compras, valoraciones de productos e interfaz responsive con un diseño limpio y elegante orientado a la conversión.",
