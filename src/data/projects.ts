@@ -6,7 +6,7 @@ export const PROJECTS: ProjectType[] = [
     title: "Rick & Morty Explorer",
     description:
       "Explorador del universo de Rick & Morty construido con React 19, TypeScript y Vite, consumiendo la API vía GraphQL (graphql-request + TanStack Query). Incluye filtros avanzados con búsqueda en vivo (debounce), estado en la URL, modales de detalle que traen residentes/reparto/episodios anidados en una sola query (sin N+1), favoritos y comparador de personajes persistentes con Zustand, un dashboard de estadísticas con Recharts que agrega todos los personajes mediante una query multi-alias, skeleton loaders, animaciones y diseño totalmente responsive con Tailwind CSS.",
-    link: "",
+    link: "https://stivencolorado.github.io/rickAndMorty/",
     github: "https://github.com/StivenColorado/rickAndMorty",
     images: [
       "/projects/rickandmorty/rickandmorty_p1.jpeg",
