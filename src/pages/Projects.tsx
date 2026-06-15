@@ -184,7 +184,7 @@ const Projects: React.FC = () => {
                 <AnimatePresence custom={direction} initial={false}>
                     {galleryState.isOpen && galleryState.mediaItems.length > 0 && (
                         <motion.div
-                            className="fixed inset-0 bg-black bg-opacity-95 z-50 flex flex-col items-center justify-center p-4"
+                            className="fixed inset-0 bg-black bg-opacity-95 z-[70] flex flex-col items-center justify-center p-4"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}

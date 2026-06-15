@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { PROJECTS } from '../data/projects'
+import type { ProjectType } from '../types/types'
 import { FaArrowDown, FaCode, FaExternalLinkAlt, FaGithub } from 'react-icons/fa'
 import GistModal from './GistModal'
+import ProjectDetailModal from './ProjectDetailModal'
 
 const useIntersectionObserver = (callback: () => void) => {
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -71,6 +74,7 @@ const TypewriterText: React.FC<{ text: string; className?: string }> = ({ text, 
 
 const EmblaCarousel: React.FC = () => {
   const [selectedGist, setSelectedGist] = useState<string | null>(null)
+  const [detailProject, setDetailProject] = useState<ProjectType | null>(null)
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: true,
@@ -95,6 +99,23 @@ const EmblaCarousel: React.FC = () => {
   const scrollTo = useCallback((index: number) => {
     if (emblaApi) emblaApi.scrollTo(index)
   }, [emblaApi])
+
+  // Distingue un clic real de un arrastre del carrusel comparando la posición
+  // del puntero entre pointerdown y click.
+  const pointerDownPos = useRef<{ x: number; y: number } | null>(null)
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    pointerDownPos.current = { x: e.clientX, y: e.clientY }
+  }, [])
+
+  const openDetail = useCallback((project: ProjectType, e: React.MouseEvent) => {
+    const start = pointerDownPos.current
+    if (start) {
+      const moved = Math.hypot(e.clientX - start.x, e.clientY - start.y)
+      if (moved > 10) return // fue un arrastre, no un clic
+    }
+    setDetailProject(project)
+  }, [])
 
   const onInit = useCallback((emblaApi: any) => {
     setScrollSnaps(emblaApi.scrollSnapList())
@@ -136,8 +157,15 @@ const EmblaCarousel: React.FC = () => {
         >
           <div className="embla__container flex">
             {PROJECTS.map((project, index) => (
-              <div key={index} className="embla__slide flex-none w-full md:w-1/2 lg:w-1/3 pl-4 select-none">
-                <div className="bg-white dark:bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-900 dark:border-zinc-100 shadow-[5px_5px_0_0_#18181b] dark:shadow-[5px_5px_0_0_#fafafa] h-full flex flex-col transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0_0_#18181b] dark:hover:shadow-[7px_7px_0_0_#fafafa] select-none">
+              <div key={index} className="embla__slide flex-none w-[85%] sm:w-[60%] md:w-1/2 lg:w-1/3 pl-4 select-none">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onPointerDown={handlePointerDown}
+                  onClick={(e) => openDetail(project, e)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailProject(project) } }}
+                  aria-label={`Ver detalle de ${project.title}`}
+                  className="bg-white dark:bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-900 dark:border-zinc-100 shadow-[5px_5px_0_0_#18181b] dark:shadow-[5px_5px_0_0_#fafafa] h-full flex flex-col transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0_0_#18181b] dark:hover:shadow-[7px_7px_0_0_#fafafa] select-none cursor-pointer">
                   {/* Barra superior estilo "ventana" retro */}
                   <div className="flex items-center justify-between px-3 py-2 border-b-2 border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800">
                     <div className="flex items-center gap-1.5">
@@ -148,7 +176,7 @@ const EmblaCarousel: React.FC = () => {
                       {project.tags[0]?.name ?? "project"}
                     </span>
                   </div>
-                  <div className="relative h-48 w-full overflow-hidden border-b-2 border-zinc-900 dark:border-zinc-100">
+                  <div className="relative h-40 sm:h-48 w-full overflow-hidden border-b-2 border-zinc-900 dark:border-zinc-100">
                     <img
                       src={project.images[0]}
                       alt={project.title}
@@ -157,18 +185,18 @@ const EmblaCarousel: React.FC = () => {
                     />
                   </div>
                   <div className="p-4 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{project.title}</h3>
-                    <p className="text-zinc-600 dark:text-gray-300 text-sm mb-4 flex-1">{project.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white mb-2">{project.title}</h3>
+                    <p className="text-zinc-600 dark:text-gray-300 text-sm mb-3 line-clamp-2">{project.description}</p>
+                    <div className="flex flex-wrap gap-1.5 mb-3">
                       {project.tags.map((tag, tagIndex) => {
                         const TagIcon = tag.icon;
                         return (
                           <div
                             key={tagIndex}
-                            className="flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                            className="flex items-center gap-1 text-[11px] font-mono px-2 py-1 rounded-full border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                             title={tag.name}
                           >
-                            {TagIcon && <TagIcon className="w-3.5 h-3.5 grayscale opacity-80" />}
+                            {TagIcon && <TagIcon className="w-3 h-3 grayscale opacity-80" />}
                             <span>{tag.name}</span>
                           </div>
                         );
@@ -180,6 +208,7 @@ const EmblaCarousel: React.FC = () => {
                           href={project.link}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="flex items-center gap-1.5 text-sm border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-3 py-2 rounded-md font-semibold transition-colors hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100"
                         >
                           <FaExternalLinkAlt className="text-xs" />
@@ -191,6 +220,7 @@ const EmblaCarousel: React.FC = () => {
                           href={project.github}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="flex items-center gap-1.5 text-sm border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 px-3 py-2 rounded-md font-semibold transition-colors hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
                         >
                           <FaGithub className="text-sm" />
@@ -199,7 +229,7 @@ const EmblaCarousel: React.FC = () => {
                       )}
                       {project.gist && (
                         <button
-                          onClick={() => setSelectedGist(project.gist || null)}
+                          onClick={(e) => { e.stopPropagation(); setSelectedGist(project.gist || null) }}
                           className="flex items-center gap-1.5 text-sm border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 px-3 py-2 rounded-md font-semibold transition-colors hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
                         >
                           <FaCode className="text-sm" />
@@ -243,6 +273,16 @@ const EmblaCarousel: React.FC = () => {
         </div>
       </div>
       
+      {/* Modal de detalle del proyecto */}
+      <AnimatePresence>
+        {detailProject && (
+          <ProjectDetailModal
+            project={detailProject}
+            onClose={() => setDetailProject(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Modal para mostrar el gist */}
       {selectedGist && (
         <GistModal

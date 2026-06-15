@@ -54,7 +54,7 @@ const GistModal: React.FC<GistModalProps> = ({ gistUrl, onClose, project }) => {
 
     return (
         <div
-            className="top-[8vh] h-[92vh] md:top-[10vh] md:h-[90vh] fixed inset-0 z-50 flex items-center justify-end overflow-hidden transition-all duration-300 ease-in-out"
+            className="top-[8vh] h-[92vh] md:top-[10vh] md:h-[90vh] fixed inset-0 z-[60] flex items-center justify-end overflow-hidden transition-all duration-300 ease-in-out"
             style={{ backgroundColor: isVisible ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)' }}
         >
             <div
