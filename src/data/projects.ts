@@ -3,6 +3,19 @@ import type { ProjectType } from "../types/types"
 
 export const PROJECTS: ProjectType[] = [
   {
+    title: "SS_RECORDER — grabador de pantalla multiplataforma",
+    description:
+      "Grabador de pantalla de escritorio multiplataforma (Windows / macOS / Linux) desarrollado en Python con interfaz moderna en CustomTkinter. Captura la pantalla y el audio del sistema (loopback) — lo que suena por los altavoces: juegos, YouTube, música, llamadas — sin necesidad de 'Stereo Mix' ni drivers extra: usa loopback WASAPI nativo en Windows, el monitor de PulseAudio/PipeWire en Linux y BlackHole en macOS. Soporta captura compatible con Wayland y X11 (en Wayland vía portal ScreenCast + PipeWire con detección automática), control de calidad/FPS, selección de monitor, capturas de pantalla y exportación a mp4, avi, mov y webm con el audio mezclado vía ffmpeg (binario embebido en imageio-ffmpeg). Arquitectura modular separando UI, captura, codificación y utilidades por plataforma.",
+    link: "",
+    github: "https://github.com/StivenColorado/SS_RECORDER",
+    images: [
+      "/projects/ss-recorder/ss-recorder_1.png",
+      "/projects/ss-recorder/ss-recorder_2.png",
+    ],
+    videos: [],
+    tags: [TAGS.PYTHON],
+  },
+  {
     title: "Rick & Morty Explorer",
     description:
       "Explorador del universo de Rick & Morty construido con React 19, TypeScript y Vite, consumiendo la API vía GraphQL (graphql-request + TanStack Query). Incluye filtros avanzados con búsqueda en vivo (debounce), estado en la URL, modales de detalle que traen residentes/reparto/episodios anidados en una sola query (sin N+1), favoritos y comparador de personajes persistentes con Zustand, un dashboard de estadísticas con Recharts que agrega todos los personajes mediante una query multi-alias, skeleton loaders, animaciones y diseño totalmente responsive con Tailwind CSS.",
