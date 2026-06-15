@@ -148,17 +148,17 @@ export const PROJECTS: ProjectType[] = [
   {
     title: "Pokémon API Consumer",
     description:
-      "Desarrollé un cliente en Astro y JavaScript para consumir la PokéAPI: autenticación, paginación, filtrado por tipo y detalles, cache local con IndexedDB y diseño modular en PHP y Tailwind CSS.",
+      "Pokédex frontend construido con Astro, JavaScript y Tailwind CSS que consume la PokéAPI. Incluye búsqueda en vivo, filtrado por tipo, favoritos persistentes en localStorage, comparador de hasta 4 Pokémon con gráfico de estadísticas lado a lado, scroll infinito con skeleton loaders, y una vista de detalle enriquecida con habilidades, cadena de evolución, sprites animados (Showdown/Gen V), arte shiny y reproducción del sonido (cry) de cada Pokémon. Migrado de npm a pnpm.",
     link: "https://pokemon-api-consumer.vercel.app/",
     github: "https://github.com/StivenColorado/pokemon-api-consumer",
     images: [
-      "/projects/pokemon/pokemon_p4.webp",
       "/projects/pokemon/pokemon_p1.webp",
       "/projects/pokemon/pokemon_p2.webp",
       "/projects/pokemon/pokemon_p3.webp",
+      "/projects/pokemon/pokemon_p4.webp",
     ],
     videos: [],
-    tags: [TAGS.PHP, TAGS.JAVASCRIPT, TAGS.TAILWIND, TAGS.ASTRO],
+    tags: [TAGS.ASTRO, TAGS.JAVASCRIPT, TAGS.TAILWIND],
   },
   {
     title: "Banco de proyectos Soft-PAC",

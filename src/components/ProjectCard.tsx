@@ -103,10 +103,10 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
                     ))}
                 </div>
 
-                <div className="flex gap-3 mt-4">
+                <div className="flex gap-2 mt-4">
                     <button
                         onClick={() => onDetailsClick?.(project)}
-                        className="flex-1 border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-center py-2 px-4 rounded-md transition-colors text-sm font-semibold hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100"
+                        className="flex-1 whitespace-nowrap border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-center py-2 px-3 rounded-md transition-colors text-sm font-semibold hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100"
                     >
                         Detalles
                     </button>
@@ -115,7 +115,7 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
                             href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-4 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
+                            className="flex-1 whitespace-nowrap border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-3 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
                         >
                             Ver Proyecto
                         </a>
@@ -125,10 +125,10 @@ const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick })
                             href={project.github}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-4 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
+                            className="flex-1 whitespace-nowrap border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-3 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
                         >
-                            <div className="flex items-center justify-center gap-2">
-                                <Github className="w-4 h-4" />
+                            <div className="flex items-center justify-center gap-1.5">
+                                <Github className="w-4 h-4 shrink-0" />
                                 <span>Repositorio</span>
                             </div>
                         </a>
