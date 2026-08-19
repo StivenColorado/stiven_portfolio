@@ -13,7 +13,7 @@ const WhatsAppButton: React.FC = () => {
             rel="noopener noreferrer"
             aria-label="Escríbeme por WhatsApp"
             title="Escríbeme por WhatsApp"
-            className="group fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full
+            className="group fixed bottom-5 right-5 z-50 flex items-center rounded-full
                        bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900
                        border-2 border-zinc-900 dark:border-zinc-100
                        p-3.5 md:p-4 transition-all duration-300
@@ -33,7 +33,7 @@ const WhatsAppButton: React.FC = () => {
             </svg>
             <span className="hidden md:inline-block max-w-0 overflow-hidden whitespace-nowrap
                              text-sm font-medium transition-all duration-300
-                             group-hover:max-w-[10rem] group-hover:ml-1">
+                             group-hover:max-w-[10rem] group-hover:ml-2">
                 WhatsApp
             </span>
         </a>

@@ -90,6 +90,18 @@ export const EXPERIENCE: ExperienceItemType[] = [
     link: "https://www.linkedin.com/company/accedo-technologies/",
   },
   {
+    date: "Noviembre 2023 - Marzo 2024",
+    title: "Desarrollador Fullstack - Proyecto Eye Tracking",
+    role: "Desarrollador FullStack",
+    company: "Proyecto académico · Eye Tracking",
+    summary:
+      "App de seguimiento ocular con visualización de datos en tiempo real y carga masiva desde Excel.",
+    stack: ["Django", "React", "Python", "JWT"],
+    description:
+      "Aplicación web de seguimiento ocular interactivo desarrollada con Django y React.js. Visualización de datos en gráficos y videos en tiempo real, gestión de grandes volúmenes de datos importados desde archivos Excel hacia la base de datos, y autenticación JWT con encriptación para la protección de la información.",
+    link: "#",
+  },
+  {
     date: "Diciembre 2023",
     title: "Desarrollador Backend - Contratista ICA",
     role: "Desarrollador Backend",
