@@ -1,0 +1,15 @@
+Modelos 3D: «Glasses» por Marius.Eder y «MacBook Laptop» por Issac Ghazanfar, CC BY 4.0
+
+«Glasses» - Marius.Eder
+  Modelo: https://sketchfab.com/3d-models/glasses-007651a9450746a5b6c5a126d484cd52
+  Autor:  https://sketchfab.com/Marius.Eder
+
+«MacBook Laptop» - Issac Ghazanfar
+  Modelo: https://sketchfab.com/3d-models/macbook-laptop-7ceb46a1425b475fa7f6bf192e01ed74
+  Autor:  https://sketchfab.com/sheshhh
+
+Licencia: Creative Commons Attribution 4.0 (CC BY 4.0)
+  https://creativecommons.org/licenses/by/4.0/
+
+Cambios: se eliminaron texturas y materiales, se simplificó la geometría
+y se comprimió con meshopt (glasses.glb y laptop.glb).

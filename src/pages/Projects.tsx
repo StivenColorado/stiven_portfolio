@@ -1,289 +1,90 @@
-import { observer } from "mobx-react";
-import React, { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useStore } from "../context/StoreContext";
+import React, { useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
+import { PROJECTS } from "../data/projects";
 import ProjectCard from "../components/ProjectCard";
 import ProjectDetailModal from "../components/ProjectDetailModal";
-import { type ProjectType } from "../types/types";
+import Select from "../components/ui/Select";
+import type { Option } from "../components/ui/Select";
+import { X } from "lucide-react";
+import type { ProjectKind, ProjectType } from "../types/types";
 
-interface MediaItem {
-    type: 'image' | 'video';
-    src: string;
-}
+const KINDS: { value: ProjectKind; label: string }[] = [
+    { value: 'case-study', label: 'Confidenciales' },
+    { value: 'demo', label: 'Demos' },
+    { value: 'oss', label: 'Open source' },
+];
 
-const variants = {
-    enter: (direction: number) => ({
-        x: direction > 0 ? 1000 : -1000,
-        opacity: 0
-    }),
-    center: {
-        zIndex: 1,
-        x: 0,
-        opacity: 1
-    },
-    exit: (direction: number) => ({
-        zIndex: 0,
-        x: direction < 0 ? 1000 : -1000,
-        opacity: 0
-    })
-};
+const TAG_ICONS = new Map(PROJECTS.flatMap((p) => p.tags.map((t) => [t.name, t.icon] as const)));
+const TAG_NAMES = [...TAG_ICONS.keys()].sort((a, b) => a.localeCompare(b));
 
-const swipeConfidenceThreshold = 10000;
-const swipePower = (offset: number, velocity: number) => {
-    return Math.abs(offset) * velocity;
-};
+const OPTIONS: Option[] = [
+    ...KINDS.map((k) => ({ value: `kind:${k.value}`, label: k.label, group: 'Tipo' })),
+    ...TAG_NAMES.map((name) => ({ value: `tag:${name}`, label: name, group: 'Tecnologías', icon: TAG_ICONS.get(name) })),
+];
+
+const csv = (raw: string | null) => (raw ? raw.split(',').filter(Boolean) : []);
 
 const Projects: React.FC = () => {
-    const { portfolioStore } = useStore();
-    const [isVisible, setIsVisible] = useState(false);
-    const [galleryState, setGalleryState] = useState<{
-        isOpen: boolean;
-        mediaItems: MediaItem[];
-        currentIndex: number;
-    }>({
-        isOpen: false,
-        mediaItems: [],
-        currentIndex: 0
-    });
-    
-    const [[page, direction], setPage] = useState([0, 0]);
+    const [params, setParams] = useSearchParams();
+    const [detail, setDetail] = useState<ProjectType | null>(null);
+    const kinds = csv(params.get('kind'));
+    const tags = csv(params.get('tag'));
+    const selected = [...kinds.map((k) => `kind:${k}`), ...tags.map((t) => `tag:${t}`)];
 
-    // Proyecto abierto en el modal de DETALLE (descripción completa + galería).
-    const [detailProject, setDetailProject] = useState<ProjectType | null>(null);
+    const visible = useMemo(
+        () => PROJECTS.filter((p) => (!kinds.length || kinds.includes(p.kind)) && (!tags.length || p.tags.some((t) => tags.includes(t.name)))),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [params],
+    );
 
-    useEffect(() => {
-        setIsVisible(true);
-    }, []);
-
-    const openGallery = (mediaItems: MediaItem[], index: number) => {
-        setGalleryState({
-            isOpen: true,
-            mediaItems,
-            currentIndex: index
-        });
-        setPage([index, 0]);
-        document.body.style.overflow = 'hidden';
-    };
-
-    const closeGallery = useCallback(() => {
-        setGalleryState(prev => ({ ...prev, isOpen: false }));
-        // Si el modal de detalle sigue abierto debajo, el fondo no debe scrollear.
-        document.body.style.overflow = detailProject ? 'hidden' : 'unset';
-    }, [detailProject]);
-
-    const paginate = useCallback((newDirection: number) => {
-        const newIndex = galleryState.currentIndex + newDirection;
-        if (newIndex >= 0 && newIndex < galleryState.mediaItems.length) {
-            setPage([newIndex, newDirection]);
-            setGalleryState(prev => ({ ...prev, currentIndex: newIndex }));
+    const apply = (values: string[]) => {
+        const next = new URLSearchParams(params);
+        for (const key of ['kind', 'tag']) {
+            const list = values.filter((v) => v.startsWith(`${key}:`)).map((v) => v.slice(key.length + 1));
+            if (list.length) next.set(key, list.join(','));
+            else next.delete(key);
         }
-    }, [galleryState.currentIndex, galleryState.mediaItems.length]);
-
-    useEffect(() => {
-        // Handle keyboard navigation
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (!galleryState.isOpen) {
-                // La galería tiene prioridad; sin ella, Esc cierra el detalle.
-                if (e.key === 'Escape') setDetailProject(null);
-                return;
-            }
-
-            switch (e.key) {
-                case 'ArrowLeft':
-                    paginate(-1);
-                    break;
-                case 'ArrowRight':
-                    paginate(1);
-                    break;
-                case 'Escape':
-                    closeGallery();
-                    break;
-                default:
-                    break;
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [galleryState.isOpen, paginate, closeGallery]);
-
-    const container = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
+        setParams(next, { replace: true });
     };
 
-    const item = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-    };
+    const labelOf = (v: string) => (v.startsWith('kind:') ? KINDS.find((k) => k.value === v.slice(5))?.label : undefined) ?? v.slice(v.indexOf(':') + 1);
 
     return (
-            <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 select-none">
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="max-w-7xl mx-auto text-center mb-16"
-                >
-                    <span className="inline-block font-mono text-xs sm:text-sm uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-300 border-2 border-zinc-900 dark:border-zinc-100 rounded-md px-3 py-1 mb-5">
-                        // Portfolio
-                    </span>
-                    <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
-                        Mis Proyectos
-                    </h1>
-                    <p className="text-xl text-zinc-600 dark:text-gray-300">
-                        Explora mi colección de proyectos desarrollados con las últimas tecnologías
-                    </p>
-                    <div className="mt-8 h-1 w-24 bg-zinc-900 dark:bg-zinc-100 mx-auto" />
-                </motion.div>
+        <div className="mx-auto w-full max-w-6xl px-5 py-12 md:py-20">
+            <span className="eyebrow">Proyectos</span>
+            <h1 className="mb-8 mt-2 text-5xl text-ink md:text-7xl">Lo que he construido</h1>
 
-                <motion.div
-                    variants={container}
-                    initial="hidden"
-                    animate={isVisible ? "show" : "hidden"}
-                    className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4"
-                >
-                    {portfolioStore.projects.map((project: ProjectType) => (
-                        <motion.div key={project.title} variants={item}>
-                            <ProjectCard
-                                key={project.title}
-                                project={project}
-                                onImageClick={openGallery}
-                                onDetailsClick={setDetailProject}
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1, duration: 1 }}
-                    className="mt-16 text-center text-gray-400"
-                >
-                    <p>Mostrando {portfolioStore.totalProjects} proyectos</p>
-                </motion.div>
-
-                {/* Detail Modal (descripción completa; la galería abre encima) */}
-                <AnimatePresence>
-                    {detailProject && (
-                        <ProjectDetailModal
-                            project={detailProject}
-                            onClose={() => setDetailProject(null)}
-                            onMediaClick={openGallery}
-                        />
-                    )}
-                </AnimatePresence>
-
-                {/* Gallery Modal */}
-                <AnimatePresence custom={direction} initial={false}>
-                    {galleryState.isOpen && galleryState.mediaItems.length > 0 && (
-                        <motion.div
-                            className="fixed inset-0 bg-black bg-opacity-95 z-[70] flex flex-col items-center justify-center p-4"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={closeGallery}
-                        >
-                            <button 
-                                className="absolute top-4 right-6 text-white text-4xl z-10 hover:text-zinc-400 transition-colors"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    closeGallery();
-                                }}
-                                aria-label="Cerrar galería"
-                            >
-                                &times;
+            <div className="mb-8 flex flex-col gap-4">
+                <Select label="Intereses" multiple clearable options={OPTIONS} value={selected} onChange={apply} searchPlaceholder="Buscar tipo o tecnología…" className="w-full md:max-w-sm" />
+                <div className="flex flex-wrap items-center gap-2" aria-live="polite">
+                    {selected.map((v) => (
+                        <span key={v} className="tag">
+                            {labelOf(v)}
+                            <button type="button" aria-label={`Quitar ${labelOf(v)}`} onClick={() => apply(selected.filter((x) => x !== v))} className="cursor-pointer leading-none hover:opacity-60 focus-visible:outline-2 focus-visible:outline-lens">
+                                <X aria-hidden="true" className="size-3.5" strokeWidth={3} />
                             </button>
-
-                            <div className="relative w-full max-w-6xl h-[80vh] flex items-center">
-                                <button 
-                                    className="absolute left-4 z-10 p-2 text-white text-2xl hover:text-zinc-400 transition-colors"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        paginate(-1);
-                                    }}
-                                    disabled={galleryState.currentIndex === 0}
-                                    aria-label="Anterior"
-                                >
-                                    ❮
-                                </button>
-
-                                <div className="w-full h-full flex items-center justify-center overflow-hidden">
-                                    <AnimatePresence custom={direction} initial={false}>
-                                        <motion.div
-                                            key={page}
-                                            custom={direction}
-                                            variants={variants}
-                                            initial="enter"
-                                            animate="center"
-                                            exit="exit"
-                                            transition={{
-                                                x: { type: "spring", stiffness: 300, damping: 30 },
-                                                opacity: { duration: 0.2 }
-                                            }}
-                                            drag="x"
-                                            dragConstraints={{ left: 0, right: 0 }}
-                                            dragElastic={1}
-                                            onDragEnd={(_, { offset, velocity }) => {
-                                                const swipe = swipePower(offset.x, velocity.x);
-                                                if (swipe < -swipeConfidenceThreshold) {
-                                                    paginate(1);
-                                                } else if (swipe > swipeConfidenceThreshold) {
-                                                    paginate(-1);
-                                                }
-                                            }}
-                                            className="w-full h-full flex items-center justify-center absolute"
-                                        >
-                                            {galleryState.mediaItems[galleryState.currentIndex]?.type === 'image' ? (
-                                                <img 
-                                                    src={galleryState.mediaItems[galleryState.currentIndex]?.src} 
-                                                    alt={`Gallery item ${galleryState.currentIndex + 1}`}
-                                                    className="max-h-full max-w-full object-contain"
-                                                    draggable={false}
-                                                />
-                                            ) : (
-                                                <video 
-                                                    src={galleryState.mediaItems[galleryState.currentIndex]?.src} 
-                                                    className="max-h-full max-w-full object-contain"
-                                                    controls
-                                                    autoPlay
-                                                    loop
-                                                    playsInline
-                                                    draggable={false}
-                                                />
-                                            )}
-                                        </motion.div>
-                                    </AnimatePresence>
-                                </div>
-
-                                <button 
-                                    className="absolute right-4 z-10 p-2 text-white text-2xl hover:text-zinc-400 transition-colors"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        paginate(1);
-                                    }}
-                                    disabled={galleryState.currentIndex === galleryState.mediaItems.length - 1}
-                                    aria-label="Siguiente"
-                                >
-                                    ❯
-                                </button>
-                            </div>
-
-                            <div className="mt-4 text-white">
-                                {galleryState.currentIndex + 1} / {galleryState.mediaItems.length}
-                            </div>
-                        </motion.div>
+                        </span>
+                    ))}
+                    {selected.length > 0 && (
+                        <button type="button" onClick={() => apply([])} className="font-mono text-xs font-bold text-ink underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-lens">Limpiar todo</button>
                     )}
-                </AnimatePresence>
+                    <span className="eyebrow ml-auto">{visible.length} {visible.length === 1 ? 'proyecto' : 'proyectos'}</span>
+                </div>
             </div>
+
+            <div data-slot="k" className="h-32 md:hidden" aria-hidden="true" />
+
+            {visible.length === 0 ? (
+                <p className="text-muted">Ningún proyecto coincide con estos filtros.</p>
+            ) : (
+                <div className="grid grid-cols-1 gap-8 pr-2 md:grid-cols-2 xl:grid-cols-3">
+                    {visible.map((p) => <ProjectCard key={p.slug} project={p} onOpen={setDetail} />)}
+                </div>
+            )}
+
+            {detail && <ProjectDetailModal project={detail} onClose={() => setDetail(null)} />}
+        </div>
     );
 };
 
-export default observer(Projects);
-
+export default Projects;

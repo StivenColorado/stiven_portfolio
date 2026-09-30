@@ -13,6 +13,15 @@ import MysqlIcon from "../components/icons/MysqlIcon"
 import TypeScriptIcon from "../components/icons/TypeScriptIcon"
 import GraphQLIcon from "../components/icons/GraphQLIcon"
 
+import NestJSIcon from "../components/icons/NestJSIcon"
+import FlutterIcon from "../components/icons/FlutterIcon"
+import N8nIcon from "../components/icons/N8nIcon"
+import SupabaseIcon from "../components/icons/SupabaseIcon"
+import SqliteIcon from "../components/icons/SqliteIcon"
+import RedisIcon from "../components/icons/RedisIcon"
+import ThreeIcon from "../components/icons/ThreeIcon"
+import { Sparkles } from "lucide-react"
+
 import type { TagType } from "../types/types"
 
 export const TAGS: Record<string, TagType> = {
@@ -90,5 +99,53 @@ export const TAGS: Record<string, TagType> = {
     name: "GraphQL",
     class: "text-pink-500",
     icon: GraphQLIcon,
+  },
+  NESTJS: {
+    name: "NestJS",
+    class: "text-red-500",
+    icon: NestJSIcon,
+  },
+  PRISMA: {
+    name: "Prisma",
+    class: "text-teal-400",
+  },
+  REDIS: {
+    name: "Redis",
+    class: "text-red-400",
+    icon: RedisIcon,
+  },
+  FLUTTER: {
+    name: "Flutter",
+    class: "text-sky-400",
+    icon: FlutterIcon,
+  },
+  N8N: {
+    name: "n8n",
+    class: "text-orange-500",
+    icon: N8nIcon,
+  },
+  SUPABASE: {
+    name: "Supabase",
+    class: "text-emerald-400",
+    icon: SupabaseIcon,
+  },
+  SQLITE: {
+    name: "SQLite",
+    class: "text-sky-300",
+    icon: SqliteIcon,
+  },
+  THREEJS: {
+    name: "three.js",
+    class: "text-white",
+    icon: ThreeIcon,
+  },
+  WHATSAPP: {
+    name: "WhatsApp",
+    class: "text-green-500",
+  },
+  IA: {
+    name: "IA",
+    class: "text-violet-400",
+    icon: Sparkles,
   },
 }

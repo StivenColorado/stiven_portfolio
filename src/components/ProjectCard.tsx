@@ -1,143 +1,84 @@
 import React from "react";
-import { motion } from "framer-motion";
-import { type ProjectType } from "../types/types";
+import { Briefcase, Code, ExternalLink, Github, Lock } from "lucide-react";
+import type { ProjectType } from "../types/types";
 import Tag from "./Tag";
-import Github from "./icons/Github";
-
-interface MediaItem {
-    type: 'image' | 'video';
-    src: string;
-}
+import { fileNameOf } from "./fileName";
 
 interface Props {
     project: ProjectType;
-    onImageClick?: (mediaItems: MediaItem[], index: number) => void;
-    onDetailsClick?: (project: ProjectType) => void;
+    onOpen: (project: ProjectType) => void;
 }
 
-const ProjectCard: React.FC<Props> = ({ project, onImageClick, onDetailsClick }) => {
-    const mediaItems: MediaItem[] = [
-        ...(project.images?.map(src => ({ type: 'image' as const, src })) || []),
-        ...(project.videos?.map(src => ({ type: 'video' as const, src })) || [])
-    ];
+export const PrivateBadge: React.FC<{ nda?: boolean }> = ({ nda }) => (
+    <span className="tag">
+        <Lock className="h-3 w-3" aria-hidden="true" />
+        {nda ? "Cliente · confidencial (NDA)" : "Código privado"}
+    </span>
+);
 
-    const handleImageClick = (e: React.MouseEvent, index: number) => {
-        e.preventDefault();
-        if (mediaItems.length > 0) {
-            onImageClick?.(mediaItems, index);
-        }
-    };
-
-    if (mediaItems.length === 0) {
-        mediaItems.push({
-            type: 'image',
-            src: 'https://via.placeholder.com/800x500/1a202c/4a5568?text=No+Preview+Available'
-        });
+/** Sin capturas se muestra un visual genérico para que tarjeta y modal no queden vacíos. */
+export const ProjectVisual: React.FC<{ project: ProjectType; large?: boolean }> = ({ project, large }) => {
+    const cover = project.images[0];
+    if (cover) {
+        return (
+            <img
+                src={cover}
+                alt={`Captura de ${project.title}`}
+                width={1280}
+                height={800}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+            />
+        );
     }
+    const Icon = project.kind === 'case-study' ? Briefcase : Code;
+    return (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-3 dither p-4 text-ink">
+            <Icon className={large ? "h-20 w-20" : "h-14 w-14"} strokeWidth={2.5} aria-hidden="true" />
+            {project.private && <PrivateBadge nda={project.nda} />}
+        </div>
+    );
+};
+
+const ProjectCard: React.FC<Props> = ({ project, onOpen }) => {
+    const { demo, repo } = project.links ?? {};
 
     return (
-        <motion.div
-            className="bg-white dark:bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-900 dark:border-zinc-100 shadow-[5px_5px_0_0_#18181b] dark:shadow-[5px_5px_0_0_#fafafa] hover:shadow-[7px_7px_0_0_#18181b] dark:hover:shadow-[7px_7px_0_0_#fafafa] transition-all duration-200 transform hover:-translate-x-0.5 hover:-translate-y-0.5"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            layout
-        >
-            {/* Barra superior estilo "ventana" retro */}
-            <div className="flex items-center justify-between px-3 py-2 border-b-2 border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800">
-                <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full border border-zinc-900 dark:border-zinc-100" />
-                    <span className="w-2.5 h-2.5 rounded-full border border-zinc-900 dark:border-zinc-100" />
-                </div>
-                <span className="font-mono text-[11px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                    {project.tags[0]?.name ?? "project"}
-                </span>
+        <article className="window group/card h-full">
+            <div className="window-bar">
+                <span className="window-dot" aria-hidden="true" />
+                <span className="window-dot" aria-hidden="true" />
+                <span className="flex-1 truncate text-center">{fileNameOf(project)}</span>
             </div>
-
-            {/* Thumbnail */}
-            <div
-                className="relative h-48 bg-zinc-200 dark:bg-zinc-700 cursor-pointer overflow-hidden group border-b-2 border-zinc-900 dark:border-zinc-100"
-                onClick={(e) => handleImageClick(e, 0)}
-            >
-                {mediaItems[0]?.type === 'image' ? (
-                    <img
-                        src={mediaItems[0].src}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                    />
-                ) : (
-                    <video
-                        src={mediaItems[0].src}
-                        className="w-full h-full object-cover"
-                        muted
-                        loop
-                        playsInline
-                    />
-                )}
-                <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-sm font-medium bg-black bg-opacity-70 px-3 py-1.5 rounded-full">
-                        Ver Galería
-                    </span>
-                </div>
-                {mediaItems.length > 1 && (
-                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
-                        +{mediaItems.length - 1}
-                    </div>
-                )}
+            <div className="aspect-[16/10] overflow-hidden border-b-[length:var(--line)] border-ink">
+                <ProjectVisual project={project} />
             </div>
-
-            {/* Content */}
-            <div className="p-5">
-                <h3
-                    className="text-xl font-bold text-zinc-900 dark:text-white mb-2 line-clamp-1 cursor-pointer hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-                    onClick={() => onDetailsClick?.(project)}
-                    title={project.title}
-                >
-                    {project.title}
-                </h3>
-                <p className="text-zinc-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{project.description}</p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tags.map((tag) => (
-                        <Tag key={tag.name} tag={tag} />
-                    ))}
+            <div className="flex flex-1 flex-col gap-3 p-4">
+                <h3 className="text-xl text-ink">{project.title}</h3>
+                <p className="line-clamp-3 text-sm text-muted">{project.summary}</p>
+                <div className="flex flex-wrap gap-1.5">
+                    {project.tags.map((tag) => <Tag key={tag.name} tag={tag} />)}
                 </div>
-
-                <div className="flex gap-2 mt-4">
-                    <button
-                        onClick={() => onDetailsClick?.(project)}
-                        className="flex-1 whitespace-nowrap border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-center py-2 px-3 rounded-md transition-colors text-sm font-semibold hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100"
-                    >
-                        Detalles
+                <div className="mt-auto flex flex-wrap gap-3 pt-2">
+                    <button type="button" className="btn text-sm" onClick={() => onOpen(project)} aria-label={`Ver detalle de ${project.title}`}>
+                        Ver proyecto
                     </button>
-                    {project.link && (
-                        <a
-                            href={project.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 whitespace-nowrap border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-3 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
-                        >
-                            Ver Proyecto
+                    {demo && (
+                        <a href={demo} target="_blank" rel="noopener noreferrer" className="btn text-sm">
+                            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                            Demo
                         </a>
                     )}
-                    {project.github && (
-                        <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 whitespace-nowrap border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 text-center py-2 px-3 rounded-md transition-colors text-sm font-semibold hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
-                        >
-                            <div className="flex items-center justify-center gap-1.5">
-                                <Github className="w-4 h-4 shrink-0" />
-                                <span>Repositorio</span>
-                            </div>
+                    {repo && (
+                        <a href={repo} target="_blank" rel="noopener noreferrer" className="btn text-sm">
+                            <Github className="h-4 w-4" aria-hidden="true" />
+                            Repositorio
                         </a>
                     )}
                 </div>
             </div>
-
-
-        </motion.div>
+        </article>
     );
 };
 

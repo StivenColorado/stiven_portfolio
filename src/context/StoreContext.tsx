@@ -1,15 +1,6 @@
-import React, { createContext, useContext } from "react";
-import { PortfolioStore } from "../stores/PortfolioStore";
-import { ThemeStore } from "../stores/ThemeStore";
-const store = {
-    portfolioStore: new PortfolioStore(),
-    themeStore: new ThemeStore(),
-}
+import type { PropsWithChildren } from "react";
+import { store, StoreContext } from "./store";
 
-const StoreContext = createContext(store);
-
-export const StoreProvider: React.FC<React.PropsWithChildren> = ({ children }) => (
+export const StoreProvider = ({ children }: PropsWithChildren) => (
     <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
-)
-
-export const useStore = () => useContext(StoreContext)
+);

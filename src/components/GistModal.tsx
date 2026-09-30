@@ -1,120 +1,76 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Github } from 'lucide-react';
 import type { ProjectType } from '../types/types'
+
 interface GistModalProps {
     gistUrl: string;
     onClose: () => void;
     project?: ProjectType;
 }
 
+const GIST_OWNER = 'StivenColorado';
+
+/** Panel lateral con <dialog> nativo: el foco vuelve al disparador al desmontarse. */
 const GistModal: React.FC<GistModalProps> = ({ gistUrl, onClose, project }) => {
-    const modalRef = useRef<HTMLDivElement>(null);
+    const dialogRef = useRef<HTMLDialogElement>(null);
+    const match = gistUrl.match(/gist\.github\.com\/([^/]+\/)?([a-f0-9]+)/i);
+    const gistId = match?.[2] ?? gistUrl;
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-                onClose();
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
+        const dialog = dialogRef.current;
+        const opener = document.activeElement as HTMLElement | null;
+        if (dialog && !dialog.open) dialog.showModal();
         document.body.style.overflow = 'hidden';
-
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = '';
+            opener?.focus();
         };
-    }, [onClose]);
-
-    const [gistId, setGistId] = useState<string>('');
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        // Extraer el ID del gist de la URL
-        const match = gistUrl.match(/gist\.github\.com\/([^\/]+\/)?([a-f0-9]+)/i);
-        if (match && match[2]) {
-            setGistId(match[2]);
-        } else {
-            // Si no se puede extraer el ID, intentar con la URL completa
-            setGistId(gistUrl);
-        }
-
-        // Activar animación de entrada
-        const timer = setTimeout(() => {
-            setIsVisible(true);
-        }, 10);
-
-        return () => clearTimeout(timer);
-    }, [gistUrl]);
-
-    const handleClose = () => {
-        setIsVisible(false);
-        // Esperar a que termine la animación antes de cerrar
-        setTimeout(() => onClose(), 300);
-    };
+    }, []);
 
     return (
-        <div
-            className="top-[8vh] h-[92vh] md:top-[10vh] md:h-[90vh] fixed inset-0 z-[60] flex items-center justify-end overflow-hidden transition-all duration-300 ease-in-out"
-            style={{ backgroundColor: isVisible ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)' }}
+        <dialog
+            ref={dialogRef}
+            onClose={onClose}
+            onClick={(e) => e.target === dialogRef.current && dialogRef.current?.close()}
+            aria-label={project?.title ?? 'Código en GitHub Gist'}
+            className="window m-0 ml-auto h-dvh max-h-none w-full max-w-2xl p-0 backdrop:bg-paper/60 backdrop:dither-dense [&:not([open])]:hidden"
         >
-            <div
-                ref={modalRef}
-                className={`bg-white dark:bg-zinc-900 border-l-2 border-zinc-900 dark:border-zinc-100 w-full max-w-2xl h-full flex flex-col transform transition-all duration-300 ease-in-out ${isVisible ? 'translate-x-0' : 'translate-x-full'
-                    }`}
-            >
-                <div className="bg-zinc-100 dark:bg-zinc-800 p-4 flex justify-between items-center border-b-2 border-zinc-900 dark:border-zinc-100">
-                    <h3 className="text-zinc-900 dark:text-white font-bold tracking-tight font-mono text-sm">{project?.title}</h3>
+            <div className="flex h-full flex-col">
+                <div className="window-bar">
+                    <span className="window-dot" aria-hidden="true" />
+                    <span className="window-dot" aria-hidden="true" />
+                    <span className="flex-1 truncate text-center">{project?.slug ?? 'gist'}.gist</span>
                     <button
-                        onClick={handleClose}
-                        className="w-8 h-8 flex items-center justify-center border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors focus:outline-none rounded-md"
-                        aria-label="Cerrar modal"
-                    >
-                        <svg
-                            className="w-6 h-6"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-                    </button>
+                    type="button"
+                    onClick={() => dialogRef.current?.close()}
+                    className="flex h-5 w-5 shrink-0 items-center justify-center border-2 border-ink bg-paper text-sm leading-none hover:bg-ink hover:text-paper"
+                    aria-label="Cerrar modal"
+                >
+                    <span aria-hidden="true">×</span>
+                </button>
                 </div>
                 <div className="flex-1 overflow-auto">
-                    {gistId ? (
-                        <iframe
-                            src={`https://gist.github.com/StivenColorado/${gistId}.pibb`}
-                            className="w-full h-full border-0"
-                            title="Github Gist"
-                            sandbox="allow-scripts allow-same-origin"
-                            loading="lazy"
-                        />
-                    ) : (
-                        <div className="flex items-center justify-center h-full">
-                            <p className="text-zinc-500 dark:text-gray-400">No se pudo cargar el código</p>
-                        </div>
-                    )}
-                    <div className="p-4 text-center text-sm text-zinc-500 border-t-2 border-zinc-900 dark:border-zinc-100">
-                        <a
-                            href={`https://gist.github.com/StivenColorado/${gistId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-zinc-900 dark:text-zinc-100 font-semibold hover:underline inline-flex items-center gap-1 transition-colors"
-                        >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.6.113.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.386-1.332-1.755-1.332-1.755-1.087-.744.084-.729.084-.729 1.205.085 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.776.417-1.305.758-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .319.216.694.825.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                            </svg>
-                            <span>Ver en GitHub Gist</span>
-                        </a>
-                    </div>
+                    <iframe
+                        src={`https://gist.github.com/${GIST_OWNER}/${gistId}.pibb`}
+                        className="h-full w-full border-0"
+                        title="Github Gist"
+                        sandbox="allow-scripts allow-same-origin"
+                        loading="lazy"
+                    />
+                </div>
+                <div className="border-t-[length:var(--line)] border-ink p-4 text-center text-sm">
+                    <a
+                        href={`https://gist.github.com/${GIST_OWNER}/${gistId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:bg-ink hover:text-paper"
+                    >
+                        <Github className="h-4 w-4" aria-hidden="true" />
+                        Ver en GitHub Gist
+                    </a>
                 </div>
             </div>
-        </div>
+        </dialog>
     );
 };
 

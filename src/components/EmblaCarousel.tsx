@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react'
-import { AnimatePresence } from 'framer-motion'
-import useEmblaCarousel from 'embla-carousel-react'
+import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { PROJECTS } from '../data/projects'
 import type { ProjectType } from '../types/types'
-import { FaArrowDown, FaCode, FaExternalLinkAlt, FaGithub } from 'react-icons/fa'
-import GistModal from './GistModal'
+import ProjectCard from './ProjectCard'
 import ProjectDetailModal from './ProjectDetailModal'
+
+const FEATURED = PROJECTS.filter(p => p.featured)
 
 const useIntersectionObserver = (callback: () => void) => {
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -72,8 +72,9 @@ const TypewriterText: React.FC<{ text: string; className?: string }> = ({ text, 
   )
 }
 
+const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 const EmblaCarousel: React.FC = () => {
-  const [selectedGist, setSelectedGist] = useState<string | null>(null)
   const [detailProject, setDetailProject] = useState<ProjectType | null>(null)
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
@@ -82,7 +83,7 @@ const EmblaCarousel: React.FC = () => {
       skipSnaps: false,
       dragFree: true
     },
-    [Autoplay({ delay: 4000, stopOnInteraction: false })]
+    prefersReducedMotion ? [] : [Autoplay({ delay: 4000, stopOnInteraction: false })]
   )
 
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -100,28 +101,11 @@ const EmblaCarousel: React.FC = () => {
     if (emblaApi) emblaApi.scrollTo(index)
   }, [emblaApi])
 
-  // Distingue un clic real de un arrastre del carrusel comparando la posición
-  // del puntero entre pointerdown y click.
-  const pointerDownPos = useRef<{ x: number; y: number } | null>(null)
-
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    pointerDownPos.current = { x: e.clientX, y: e.clientY }
-  }, [])
-
-  const openDetail = useCallback((project: ProjectType, e: React.MouseEvent) => {
-    const start = pointerDownPos.current
-    if (start) {
-      const moved = Math.hypot(e.clientX - start.x, e.clientY - start.y)
-      if (moved > 10) return // fue un arrastre, no un clic
-    }
-    setDetailProject(project)
-  }, [])
-
-  const onInit = useCallback((emblaApi: any) => {
+  const onInit = useCallback((emblaApi: NonNullable<UseEmblaCarouselType[1]>) => {
     setScrollSnaps(emblaApi.scrollSnapList())
   }, [])
 
-  const onSelect = useCallback((emblaApi: any) => {
+  const onSelect = useCallback((emblaApi: NonNullable<UseEmblaCarouselType[1]>) => {
     setSelectedIndex(emblaApi.selectedScrollSnap())
   }, [])
 
@@ -135,161 +119,49 @@ const EmblaCarousel: React.FC = () => {
   }, [emblaApi, onInit, onSelect])
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8">
-      <div className="flex flex-col items-center justify-center pb-2 min-h-[60px]">
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="min-h-6 pb-2">
         <TypewriterText
           text="// desliza para ver los proyectos"
-          className="font-mono text-base text-zinc-500 dark:text-zinc-300 text-center"
+          className="font-mono text-sm text-muted"
         />
-        <FaArrowDown className="text-zinc-500 dark:text-zinc-300 text-2xl mt-2 animate-bounce" />
       </div>
       <div className="embla relative">
-        <div
-          className="embla__viewport overflow-hidden py-4"
-          ref={emblaRef}
-          style={{
-            // Degradado en los bordes: los proyectos se desvanecen al salir de vista
-            WebkitMaskImage:
-              'linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%)',
-            maskImage:
-              'linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%)',
-          }}
-        >
+        <div className="embla__viewport overflow-hidden pb-4 pt-1" ref={emblaRef}>
           <div className="embla__container flex">
-            {PROJECTS.map((project, index) => (
-              <div key={index} className="embla__slide flex-none w-[85%] sm:w-[60%] md:w-1/2 lg:w-1/3 pl-4 select-none">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onPointerDown={handlePointerDown}
-                  onClick={(e) => openDetail(project, e)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailProject(project) } }}
-                  aria-label={`Ver detalle de ${project.title}`}
-                  className="bg-white dark:bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-900 dark:border-zinc-100 shadow-[5px_5px_0_0_#18181b] dark:shadow-[5px_5px_0_0_#fafafa] h-full flex flex-col transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0_0_#18181b] dark:hover:shadow-[7px_7px_0_0_#fafafa] select-none cursor-pointer">
-                  {/* Barra superior estilo "ventana" retro */}
-                  <div className="flex items-center justify-between px-3 py-2 border-b-2 border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full border border-zinc-900 dark:border-zinc-100" />
-                      <span className="w-2.5 h-2.5 rounded-full border border-zinc-900 dark:border-zinc-100" />
-                    </div>
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                      {project.tags[0]?.name ?? "project"}
-                    </span>
-                  </div>
-                  <div className="relative h-40 sm:h-48 w-full overflow-hidden border-b-2 border-zinc-900 dark:border-zinc-100">
-                    <img
-                      src={project.images[0]}
-                      alt={project.title}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col">
-                    <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white mb-2">{project.title}</h3>
-                    <p className="text-zinc-600 dark:text-gray-300 text-sm mb-3 line-clamp-2">{project.description}</p>
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {project.tags.map((tag, tagIndex) => {
-                        const TagIcon = tag.icon;
-                        return (
-                          <div
-                            key={tagIndex}
-                            className="flex items-center gap-1 text-[11px] font-mono px-2 py-1 rounded-full border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
-                            title={tag.name}
-                          >
-                            {TagIcon && <TagIcon className="w-3 h-3 grayscale opacity-80" />}
-                            <span>{tag.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-auto">
-                      {project.link && (
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1.5 text-sm border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-3 py-2 rounded-md font-semibold transition-colors hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100"
-                        >
-                          <FaExternalLinkAlt className="text-xs" />
-                          <span>Ver Proyecto</span>
-                        </a>
-                      )}
-                      {project.github && (
-                        <a
-                          href={project.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1.5 text-sm border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 px-3 py-2 rounded-md font-semibold transition-colors hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
-                        >
-                          <FaGithub className="text-sm" />
-                          <span>Repositorio</span>
-                        </a>
-                      )}
-                      {project.gist && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setSelectedGist(project.gist || null) }}
-                          className="flex items-center gap-1.5 text-sm border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 px-3 py-2 rounded-md font-semibold transition-colors hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
-                        >
-                          <FaCode className="text-sm" />
-                          <span>Código</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            {FEATURED.map((project) => (
+              <div key={project.slug} className="embla__slide flex-none w-[88%] sm:w-[60%] md:w-1/2 lg:w-1/3 pr-6 pb-3">
+                <ProjectCard project={project} onOpen={setDetailProject} />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Navigation Buttons */}
-        <button
-          aria-label="Anterior"
-          className="embla__prev absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white dark:bg-zinc-900 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 rounded-full transition-colors z-20 font-mono"
-          onClick={scrollPrev}
-        >
-          ←
-        </button>
-        <button
-          aria-label="Siguiente"
-          className="embla__next absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white dark:bg-zinc-900 border-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 rounded-full transition-colors z-20 font-mono"
-          onClick={scrollNext}
-        >
-          →
-        </button>
-
-        {/* Dots */}
-        <div className="flex justify-center mt-6 gap-2">
-          {scrollSnaps.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full transition-colors ${index === selectedIndex ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-300 dark:bg-zinc-700'
-                }`}
-              onClick={() => scrollTo(index)}
-            />
-          ))}
+        <div className="mt-4 flex items-center justify-center gap-4">
+          <button aria-label="Anterior" className="btn !min-h-9 !px-3 font-mono text-lg" onClick={scrollPrev}>
+            ‹
+          </button>
+          <div className="flex gap-1">
+            {scrollSnaps.map((_, index) => (
+              <button
+                key={index}
+                aria-label={`Ir al proyecto ${index + 1}`}
+                aria-current={index === selectedIndex}
+                className="flex h-6 w-4 items-center justify-center"
+                onClick={() => scrollTo(index)}
+              >
+                <span className={`block h-2.5 w-2.5 border-2 border-ink ${index === selectedIndex ? 'bg-ink' : 'bg-paper'}`} />
+              </button>
+            ))}
+          </div>
+          <button aria-label="Siguiente" className="btn !min-h-9 !px-3 font-mono text-lg" onClick={scrollNext}>
+            ›
+          </button>
         </div>
       </div>
-      
-      {/* Modal de detalle del proyecto */}
-      <AnimatePresence>
-        {detailProject && (
-          <ProjectDetailModal
-            project={detailProject}
-            onClose={() => setDetailProject(null)}
-          />
-        )}
-      </AnimatePresence>
 
-      {/* Modal para mostrar el gist */}
-      {selectedGist && (
-        <GistModal
-          gistUrl={selectedGist}
-          project={PROJECTS.find(project => project.gist === selectedGist)}
-          onClose={() => setSelectedGist(null)}
-        />
+      {detailProject && (
+        <ProjectDetailModal project={detailProject} onClose={() => setDetailProject(null)} />
       )}
     </div>
   )

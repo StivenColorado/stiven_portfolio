@@ -57,26 +57,23 @@ const ContactForm: React.FC = () => {
         }
     };
 
-    const inputBase =
-        "w-full rounded-lg px-4 py-3 outline-none transition-colors " +
-        "bg-black/5 dark:bg-white/5 " +
-        "border border-zinc-300 dark:border-white/10 " +
-        "text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 " +
-        "focus:border-zinc-900 dark:focus:border-zinc-100 focus:ring-2 focus:ring-zinc-900/15 dark:focus:ring-zinc-100/20";
+    const inputBase = "field";
+    const labelBase = "mb-1.5 block font-mono text-xs font-bold uppercase tracking-widest text-ink";
 
     if (status === "success") {
         return (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-md border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-900 p-8 text-center">
-                <CheckCircle2 className="h-12 w-12 text-zinc-900 dark:text-zinc-100" />
-                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            <div role="status" className="flex flex-col items-center justify-center gap-3 p-4 text-center">
+                <CheckCircle2 className="h-12 w-12" strokeWidth={2.5} aria-hidden="true" />
+                <h3 className="text-2xl text-ink">
                     ¡Mensaje enviado!
                 </h3>
-                <p className="text-zinc-600 dark:text-zinc-300">
+                <p className="text-muted">
                     Gracias por escribir. Te responderé lo antes posible.
                 </p>
                 <button
+                    type="button"
                     onClick={() => setStatus("idle")}
-                    className="mt-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:underline"
+                    className="mt-2 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper"
                 >
                     Enviar otro mensaje
                 </button>
@@ -85,33 +82,37 @@ const ContactForm: React.FC = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Honeypot anti-spam (Web3Forms lo ignora si está vacío) */}
+        <form onSubmit={handleSubmit} className="space-y-4" aria-describedby={status === "error" ? "cf-error" : undefined}>
             <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label htmlFor="cf-name" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label htmlFor="cf-name" className={labelBase}>
                         Nombre
                     </label>
                     <input
                         id="cf-name"
                         name="name"
                         type="text"
+                        autoComplete="name"
                         required
+                        aria-describedby={status === "error" ? "cf-error" : undefined}
                         placeholder="Tu nombre"
                         className={inputBase}
                     />
                 </div>
                 <div>
-                    <label htmlFor="cf-email" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label htmlFor="cf-email" className={labelBase}>
                         Tu correo
                     </label>
                     <input
                         id="cf-email"
                         name="email"
                         type="email"
+                        autoComplete="email"
+                        inputMode="email"
                         required
+                        aria-describedby={status === "error" ? "cf-error" : undefined}
                         placeholder="tucorreo@ejemplo.com"
                         className={inputBase}
                     />
@@ -119,13 +120,15 @@ const ContactForm: React.FC = () => {
             </div>
 
             <div>
-                <label htmlFor="cf-message" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label htmlFor="cf-message" className={labelBase}>
                     Mensaje
                 </label>
                 <textarea
                     id="cf-message"
                     name="message"
+                    autoComplete="off"
                     required
+                    aria-describedby={status === "error" ? "cf-error" : undefined}
                     rows={5}
                     placeholder="Cuéntame en qué puedo ayudarte..."
                     className={`${inputBase} resize-y`}
@@ -133,8 +136,8 @@ const ContactForm: React.FC = () => {
             </div>
 
             {status === "error" && (
-                <p className="flex items-start gap-2 text-sm text-red-500">
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p id="cf-error" role="alert" className="flex items-start gap-2 border-2 border-ink bg-paper p-2 text-sm text-ink">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                     {errorMsg}
                 </p>
             )}
@@ -142,18 +145,15 @@ const ContactForm: React.FC = () => {
             <button
                 type="submit"
                 disabled={status === "sending"}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md
-                           border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 px-6 py-3 font-semibold text-white dark:text-zinc-900
-                           transition-all duration-200 hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100
-                           disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="btn btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
                 {status === "sending" ? (
                     <>
-                        <Loader2 className="h-5 w-5 animate-spin" /> Enviando...
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> Enviando...
                     </>
                 ) : (
                     <>
-                        <Send className="h-5 w-5" /> Enviar mensaje
+                        <Send className="h-5 w-5" aria-hidden="true" /> Enviar mensaje
                     </>
                 )}
             </button>

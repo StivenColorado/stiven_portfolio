@@ -1,112 +1,88 @@
-# Portfolio — React + TypeScript + Vite
+# Portfolio de Stiven Colorado
 
-Portfolio de Stiven Colorado. React 19 + Vite 7 + Tailwind CSS v4 + MobX.
+Sitio: https://negocioempresarial.online
 
-## Requisitos
+## Stack
 
-Este proyecto usa **pnpm** como gestor de paquetes (ver campo `packageManager` en `package.json`).
+- Frontend: React 19, Vite, Tailwind CSS v4, MobX, react-router, framer-motion, three.
+- Backend (`server/`): Node sin framework (`node:http`), SQLite (`node:sqlite`), geolocalización con `mmdb-lib` y base DB-IP City Lite.
+- Gestor de paquetes: pnpm.
+
+## Desarrollo
 
 ```bash
-# Instalar pnpm (si no lo tienes)
-corepack enable
-
-# Instalar dependencias
 pnpm install
-
-# La primera vez, aprobar los build scripts nativos (oxide/esbuild)
-pnpm approve-builds --all   # solo si pnpm los marca como "ignored"
-
-# Desarrollo
-pnpm dev
-
-# Build de producción
-pnpm build
-
-# Preview del build
-pnpm preview
-
-# Lint
-pnpm lint
+cp .env.example .env     # completar variables
+pnpm dev                 # frontend (Vite, proxy de /api al backend)
+pnpm server              # backend en otra terminal
 ```
 
-> Nota: `pnpm-workspace.yaml` declara `onlyBuiltDependencies` para que `@tailwindcss/oxide` y `esbuild` compilen sus binarios nativos en CI/Vercel sin intervención manual.
+Otros scripts: `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test:server`.
 
-## Variables de entorno
+## Variables de entorno (`.env`)
 
-Crea un archivo `.env` (ver `.env.example`):
+| Variable | Valor por defecto | Uso |
+|---|---|---|
+| `VITE_WEB3FORMS_KEY` | | Access key del formulario de contacto |
+| `PORT` / `HOST` | `3001` / `127.0.0.1` | Dirección del backend |
+| `DB_PATH` | `server/data/visits.sqlite` | Base SQLite |
+| `GEO_DB` | `server/data/dbip-city-lite.mmdb` | Base de geolocalización |
+| `ADMIN_PASSWORD_HASH` | | Hash scrypt del admin |
+| `TRUST_PROXY` | `0` | `1` para confiar en `X-Real-IP` (solo detrás de nginx) |
+| `RETENTION_DAYS` | `30` | Retención de visitas |
+| `SESSION_HOURS` | `12` | Duración de la sesión admin |
+| `COOKIE_SECURE` | `1` | Usar `0` en desarrollo sobre http |
 
-```
-VITE_WEB3FORMS_KEY=tu-access-key-de-web3forms
-```
+## Hash de la contraseña del admin
 
-La key gratuita se obtiene en https://web3forms.com (solo pide tu correo de destino).
-
----
-
-## Sobre la plantilla base (Vite)
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm server:hash         # lee la contraseña por stdin e imprime scrypt$<salt>$<hash>
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Pegar el resultado en `ADMIN_PASSWORD_HASH`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Base de geolocalización
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+sh server/scripts/get-geodb.sh
 ```
+
+Descarga DB-IP City Lite (`.mmdb`, ~130 MB) en `server/data/`. Si falta el archivo, el servidor arranca igual sin país ni ciudad. Se actualiza mensualmente (cron opcional con el mismo script).
+
+## Producción (referencia)
+
+Build: `pnpm install --frozen-lockfile && pnpm build`; servir `dist/` con nginx y ejecutar el backend con systemd. Con nginx delante, definir `TRUST_PROXY=1` en `.env`.
+
+nginx:
+
+```nginx
+location /api {
+    proxy_pass http://127.0.0.1:3001;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+location / {
+    try_files $uri /index.html;
+}
+```
+
+systemd (`/etc/systemd/system/portfolio-api.service`):
+
+```ini
+[Unit]
+Description=Portfolio API
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/portfolio
+ExecStart=/usr/bin/node --env-file=.env --disable-warning=ExperimentalWarning server/index.ts
+Restart=on-failure
+User=www-data
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Privacidad
+
+Se registran IP, país y ciudad aproximados, agente de usuario, ruta, referrer y fecha, solo para estadísticas de tráfico y sin terceros. Se respeta `Sec-GPC`/DNT. Las visitas se purgan automáticamente a los 30 días (`RETENTION_DAYS`). Detalle en la ruta `/privacidad`. Geolocalización: IP Geolocation by DB-IP (CC BY 4.0).

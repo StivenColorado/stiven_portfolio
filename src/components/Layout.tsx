@@ -1,30 +1,27 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
+import { Outlet } from "react-router";
 import Navbar from "./Navbar";
-import { ParticlesBackground } from "./ParticlesBackground";
+import Footer from "./Footer";
+import ScrollToTop from "./ScrollToTop";
 import WhatsAppButton from "./WhatsAppButton";
+import { useTrack } from "../lib/track";
 
-interface Props {
-    children: React.ReactNode;
-}
+const SceneCanvas = lazy(() => import("../three/SceneCanvas"));
 
-const Layout: React.FC<Props> = ({ children }) => {
+const Layout: React.FC = () => {
+    useTrack();
+
     return (
-        <div className="relative h-screen flex flex-col overflow-hidden">
-            {/* Fondo base según tema (token --bg) */}
-            <div className="fixed inset-0 bg-[var(--bg)] -z-10 transition-colors duration-300" />
-
-            {/* Capa de partículas monocromas (visibles pero sutiles en ambos temas) */}
-            <div className="fixed inset-0 z-0 w-full h-full opacity-50 dark:opacity-60 transition-opacity duration-300">
-                <ParticlesBackground />
-            </div>
-
-            {/* Contenido principal */}
-            <div className="relative z-10 flex flex-col h-full">
-                <Navbar />
-                <main className="flex-1 overflow-y-auto">{children}</main>
-            </div>
-
-            {/* Botón flotante de WhatsApp (global) */}
+        <div className="min-h-dvh bg-paper text-ink font-sans">
+            <Suspense fallback={null}>
+                <SceneCanvas />
+            </Suspense>
+            <ScrollToTop />
+            <Navbar />
+            <main className="relative">
+                <Outlet />
+            </main>
+            <Footer />
             <WhatsAppButton />
         </div>
     );

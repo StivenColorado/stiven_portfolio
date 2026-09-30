@@ -1,111 +1,109 @@
 import React from "react"
-import { motion } from "framer-motion"
+import { Link } from "react-router"
+import { motion, useReducedMotion } from "framer-motion"
 import EmblaCarousel from "../components/EmblaCarousel"
 import ExperienceTimeline from "../components/ExperienceItemTimeline"
 import ContactForm from "../components/ContactForm"
+import Services from "../components/Services"
+import { useDocumentMeta } from "../lib/seo"
 
 const Home: React.FC = () => {
+  const reduce = useReducedMotion()
+  useDocumentMeta({
+    title: "Stiven Colorado | Software a medida, IA y seguridad",
+    description:
+      "Desarrollador full-stack en Colombia. Software a medida, inteligencia artificial y seguridad para pymes y grandes empresas.",
+  })
+
+  const reveal = reduce
+    ? {}
+    : {
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true },
+        transition: { duration: 0.6 },
+      }
+
   return (
-    <div className="min-h-screen  py-16 px-4 sm:px-6 lg:px-8 select-none">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-4xl mx-auto text-center mb-20"
+    <div className="text-ink">
+      <section
+        data-scene="hero"
+        className="section flex flex-col justify-center pb-10 pt-0 md:min-h-[88svh] md:py-16"
       >
-        <span className="inline-block font-mono text-xs sm:text-sm uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-300 border-2 border-zinc-900 dark:border-zinc-100 rounded-md px-3 py-1 mb-6">
-          // Full Stack Developer
-        </span>
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-6">
-          Hola, soy Stiven <span className="inline-block">👋</span>
-        </h1>
-        <p className="text-xl sm:text-2xl text-zinc-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-          Desarrollador Full Stack apasionado por crear experiencias digitales excepcionales
-        </p>
-
-        {/* Quick links estilo retro (cajas con borde y flecha) */}
-        <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
-          {[
-            { label: "Proyectos", href: "/projects" },
-            { label: "Acerca", href: "/about" },
-            { label: "Contacto", href: "#contacto" },
-            { label: "GitHub", href: "https://github.com/StivenColorado", external: true },
-          ].map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              {...(l.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className="group flex items-center justify-between gap-2 border-2 border-zinc-900 dark:border-zinc-100 rounded-md px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100 bg-white/60 dark:bg-white/5 backdrop-blur-sm transition-all hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 hover:-translate-y-0.5"
-            >
-              {l.label}
-              <span className="font-mono transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>
+        <div data-slot="k" className="h-[26svh] md:hidden" aria-hidden="true" />
+        <motion.div {...reveal} className="md:w-1/2">
+          <h1 className="text-[clamp(3rem,9vw,5.5rem)]">
+            Hola.
+            <br />
+            Soy Stiven.
+          </h1>
+          <p className="mt-4 max-w-md text-lg leading-snug">
+            Software a medida, IA y seguridad para tu empresa.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-4">
+            <a href="#servicios" className="btn">
+              Ver servicios
             </a>
-          ))}
-        </div>
-      </motion.div>
+          </div>
+        </motion.div>
 
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.8 }}
-        className="mb-24"
-      >
+        <div className="mt-10 md:mt-14">
+          <h2 className="mb-3 text-lg leading-none">Quick links</h2>
+          <nav aria-label="Accesos rápidos" className="quicklinks">
+            <a href="#servicios" className="quicklink">Servicios</a>
+            <a href="#proyectos" className="quicklink">Proyectos</a>
+            <Link to="/about" className="quicklink">Acerca</Link>
+            <a href="#contacto" className="quicklink">Contacto</a>
+          </nav>
+        </div>
+      </section>
+
+      <div className="divider" />
+      <Services />
+      <div className="divider" />
+
+      <section id="proyectos" data-scene="projects" className="section scroll-mt-10">
+        <motion.div {...reveal}>
+          <h2 className="text-4xl md:text-5xl">Projects</h2>
+          <p className="mt-3 max-w-xl text-muted">Proyectos destacados, incluidos trabajos para clientes bajo acuerdos de confidencialidad.</p>
+          <div className="mt-6">
+            <EmblaCarousel />
+          </div>
+          <div data-slot="k" className="h-36 md:hidden" aria-hidden="true" />
+          <div className="mt-8 text-center">
+            <Link to="/projects" className="btn">
+              Ver todos los proyectos <span className="font-mono">→</span>
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      <div className="divider" />
+      <section data-scene="experience" className="dither">
+        <div data-slot="g" className="h-40 md:hidden" aria-hidden="true" />
         <ExperienceTimeline />
-      </motion.section>
+      </section>
+      <div className="divider" />
 
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="max-w-7xl mx-auto mb-20"
-      >
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Proyectos Destacados
-          </h2>
-          <div className="mt-3 h-1 w-20 bg-zinc-900 dark:bg-zinc-100 mx-auto" />
-        </div>
-        <EmblaCarousel />
-      </motion.section>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-        className="text-center mt-8 mb-24"
-      >
-        <a
-          href="/projects"
-          className="inline-flex items-center gap-2 border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold py-3 px-8 rounded-md transition-all duration-200 hover:bg-transparent hover:text-zinc-900 dark:hover:bg-transparent dark:hover:text-zinc-100 shadow-[4px_4px_0_0_#18181b] dark:shadow-[4px_4px_0_0_#fafafa] hover:-translate-x-0.5 hover:-translate-y-0.5"
-        >
-          Ver Todos los Proyectos <span className="font-mono">→</span>
-        </a>
-      </motion.div>
-
-      {/* Sección de contacto */}
-      <motion.section
-        id="contacto"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="max-w-2xl mx-auto"
-      >
-        <div className="text-center mb-10">
-          <h2 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-3">
-            Hablemos
-          </h2>
-          <div className="h-1 w-20 bg-zinc-900 dark:bg-zinc-100 mx-auto mb-4" />
-          <p className="text-zinc-600 dark:text-gray-300">
+      <section id="contacto" data-scene="contact" className="section scroll-mt-10">
+        <motion.div {...reveal} className="mx-auto max-w-2xl">
+          <h2 className="text-4xl md:text-5xl">Hablemos</h2>
+          <p className="mt-3 text-muted">
             ¿Tienes un proyecto en mente? Escríbeme y te respondo a tu correo.
           </p>
-        </div>
-        <div className="rounded-lg border-2 border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-8 shadow-[6px_6px_0_0_#18181b] dark:shadow-[6px_6px_0_0_#fafafa]">
-          <ContactForm />
-        </div>
-      </motion.section>
+          <div data-slot="l" className="h-36 md:hidden" aria-hidden="true" />
+          <div className="window mt-8">
+            <div className="window-bar">
+              <span className="window-dot" aria-hidden="true" />
+              <span className="window-dot" aria-hidden="true" />
+              <span className="flex-1 truncate text-center">contacto.form</span>
+            </div>
+            <div className="window-body">
+              <ContactForm />
+            </div>
+          </div>
+        </motion.div>
+      </section>
     </div>
   )
 }
