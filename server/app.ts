@@ -1,5 +1,6 @@
 import { createServer } from 'node:http'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
+import { isIP } from 'node:net'
 import type { DatabaseSync } from 'node:sqlite'
 import { randomBytes } from 'node:crypto'
 import {
@@ -13,7 +14,9 @@ import { geoReady } from './geo.ts'
 import { clientIp } from './ip.ts'
 import { sendResetMail } from './mail.ts'
 import { hit } from './ratelimit.ts'
-import { countMatching, deleteVisits, listVisits, parseDeleteSpec, recordVisit, stats } from './visits.ts'
+import {
+  countMatching, deleteVisits, filterFromQuery, listVisitors, listVisits, parseDeleteSpec, recordVisit, stats, visitsOfIp,
+} from './visits.ts'
 
 const MAX_BODY = 1024
 const MAX_DELETE_BODY = 16 * 1024
@@ -253,7 +256,8 @@ export function createApp(config: Config, db: DatabaseSync): Server {
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const ip = clientIp(req, config.trustProxy)
     const url = new URL(req.url ?? '/', 'http://localhost')
-    const route = `${req.method} ${url.pathname}`
+    const detail = req.method === 'GET' ? /^\/api\/admin\/visitors\/([^/]+)\/visits$/.exec(url.pathname) : null
+    const route = detail ? 'GET /api/admin/visitors/:ip/visits' : `${req.method} ${url.pathname}`
 
     if (route === 'POST /api/track') return track(req, res, ip)
     if (route === 'POST /api/admin/login') return login(req, res, ip)
@@ -266,7 +270,7 @@ export function createApp(config: Config, db: DatabaseSync): Server {
       return send(res, 200, { ok: true, geo: geoReady(), visits: row.n })
     }
 
-    const admin = new Set(['POST /api/admin/logout', 'POST /api/admin/password', 'GET /api/admin/me', 'GET /api/admin/visits', 'POST /api/admin/visits/delete', 'GET /api/admin/stats'])
+    const admin = new Set(['POST /api/admin/logout', 'POST /api/admin/password', 'GET /api/admin/me', 'GET /api/admin/visits', 'GET /api/admin/visitors', 'GET /api/admin/visitors/:ip/visits', 'POST /api/admin/visits/delete', 'GET /api/admin/stats'])
     if (!admin.has(route)) return send(res, 404, { error: 'not_found' })
 
     const limit = route === 'POST /api/admin/logout' ? 60 : route === 'POST /api/admin/visits/delete' ? 30 : 120
@@ -293,6 +297,24 @@ export function createApp(config: Config, db: DatabaseSync): Server {
         const before = beforeRaw === null ? null : clampInt(beforeRaw, 0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
         const data = memo(`visits:${lim}:${before}`, 15_000, () => listVisits(db, lim, before))
         return send(res, 200, { visits: data })
+      }
+      case 'GET /api/admin/visitors': {
+        const filter = filterFromQuery(url.searchParams)
+        if (!filter) return send(res, 400, { error: 'invalid_request' })
+        const lim = clampInt(url.searchParams.get('limit'), 1, 200, 50)
+        const offset = clampInt(url.searchParams.get('offset'), 0, 1_000_000, 0)
+        const key = `visitors:${url.searchParams.toString()}`
+        return send(res, 200, { visitors: memo(key, 15_000, () => listVisitors(db, filter, lim, offset)) })
+      }
+      case 'GET /api/admin/visitors/:ip/visits': {
+        let ip = ''
+        try {
+          ip = decodeURIComponent(detail?.[1] ?? '')
+        } catch {
+          ip = ''
+        }
+        if (isIP(ip) === 0) return send(res, 400, { error: 'invalid_ip' })
+        return send(res, 200, { visits: visitsOfIp(db, ip) })
       }
       default: {
         const days = clampInt(url.searchParams.get('days'), 1, 90, 7)

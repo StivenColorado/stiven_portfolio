@@ -14,6 +14,21 @@ export interface Visit {
     referrer: string | null;
 }
 
+export interface Visitor {
+    ip: string;
+    visits: number;
+    firstSeen: number;
+    lastSeen: number;
+    country: string | null;
+    city: string | null;
+    os: OS;
+    device: Device;
+    oses: OS[];
+    devices: Device[];
+    paths: Count[];
+    referrers: string[];
+}
+
 export interface Count {
     key: string;
     n: number;
@@ -33,6 +48,7 @@ export interface Stats {
 export type DeleteTarget =
     | { ids: number[] }
     | { ip: string }
+    | { ips: string[] }
     | { filter: Partial<Record<"os" | "device" | "country" | "path", string>> & { from?: number; to?: number } };
 
 export class ApiError extends Error {
@@ -72,6 +88,10 @@ export const adminApi = {
     stats: (days: number) => request<Stats>(`stats?days=${days}`),
     deleteVisits: (target: DeleteTarget) => request<{ deleted: number }>("visits/delete", "POST", target),
     countVisits: (target: DeleteTarget) => request<{ matched: number }>("visits/delete", "POST", { ...target, dryRun: true }),
-    visits: (limit = 50, before?: number) =>
-        request<{ visits: Visit[] }>(`visits?limit=${limit}${before === undefined ? "" : `&before=${before}`}`),
+    visitors: (filters: Partial<Record<"os" | "device" | "country" | "path", string>>, limit = 50, offset = 0) => {
+        const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+        for (const [k, v] of Object.entries(filters)) if (v) q.set(k, v);
+        return request<{ visitors: Visitor[] }>(`visitors?${q}`);
+    },
+    visitorVisits: (ip: string) => request<{ visits: Visit[] }>(`visitors/${encodeURIComponent(ip)}/visits`),
 };

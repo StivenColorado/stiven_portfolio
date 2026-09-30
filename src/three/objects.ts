@@ -7,7 +7,6 @@ import {
     Mesh,
     MeshBasicMaterial,
     Object3D,
-    SphereGeometry,
     TorusGeometry,
     TubeGeometry,
     Vector2,
@@ -40,7 +39,7 @@ export type Tick = (seconds: number) => void;
 export const SIZE: Record<ObjectKey, { w: number; h: number }> = {
     g: { w: 1.5, h: 1.1 },
     k: { w: 4.2, h: 1.75 },
-    m: { w: 1.6, h: 2.0 },
+    m: { w: 1.2, h: 1.7 },
     t: { w: 1.4, h: 1.2 },
     l: { w: 3, h: 2.4 },
 };
@@ -83,71 +82,63 @@ function tube(points: [number, number, number][], seg: number, radius: number, r
 export function mouse(m: Materials): Group {
     const root = new Group();
     const hull = m.hull.m;
-    const A = { x: 0.46, y: 0.85, z: 0.32 };
-    const deform = (v: Vector3) => {
-        const t = (v.y / A.y + 1) / 2;
-        v.x = v.x * (1 - 0.45 * t) + 0.36 * v.y;
-        v.z *= 1 - 0.3 * t;
-        return v;
-    };
-    const face = (x: number, y: number, lift = 0) => {
-        const k = 1 - (x / A.x) ** 2 - (y / A.y) ** 2;
-        const v = new Vector3(x, y, A.z * Math.sqrt(Math.max(k, 0.0001)));
-        deform(v);
-        v.z += lift;
-        return v;
-    };
+    const RX = 0.31;
+    const RZ = 0.5;
+    const H = 0.2;
+    const dome = (x: number, z: number) => H * Math.sqrt(Math.max(0, 1 - (x / RX) ** 2 - (z / RZ) ** 2));
 
-    const lean = new Group();
-    lean.rotation.set(0, 0, -0.28);
-    lean.position.y = 0;
-    root.add(lean);
-
-    const body = new SphereGeometry(1, 22, 14);
-    body.scale(A.x, A.y, A.z);
+    const pts: Vector2[] = [new Vector2(0, 0), new Vector2(0.97, 0)];
+    for (let i = 0; i <= 12; i++) {
+        const a = (i / 12) * (Math.PI / 2);
+        pts.push(new Vector2(Math.cos(a), 0.02 + Math.sin(a) * (H - 0.02)));
+    }
+    const body = new LatheGeometry(pts, 28);
+    body.scale(RX, 1, RZ);
     const pos = body.attributes.position;
-    const tmp = new Vector3();
     for (let i = 0; i < pos.count; i++) {
-        tmp.fromBufferAttribute(pos, i);
-        deform(tmp);
-        pos.setXYZ(i, tmp.x, tmp.y, tmp.z);
+        const z = pos.getZ(i);
+        pos.setX(i, pos.getX(i) * (0.88 + 0.12 * ((z + RZ) / (2 * RZ))));
     }
     body.computeVertexNormals();
-    lean.add(part(body, m.fill, hull));
+    root.add(part(body, m.fill, hull));
 
-    const capGeo = new SphereGeometry(1, 14, 10);
-    capGeo.scale(0.15, 0.34, 0.1);
-    for (const sx of [-1, 1]) {
-        const cap = part(capGeo, m.fill, hull);
-        cap.position.copy(face(sx * 0.16 + 0.12, 0.4, 0.05));
-        cap.rotation.z = -0.32;
-        lean.add(cap);
+    const lift = 0.006;
+    const split: [number, number, number][] = [];
+    for (let i = 0; i <= 8; i++) {
+        const z = -0.47 + (i / 8) * 0.4;
+        split.push([0, dome(0, z) + lift, z]);
     }
-    const wheel = new Mesh(new CapsuleGeometry(0.04, 0.16, 3, 8), m.line);
-    wheel.position.copy(face(0.12, 0.4, 0.15));
-    wheel.rotation.z = -0.32;
-    lean.add(wheel);
+    root.add(new Mesh(tube(split, 16, 0.007, 5), m.line));
+    const cross: [number, number, number][] = [];
+    for (let i = 0; i <= 10; i++) {
+        const x = -0.27 + (i / 10) * 0.54;
+        cross.push([x, dome(x, -0.07) + lift, -0.07]);
+    }
+    root.add(new Mesh(tube(cross, 20, 0.007, 5), m.line));
 
-    const thumb = new CapsuleGeometry(0.12, 0.36, 4, 10);
-    thumb.rotateZ(Math.PI / 2 - 0.55);
-    lean.add(at(part(thumb, m.fill, hull), -0.1, -0.3, 0.26));
+    const wheel = new Mesh(new CapsuleGeometry(0.03, 0.09, 3, 8), m.line);
+    wheel.rotation.x = Math.PI / 2;
+    wheel.position.set(0, dome(0, -0.25) + 0.012, -0.25);
+    root.add(wheel);
 
-    lean.add(
+    root.add(
         new Mesh(
             tube(
                 [
-                    [0.3, 0.8, 0.0],
-                    [0.36, 1.1, 0.0],
-                    [0.05, 1.35, 0.0],
-                    [0.3, 1.7, 0.0],
+                    [0, 0.02, -0.46],
+                    [0, 0.02, -0.72],
+                    [-0.04, 0.02, -0.92],
+                    [-0.22, 0.02, -1.06],
+                    [-0.5, 0.02, -1.1],
                 ],
-                18,
-                0.028,
+                24,
+                0.016,
                 6,
             ),
             m.line,
         ),
     );
+    root.position.z = 0.35;
     return root;
 }
 

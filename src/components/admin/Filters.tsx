@@ -1,17 +1,16 @@
 import { FILTER_KEYS } from "./filterState";
-import type { FilterKey, FilterValues } from "./filterState";
+import type { FilterKey, FilterOptions, FilterValues } from "./filterState";
 import Select from "../ui/Select";
 import { countryName } from "./country";
 import { flagIcon } from "./flagIcon";
-import type { Visit } from "../../lib/api";
 
 const LABELS: Record<FilterKey, string> = { os: "OS", device: "Dispositivo", country: "País", path: "Ruta" };
 
-export default function Filters({ values, visits, onChange }: { values: FilterValues; visits: Visit[]; onChange: (k: FilterKey, v: string) => void }) {
+export default function Filters({ values, known, onChange }: { values: FilterValues; known: FilterOptions; onChange: (k: FilterKey, v: string) => void }) {
     return (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {FILTER_KEYS.map((k) => {
-                const options = [...new Set([...visits.map((v) => v[k]).filter((x): x is string => !!x), ...(values[k] ? [values[k]] : [])])].sort();
+                const options = [...new Set([...known[k], ...(values[k] ? [values[k]] : [])])].sort();
                 return (
                     <Select
                         key={k}

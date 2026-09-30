@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { ApiError, adminApi } from "../lib/api";
-import type { DeleteTarget, Stats, Visit } from "../lib/api";
+import type { DeleteTarget, Stats, Visitor } from "../lib/api";
 import { useDocumentMeta } from "../lib/seo";
 import ConfirmDelete from "../components/admin/ConfirmDelete";
 import type { PendingDelete } from "../components/admin/ConfirmDelete";
 import Filters from "../components/admin/Filters";
-import { FILTER_KEYS, matches } from "../components/admin/filterState";
-import type { FilterKey, FilterValues } from "../components/admin/filterState";
+import { FILTER_KEYS } from "../components/admin/filterState";
+import type { FilterKey, FilterOptions, FilterValues } from "../components/admin/filterState";
 import ChangePassword from "../components/admin/ChangePassword";
 import LoginForm from "../components/admin/LoginForm";
 import StatsCards from "../components/admin/StatsCards";
 import { RANGES } from "../components/admin/ranges";
+import VisitorDialog from "../components/admin/VisitorDialog";
 import VisitsTable from "../components/admin/VisitsTable";
 
 const PAGE = 50;
@@ -21,11 +22,13 @@ type Auth = "checking" | "out" | "in";
 function Dashboard({ onLogout }: { onLogout: () => void }) {
     const [params, setParams] = useSearchParams();
     const [stats, setStats] = useState<Stats | null>(null);
-    const [visits, setVisits] = useState<Visit[]>([]);
+    const [visitors, setVisitors] = useState<Visitor[]>([]);
+    const [known, setKnown] = useState<FilterOptions>({ os: [], device: [], country: [], path: [] });
+    const [detail, setDetail] = useState<Visitor | null>(null);
     const [more, setMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [statsKey, setStatsKey] = useState(0);
-    const [selected, setSelected] = useState<Set<number>>(new Set());
+    const [selected, setSelected] = useState<Set<string>>(new Set());
     const [pending, setPending] = useState<PendingDelete | null>(null);
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState("");
@@ -54,24 +57,38 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         return () => { live = false; };
     }, [days, expired, statsKey]);
 
-    const load = useCallback(async (before?: number) => {
+    const filterKey = FILTER_KEYS.map((k) => params.get(k) ?? "").join("\u0000");
+    const latest = useRef(0);
+
+    const load = useCallback(async (offset = 0) => {
+        const ticket = ++latest.current;
+        const active = Object.fromEntries(FILTER_KEYS.map((k, i) => [k, filterKey.split("\u0000")[i]]));
         setLoading(true);
         try {
-            const { visits: page } = await adminApi.visits(PAGE, before);
-            setVisits((prev) => (before === undefined ? page : [...prev, ...page]));
+            const { visitors: page } = await adminApi.visitors(active, PAGE, offset);
+            if (ticket !== latest.current) return;
+            setVisitors((prev) => (offset === 0 ? page : [...prev, ...page]));
             setMore(page.length === PAGE);
+            setKnown((prev) => {
+                const add = (k: FilterKey, xs: string[]) => [...new Set([...prev[k], ...xs])];
+                return {
+                    os: add("os", page.flatMap((v) => v.oses)),
+                    device: add("device", page.flatMap((v) => v.devices)),
+                    country: add("country", page.flatMap((v) => (v.country ? [v.country] : []))),
+                    path: add("path", page.flatMap((v) => v.paths.map((p) => p.key))),
+                };
+            });
         } catch (err) {
             expired(err);
         } finally {
-            setLoading(false);
+            if (ticket === latest.current) setLoading(false);
         }
-    }, [expired]);
+    }, [expired, filterKey]);
 
     useEffect(() => { void load(); }, [load]);
 
-    const shown = useMemo(() => visits.filter((v) => matches(v, filters)), [visits, filters]);
     const activeFilters = FILTER_KEYS.filter((k) => filters[k]);
-    const chosen = useMemo(() => shown.filter((v) => selected.has(v.id)).map((v) => v.id), [shown, selected]);
+    const chosen = useMemo(() => visitors.filter((v) => selected.has(v.ip)).map((v) => v.ip), [visitors, selected]);
 
     useEffect(() => {
         if (!notice) return;
@@ -91,6 +108,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                         const { deleted } = await adminApi.deleteVisits(target);
                         setPending(null);
                         setSelected(new Set());
+                        setDetail(null);
                         setNotice(deleted === 1 ? "1 visita borrada" : `${deleted} visitas borradas`);
                         setStatsKey((n) => n + 1);
                         await load();
@@ -109,13 +127,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         }
     }, [expired, load]);
 
-    const toggle = (id: number, on: boolean) => setSelected((prev) => {
+    const toggle = (ip: string, on: boolean) => setSelected((prev) => {
         const next = new Set(prev);
-        if (on) next.add(id);
-        else next.delete(id);
+        if (on) next.add(ip);
+        else next.delete(ip);
         return next;
     });
-    const toggleAll = (on: boolean) => setSelected(on ? new Set(shown.map((v) => v.id)) : new Set());
+    const toggleAll = (on: boolean) => setSelected(on ? new Set(visitors.map((v) => v.ip)) : new Set());
 
     const deleteFiltered = () => {
         const filter = Object.fromEntries(activeFilters.map((k) => [k, filters[k]]));
@@ -132,19 +150,19 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             <header className="flex items-center justify-between gap-3">
                 <div>
                     <p className="eyebrow">Admin</p>
-                    <h1 className="font-display text-3xl tracking-tight text-ink">Visitas</h1>
+                    <h1 className="font-display text-3xl tracking-tight text-ink">Visitantes</h1>
                 </div>
                 <button type="button" onClick={logout} className="btn">Cerrar sesión</button>
             </header>
             <ChangePassword onUnauthorized={onLogout} />
             <StatsCards stats={stats} days={days} onDays={(d) => setParam("days", String(d))} />
             <section className="space-y-4">
-                <Filters values={filters} visits={visits} onChange={(k: FilterKey, v) => setParam(k, v)} />
+                <Filters values={filters} known={known} onChange={(k: FilterKey, v) => setParam(k, v)} />
                 {(chosen.length > 0 || activeFilters.length > 0) && (
                     <div className="window window-body !flex-row flex-wrap items-center gap-3 !p-3">
                         {chosen.length > 0 && (
-                            <button type="button" className="btn btn-primary" onClick={() => void ask({ ids: chosen }, "Son las visitas seleccionadas.", chosen.length)}>
-                                Borrar seleccionadas ({chosen.length})
+                            <button type="button" className="btn btn-primary" onClick={() => void ask({ ips: chosen }, `Son todas las visitas de ${chosen.length === 1 ? "la IP seleccionada" : `las ${chosen.length} IP seleccionadas`}.`)}>
+                                Borrar seleccionados ({chosen.length})
                             </button>
                         )}
                         {activeFilters.length > 0 && (
@@ -152,20 +170,19 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                         )}
                     </div>
                 )}
-                <VisitsTable
-                    visits={shown}
-                    selected={selected}
-                    onToggle={toggle}
-                    onToggleAll={toggleAll}
-                    onDeleteOne={(v) => void ask({ ids: [v.id] }, "Es la visita elegida.", 1)}
-                    onDeleteIp={(v) => void ask({ ip: v.ip }, `Son todas las visitas de la IP ${v.ip}.`)}
-                />
+                <VisitsTable visitors={visitors} selected={selected} onToggle={toggle} onToggleAll={toggleAll} onOpen={setDetail} />
                 {more && (
-                    <button type="button" disabled={loading} onClick={() => load(visits[visits.length - 1]?.ts)} className="btn w-full disabled:opacity-50 md:w-auto">
+                    <button type="button" disabled={loading} onClick={() => load(visitors.length)} className="btn w-full disabled:opacity-50 md:w-auto">
                         {loading ? "Cargando…" : "Cargar más"}
                     </button>
                 )}
             </section>
+            <VisitorDialog
+                visitor={detail}
+                onClose={() => setDetail(null)}
+                onDelete={(v) => void ask({ ip: v.ip }, `Son todas las visitas de la IP ${v.ip}.`, v.visits)}
+                onUnauthorized={expired}
+            />
             <ConfirmDelete pending={pending} busy={busy} onCancel={() => !busy && setPending(null)} />
             <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-4 z-50 flex justify-center">
                 {notice && <p className="window window-body !px-4 !py-2 text-sm font-bold">{notice}</p>}

@@ -14,6 +14,7 @@ export function openDb(path: string): DatabaseSync {
       ua TEXT, os TEXT, device TEXT, path TEXT NOT NULL, referrer TEXT);
     CREATE INDEX IF NOT EXISTS visits_ts ON visits(ts);
     CREATE INDEX IF NOT EXISTS visits_path ON visits(path);
+    CREATE INDEX IF NOT EXISTS visits_ip ON visits(ip, ts);
     CREATE TABLE IF NOT EXISTS admins (
       email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, updated INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS reset_tokens (

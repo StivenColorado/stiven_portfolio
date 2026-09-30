@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
@@ -8,14 +8,20 @@ import { useTrack } from "../lib/track";
 
 const SceneCanvas = lazy(() => import("../three/SceneCanvas"));
 
+const SCENE_ROUTES = new Set(["/", "/projects", "/about"]);
+
 const Layout: React.FC = () => {
     useTrack();
+    const { pathname } = useLocation();
+    const showScene = SCENE_ROUTES.has(pathname.replace(/\/+$/, "") || "/");
 
     return (
         <div className="min-h-dvh bg-paper text-ink font-sans">
-            <Suspense fallback={null}>
-                <SceneCanvas />
-            </Suspense>
+            {showScene && (
+                <Suspense fallback={null}>
+                    <SceneCanvas />
+                </Suspense>
+            )}
             <ScrollToTop />
             <Navbar />
             <main className="relative">

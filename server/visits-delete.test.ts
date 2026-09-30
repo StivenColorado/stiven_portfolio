@@ -6,6 +6,7 @@ import { createApp } from './app.ts'
 import { hashPassword } from './auth.ts'
 import { loadConfig } from './config.ts'
 import { openDb } from './db.ts'
+import { clearCache } from './cache.ts'
 import { resetBuckets } from './ratelimit.ts'
 
 const EMAIL = 'admin@test.com'
@@ -44,6 +45,7 @@ after(() => {
 })
 beforeEach(async () => {
   resetBuckets()
+  clearCache()
   seed()
   const res = await fetch(`${base}/api/admin/login`, { method: 'POST', headers: SAME, body: JSON.stringify({ email: EMAIL, password: 'secreta-larga-1' }) })
   cookie = (res.headers.get('set-cookie') ?? '').split(';')[0] as string
@@ -66,6 +68,21 @@ test('borra por filtro (combinado y por rango de fechas)', async () => {
 test('borra por ip', async () => {
   assert.deepEqual(await (await del({ ip: '1.1.1.1' })).json(), { deleted: 2 })
   assert.equal(count(), 2)
+})
+
+test('borra por ips (varias) y acepta dryRun', async () => {
+  assert.deepEqual(await (await del({ ips: ['1.1.1.1', '3.3.3.3'], dryRun: true })).json(), { matched: 3 })
+  assert.equal(count(), 4)
+  assert.deepEqual(await (await del({ ips: ['1.1.1.1', '3.3.3.3', '1.1.1.1'] })).json(), { deleted: 3 })
+  assert.equal(count(), 1)
+})
+
+test('ips inválido: vacío, demasiadas, no-IP o mezclado', async () => {
+  const many = Array.from({ length: 201 }, (_, i) => `10.0.${Math.floor(i / 250)}.${(i % 250) + 1}`)
+  for (const body of [{ ips: [] }, { ips: many }, { ips: ['nope'] }, { ips: [5] }, { ips: '1.1.1.1' }, { ips: ['1.1.1.1'], ip: '1.1.1.1' }]) {
+    assert.equal((await del(body)).status, 400, JSON.stringify(body).slice(0, 60))
+  }
+  assert.equal(count(), 4)
 })
 
 test('dryRun cuenta sin borrar', async () => {

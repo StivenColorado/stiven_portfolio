@@ -16,7 +16,9 @@
     "server:hash": "node server/scripts/hash-password.ts",
     "test:server": "node --test 'server/**/*.test.ts'",
     "typecheck": "tsc -b",
-    "assets": "sh scripts/optimize-assets.sh"
+    "assets": "sh scripts/optimize-assets.sh",
+    "email:build": "tsx --tsconfig emails/tsconfig.json scripts/build-emails.tsx",
+    "email:dev": "email dev --dir emails --port 3099"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
@@ -35,6 +37,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.1.0",
     "@types/node": "^24.0.7",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
@@ -44,6 +48,8 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
+    "react-email": "^6.11.0",
+    "tsx": "^4.23.15",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.34.1",
     "vite": "^7.0.0"

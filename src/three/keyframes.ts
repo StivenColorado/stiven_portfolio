@@ -18,14 +18,13 @@ export type ScenePose = Record<ObjectKey, Pose>;
 
 const OFF: Pose = { p: [0, 0, 0], s: 0 };
 const DESK: V3 = [Math.PI / 2 - 0.3, 0, 0];
-const FLAT_MOUSE: V3 = [-0.3, 0, 0];
 const FLAT_GLASSES: V3 = [-0.75, 0, -0.12];
 
 export const POSES = {
     hero: {
         g: { p: [2.45, 1.78, 0], r: FLAT_GLASSES, s: 0.7 },
         k: { p: [1.55, 0.35, 0], r: DESK, s: 0.9 },
-        m: { p: [3.95, 0.25, 0], r: FLAT_MOUSE, s: 0.5 },
+        m: { p: [4.0, 0.35, 0], r: DESK, s: 0.9 },
         t: OFF,
         l: OFF,
     },
@@ -39,7 +38,7 @@ export const POSES = {
     projects: {
         g: OFF,
         k: { p: [1.6, 1.95, 0], r: DESK, s: 0.4 },
-        m: { p: [3.3, 1.92, 0], r: FLAT_MOUSE, s: 0.5 },
+        m: { p: [3.0, 1.95, 0], r: DESK, s: 0.4 },
         t: OFF,
         l: OFF,
     },
@@ -53,23 +52,23 @@ export const POSES = {
     contact: {
         g: { p: [-3.55, 0.35, 0], r: FLAT_GLASSES, s: 0.8 },
         k: { p: [3.5, -1.7, 0], r: DESK, s: 0.4 },
-        m: { p: [3.1, 0.95, 0], r: FLAT_MOUSE, s: 0.6 },
+        m: OFF,
         t: { p: [-3.5, -1.6, 0], s: 0.6 },
         l: OFF,
     },
     "route:projects": {
         g: OFF,
         k: { p: [2.3, 1.72, 0], r: DESK, s: 0.5 },
-        m: { p: [3.95, 1.65, 0], r: FLAT_MOUSE, s: 0.4 },
+        m: { p: [3.95, 1.72, 0], r: DESK, s: 0.5 },
         t: OFF,
         l: OFF,
     },
     "route:about": {
-        g: { p: [3.65, 1.75, 0], r: FLAT_GLASSES, s: 0.8 },
+        g: OFF,
         k: OFF,
         m: OFF,
         t: OFF,
-        l: { p: [3.85, -1.55, 0.6], r: [0.45, -0.5, 0], s: 0.22 },
+        l: OFF,
     },
 } satisfies Record<string, ScenePose>;
 
@@ -84,7 +83,7 @@ const TABLET_POSES: Partial<Record<SceneName, ScenePose>> = {
     services: { g: OFF, k: OFF, m: OFF, t: OFF, l: { p: [1.85, 2.0, 0.3], r: [0.55, -0.5, 0], s: 0.22 } },
     projects: { g: OFF, k: { p: [1.5, 2.25, 0], r: DESK, s: 0.3 }, m: OFF, t: OFF, l: OFF },
     experience: { g: OFF, k: OFF, m: OFF, t: { p: [1.55, 2.15, 0], s: 0.4 }, l: OFF },
-    contact: { g: OFF, k: OFF, m: { p: [1.3, 0.83, 0], r: FLAT_MOUSE, s: 0.4 }, t: OFF, l: OFF },
+    contact: { g: OFF, k: OFF, m: OFF, t: OFF, l: OFF },
 };
 
 export const OBJECT_KEYS: ObjectKey[] = ["g", "k", "m", "t", "l"];

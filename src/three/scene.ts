@@ -192,7 +192,7 @@ export function mount(container: HTMLElement, initialPath: string): SceneHandle 
             const fit = Math.min(w.h / SIZE[k].h, width / SIZE[k].w) * (half ? 0.8 : 0.92);
             out[k] = {
                 p: [x, w.p[1], w.p[2]],
-                r: k === "g" || k === "k" ? base[k].r : (base[k].r.map((v) => v * 0.5) as ResolvedPose["r"]),
+                r: k === "g" || k === "k" || k === "m" ? base[k].r : (base[k].r.map((v) => v * 0.5) as ResolvedPose["r"]),
                 s: Math.min(fit, 1.15),
             };
         }
