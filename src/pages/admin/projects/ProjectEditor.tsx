@@ -204,7 +204,7 @@ export default function ProjectEditor() {
     const toggleTagRemove = (key: string) => set("tags", form.tags.filter((x) => x !== key));
 
     return (
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); void save(false); }} noValidate>
+        <form className="min-w-0 space-y-6" onSubmit={(e) => { e.preventDefault(); void save(false); }} noValidate>
             <header className="space-y-2">
                 <button type="button" onClick={leave} className="eyebrow inline-flex items-center gap-1.5 hover:underline">
                     <ArrowLeft size={14} strokeWidth={2.5} aria-hidden /> {t("adminProjects.editor.backToList")}
@@ -222,8 +222,8 @@ export default function ProjectEditor() {
                 )}
             </header>
 
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-                <div className="space-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+                <div className="min-w-0 space-y-6">
                     <Section id="sec-basic" title={t("adminProjects.sections.basic")}>
                         <Field
                             label={t("adminProjects.basic.slug")}
@@ -377,7 +377,7 @@ export default function ProjectEditor() {
                     </Section>
                 </div>
 
-                <aside className="space-y-3 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain [&_.window-bar]:sticky [&_.window-bar]:top-0 [&_.window-bar]:z-10">
+                <aside className="min-w-0 space-y-3 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:[&_.window-bar]:sticky lg:[&_.window-bar]:top-0 lg:[&_.window-bar]:z-10">
                     <Section id="sec-preview" title={t("adminProjects.sections.preview")}>
                         <p className="text-xs text-muted">{t("adminProjects.preview.hint")}</p>
                         <ProjectPreview form={form} lang={lang} />
@@ -385,7 +385,7 @@ export default function ProjectEditor() {
                 </aside>
             </div>
 
-            <div role="group" aria-label={t("adminProjects.actions.barLabel")} className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center gap-2 border-t-[length:var(--line)] border-ink bg-paper px-4 py-3 sm:mx-0 sm:border-[length:var(--line)]">
+            <div role="group" aria-label={t("adminProjects.actions.barLabel")} className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center gap-2 border-t-[length:var(--line)] border-ink bg-paper px-4 py-2 [&_.btn]:!min-h-10 [&_.btn]:!px-3 [&_.btn]:!py-1.5 sm:mx-0 sm:border-[length:var(--line)] sm:py-3 sm:[&_.btn]:!px-[1.1rem]">
                 <button type="submit" className="btn btn-primary" disabled={saving} title={t("adminProjects.actions.shortcut")}>
                     <Save size={16} strokeWidth={2.5} aria-hidden /> {t(saving ? "adminProjects.actions.saving" : "adminProjects.actions.save")}
                 </button>

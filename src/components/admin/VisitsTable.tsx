@@ -82,7 +82,7 @@ export default function VisitsTable({ visitors, selected, onToggle, onToggleAll,
                     </li>
                 ))}
             </ul>
-            <div className="window hidden overflow-x-auto md:block">
+            <div className="window relative hidden overflow-x-auto md:block">
                 <table className="w-full text-left text-sm">
                     <thead className="eyebrow border-b-2 border-ink bg-grey-2">
                         <tr>

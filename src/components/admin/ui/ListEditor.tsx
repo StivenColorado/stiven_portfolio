@@ -37,7 +37,7 @@ export default function ListEditor({ label, items, onChange, max, maxLength, pla
     };
 
     return (
-        <fieldset className="space-y-2" aria-describedby={describedBy}>
+        <fieldset className="min-w-0 space-y-2" aria-describedby={describedBy}>
             <legend className="eyebrow flex w-full justify-between gap-3">
                 <span>{label}</span>
                 {max !== undefined && <span className="font-mono text-muted">{items.length}/{max}</span>}

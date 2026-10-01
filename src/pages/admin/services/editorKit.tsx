@@ -58,7 +58,7 @@ export function EditorFrame({ eyebrow, heading, backTo, backLabel, status, savin
     const cancel = () => (dirty ? setConfirmLeave(true) : navigate(backTo));
 
     return (
-        <form noValidate onSubmit={(e) => { e.preventDefault(); onSave(false); }} className="space-y-6">
+        <form noValidate onSubmit={(e) => { e.preventDefault(); onSave(false); }} className="min-w-0 space-y-6">
             <header className="space-y-2">
                 <Link to={backTo} className="inline-flex items-center gap-1 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper">
                     <ArrowLeft size={14} strokeWidth={2.5} aria-hidden /> {backLabel}
@@ -71,7 +71,7 @@ export function EditorFrame({ eyebrow, heading, backTo, backLabel, status, savin
                 </div>
             </header>
             {children}
-            <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-end gap-2 border-t-2 border-ink bg-paper py-3 pl-4 pr-20 md:static md:mx-0 md:border-t-0 md:bg-transparent md:p-0">
+            <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-end gap-2 border-t-2 border-ink bg-paper px-4 py-2 [&_.btn]:!min-h-10 [&_.btn]:!px-3 [&_.btn]:!py-1.5 md:static md:mx-0 md:border-t-0 md:bg-transparent md:p-0 md:[&_.btn]:!min-h-10 md:[&_.btn]:!px-[1.1rem]">
                 <span className="mr-auto hidden text-xs text-muted sm:inline">{t("adminContent.common.shortcut")}</span>
                 <button type="button" className="btn" onClick={cancel} disabled={saving}>{t("adminContent.common.cancel")}</button>
                 <button type="submit" className="btn" disabled={saving}>{saving ? t("adminContent.common.saving") : t("adminContent.common.save")}</button>

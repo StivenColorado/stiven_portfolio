@@ -105,8 +105,8 @@ export default function ServiceEditor() {
             dirty={dirty}
             onSave={(publish) => void save(publish)}
         >
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-                <div className="space-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+                <div className="min-w-0 space-y-6">
                     <section className="window window-body space-y-4 !shadow-none">
                         <Field
                             label={t("adminContent.services.slug")}
@@ -159,7 +159,7 @@ export default function ServiceEditor() {
                     </section>
 
                     <section className="window window-body space-y-4 !shadow-none">
-                        <fieldset className="space-y-2">
+                        <fieldset className="min-w-0 space-y-2">
                             <legend className="eyebrow">{t("adminContent.services.icon")}</legend>
                             <div className="grid grid-cols-4 gap-2 sm:grid-cols-8 lg:grid-cols-4 xl:grid-cols-8">
                                 {SERVICE_ICON_NAMES.map((name) => {
@@ -200,7 +200,7 @@ export default function ServiceEditor() {
                     </section>
                 </div>
 
-                <aside aria-label={t("adminContent.services.preview")} className="space-y-2 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain [&_.window-bar]:sticky [&_.window-bar]:top-0 [&_.window-bar]:z-10">
+                <aside aria-label={t("adminContent.services.preview")} className="min-w-0 space-y-2 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:[&_.window-bar]:sticky lg:[&_.window-bar]:top-0 lg:[&_.window-bar]:z-10">
                     <p className="eyebrow">{t("adminContent.services.preview")}</p>
                     <div className="window">
                         <div className="window-bar">

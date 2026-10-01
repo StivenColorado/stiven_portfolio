@@ -35,10 +35,18 @@ export interface MacbookScene {
     dispose(): void
 }
 
+export interface Inset {
+    left: number
+    right: number
+    top: number
+    bottom: number
+}
+
 interface Options {
     url: string
     screenEl: HTMLElement
     staticOpen: boolean
+    inset?: (wide: boolean) => Inset
     onLost: () => void
 }
 
@@ -192,6 +200,7 @@ export async function createMacbookScene(host: HTMLElement, opts: Options): Prom
     const screenObj = new CSS3DObject(opts.screenEl)
     opts.screenEl.style.userSelect = "text"
     opts.screenEl.style.setProperty("-webkit-user-select", "text")
+    opts.screenEl.style.touchAction = "pan-y"
     screenObj.position.set(scx, scy, glass.max.z + 0.006)
     lid.add(screenObj)
 
@@ -247,10 +256,18 @@ export async function createMacbookScene(host: HTMLElement, opts: Options): Prom
         for (const x of [box.min.x, box.max.x])
             for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) corners.push(new Vector3(x, y, z))
         const center = box.getCenter(new Vector3())
-        const fitW = wide ? 0.56 : 0.97
-        const fitH = wide ? 0.8 : 0.7
-        const goalX = wide ? 0.32 : 0
-        const goalY = wide ? 0.0 : 0.06
+        const gap = Math.min(width, height) * 0.02
+        const inset = opts.inset?.(wide) ?? { left: 0, right: 0, top: 0, bottom: 0 }
+        const free = {
+            x0: Math.min(width * 0.6, inset.left + gap),
+            x1: Math.max(width * 0.4, width - inset.right - gap),
+            y0: Math.min(height * 0.6, inset.top + gap),
+            y1: Math.max(height * 0.4, height - inset.bottom - gap),
+        }
+        const fitW = (free.x1 - free.x0) / width
+        const fitH = (free.y1 - free.y0) / height
+        const goalX = (free.x0 + free.x1) / width - 1
+        const goalY = 1 - (free.y0 + free.y1) / height
         const elev = wide ? -OPEN_ANGLE : 0.5
         let dist = 10
         const look = center.clone()
@@ -296,6 +313,7 @@ export async function createMacbookScene(host: HTMLElement, opts: Options): Prom
         opts.screenEl.style.width = `${cssW}px`
         opts.screenEl.style.height = `${cssH}px`
         opts.screenEl.style.fontSize = `${cssW < 420 ? 12 : cssW < 760 ? 13.5 : 15.5}px`
+        opts.screenEl.style.setProperty("--eff", String(pxW / cssW))
         opts.screenEl.dataset.size = cssW < 420 ? "s" : "m"
         screenObj.scale.setScalar(sw / cssW)
 

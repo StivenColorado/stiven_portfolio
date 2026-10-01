@@ -57,7 +57,7 @@ export default function ActionsTab() {
             ) : items.length === 0 && !loading ? (
                 <EmptyState title={t("admin.actions.empty")}>{t("admin.actions.emptyHint")}</EmptyState>
             ) : (
-                <div className="window overflow-x-auto !shadow-none">
+                <div className="window relative overflow-x-auto !shadow-none">
                     <table className="w-full min-w-[40rem] text-left text-sm">
                         <caption className="sr-only">{t("admin.actions.caption")}</caption>
                         <thead className="border-b-2 border-ink bg-grey">

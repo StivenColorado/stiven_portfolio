@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
+import NowWorking from "../components/NowWorking"
 import GithubIcon from "../components/icons/Github"
 import LinkedinIcon from "../components/icons/Linkedin"
 import {
@@ -157,7 +158,8 @@ const AboutStage: React.FC<Props> = ({ data, webgl }) => {
             schedule()
         }
         const goTo = (p: number) => {
-            window.scrollTo({ top: trackTop + clamp01(p) * travel, behavior: "smooth" })
+            const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            window.scrollTo({ top: trackTop + clamp01(p) * travel, behavior: calm ? "auto" : "smooth" })
         }
         api.current = { goTo }
 
@@ -213,6 +215,19 @@ const AboutStage: React.FC<Props> = ({ data, webgl }) => {
         const stop = chapterStops(count).find((s) => s.chapter === i)
         if (stop) api.current.goTo(stop.p)
     }
+    const onListKey = (e: React.KeyboardEvent<HTMLElement>) => {
+        const last = count - 1
+        let next = -1
+        if (e.key === "ArrowDown") next = group === last ? 0 : group + 1
+        else if (e.key === "ArrowUp") next = group === 0 ? last : group - 1
+        else if (e.key === "Home") next = 0
+        else if (e.key === "End") next = last
+        if (next < 0) return
+        e.preventDefault()
+        e.stopPropagation()
+        selectGroup(next)
+        ;(e.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus()
+    }
     const setRef = (i: number) => (el: HTMLElement | null) => {
         chapters.current[i] = el
     }
@@ -239,14 +254,17 @@ const AboutStage: React.FC<Props> = ({ data, webgl }) => {
         <div ref={trackRef} className="about-track">
             <div ref={stageRef} className="about-stage">
                 <section ref={setRef(0)} data-ch="0" className="about-ch" aria-label={data.nav[0]}>
-                    <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-[3svh] md:flex-row md:justify-between md:gap-12">
+                    <div className="about-intro">
                         <div className="about-intro-title">
                             <p className="eyebrow">{t("about.eyebrow")}</p>
                             <h1 className="about-h1 mt-2">{t("about.title")}</h1>
                         </div>
-                        <figure className="about-photo dither" style={vars({ "--a": 0, "--b": 0.6 })}>
+                        <figure className="about-photo dither">
                             <img src="/pic.webp" alt={t("about.photoAlt")} width={480} height={640} decoding="async" />
                         </figure>
+                        <div className="about-intro-now">
+                            <NowWorking compact />
+                        </div>
                     </div>
                     <p className="about-hint" aria-hidden="true">
                         {t("about.scroll")} <span className="about-hint-arrow">↓</span>
@@ -361,23 +379,28 @@ const AboutStage: React.FC<Props> = ({ data, webgl }) => {
                         </div>
                     )}
                     <div className="about-stack-caption">
-                        <p className="eyebrow">{t("about.stackEyebrow")}</p>
-                        <h2 className="mt-1 text-[clamp(1.6rem,8vw,3rem)] md:text-[clamp(2.4rem,4vw,3.75rem)]">{t("about.stackTitle")}</h2>
-                        <p className="about-stack-lead mt-2 font-mono text-xs md:text-sm">{t("about.stackLead")}</p>
-                        <ol className="about-stack-list" aria-label={t("about.stackTabs")}>
-                            {data.stack.map((g, i) => (
-                                <li key={g.id}>
+                        <div className="about-stack-text">
+                            <p className="eyebrow">{t("about.stackEyebrow")}</p>
+                            <h2 className="mt-1 text-[clamp(1.6rem,8vw,3rem)] md:text-[clamp(2.2rem,3.6vw,3.75rem)]">{t("about.stackTitle")}</h2>
+                            <p className="about-stack-lead mt-2 font-mono text-xs md:text-sm">{t("about.stackLead")}</p>
+                            <div role="tablist" aria-label={t("about.stackTabs")} aria-orientation="vertical" className="about-stack-list">
+                                {data.stack.map((g, i) => (
                                     <button
+                                        key={g.id}
                                         type="button"
+                                        role="tab"
+                                        aria-selected={i === group}
+                                        aria-controls="stack-panel"
+                                        tabIndex={i === group ? 0 : -1}
                                         onClick={() => selectGroup(i)}
-                                        aria-current={i === group ? "true" : undefined}
+                                        onKeyDown={onListKey}
                                         className="about-stack-item"
                                     >
                                         <span aria-hidden="true">0{i + 1}</span> {g.title}
                                     </button>
-                                </li>
-                            ))}
-                        </ol>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                     <div className="about-stack-foot" aria-hidden="true">
                         <p className="eyebrow">

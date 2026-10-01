@@ -11,18 +11,49 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
     ["minute", 60],
 ];
 
-function relativeTime(iso: string, lang: string) {
+function relativeTime(iso: string, lang: string, style: "long" | "short" = "long") {
     const seconds = (new Date(iso).getTime() - Date.now()) / 1000;
     const [unit, size] = UNITS.find(([, s]) => Math.abs(seconds) >= s) ?? ["minute", 60];
-    return new Intl.RelativeTimeFormat(lang, { numeric: "auto" }).format(Math.round(seconds / size), unit);
+    return new Intl.RelativeTimeFormat(lang, { numeric: "auto", style }).format(Math.round(seconds / size), unit);
 }
 
-export default function NowWorking() {
+export default function NowWorking({ compact = false }: { compact?: boolean }) {
     const { t, i18n } = useTranslation();
     const { data } = useContent();
     const projects = data?.projects.filter((p) => p.workingOn) ?? [];
     if (!projects.length) return null;
     const lang = i18n.resolvedLanguage ?? "es";
+
+    if (compact) {
+        return (
+            <section aria-labelledby="now-title" className="about-now">
+                <h2 id="now-title" className="about-now-title">{t("experience.now.title")}</h2>
+                <ul aria-label={t("experience.now.listAria")} className="about-now-list">
+                    {projects.slice(0, 3).map((p) => (
+                        <li key={p.slug} className="about-now-item">
+                            <div className="about-now-line">
+                                <Link
+                                    to={`/projects?open=${encodeURIComponent(p.slug)}`}
+                                    aria-label={t("experience.now.openProject", { title: p.title })}
+                                    className="font-black underline decoration-2 underline-offset-4 hover:bg-ink hover:text-paper"
+                                >
+                                    {p.title}
+                                </Link>
+                                <ActiveBadge size="sm" />
+                            </div>
+                            {p.activity && (
+                                <p className="about-now-activity">
+                                    {relativeTime(p.activity.pushedAt, lang, "short")}
+                                    {" · "}
+                                    {t("experience.now.commitsWeek", { count: p.activity.commitsWeek })}
+                                </p>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        );
+    }
 
     return (
         <section aria-labelledby="now-title" className="window mt-8 max-w-2xl">

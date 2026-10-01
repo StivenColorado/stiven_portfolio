@@ -77,8 +77,8 @@ export default function ExperienceEditor() {
             dirty={dirty}
             onSave={(publish) => void save(publish)}
         >
-            <div className="grid gap-6 lg:grid-cols-2">
-                <section className="window window-body space-y-4 !shadow-none">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
+                <section className="window window-body min-w-0 space-y-4 !shadow-none">
                     <LangTabs lang={lang} onChange={setLang} idPrefix={uid} />
                     <div role="tabpanel" id={`${uid}-panel`} aria-labelledby={`${uid}-tab-${lang}`} className="space-y-4">
                         {!es && <p className="text-xs text-muted">{t("adminContent.common.fallbackHint")}</p>}
@@ -95,7 +95,7 @@ export default function ExperienceEditor() {
                     </div>
                 </section>
 
-                <section className="window window-body h-fit space-y-4 !shadow-none">
+                <section className="window window-body h-fit min-w-0 space-y-4 !shadow-none">
                     <p className="eyebrow">{t("adminContent.experience.shared")}</p>
                     <Field label={t("adminContent.experience.company")} value={form.company} onChange={(v) => patch({ company: v })} maxLength={120} error={err("company")} />
                     <ListEditor

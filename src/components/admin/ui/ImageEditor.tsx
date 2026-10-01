@@ -666,7 +666,7 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
                                 {selected && (
                                     <div className="space-y-3 border-2 border-ink p-3">
                                         {selZones.length > 1 && <p className="font-mono text-xs font-bold">{t("adminEditor.selectedN", { n: selZones.length })}</p>}
-                                        <fieldset className="space-y-1.5">
+                                        <fieldset className="min-w-0 space-y-1.5">
                                             <legend className="eyebrow">{t("adminEditor.mode")}</legend>
                                             <div className="flex flex-wrap gap-2">
                                                 {(["blur", "pixelate", "box"] as Mode[]).map((m) => (

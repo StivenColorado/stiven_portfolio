@@ -11,7 +11,7 @@ const DEVICE_KEYS = ["mobile", "tablet", "desktop", "bot"];
 function BarList({ title, items, label, total, flags }: { title: string; items: Count[]; label?: (key: string) => string; total: number; flags?: boolean }) {
     const { t } = useTranslation();
     return (
-        <section className="window">
+        <section className="window min-w-0">
             <div className="window-bar"><span className="window-dot" aria-hidden="true" /><h3 className="flex-1 truncate">{title}</h3></div>
             <div className="window-body">
             {items.length === 0 ? (
@@ -65,8 +65,8 @@ export default function StatsCards({ stats, days, onDays }: { stats: Stats | nul
             {!stats ? (
                 <p className="text-sm text-muted">{t("admin.common.loading")}</p>
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <section className="window">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <section className="window min-w-0">
                         <div className="window-bar"><span className="window-dot" aria-hidden="true" /><h3 className="flex-1 truncate">{t("admin.stats.visits")}</h3></div>
                         <p className="window-body font-mono text-4xl text-ink">{stats.total}</p>
                     </section>

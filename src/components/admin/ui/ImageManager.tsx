@@ -63,7 +63,8 @@ async function toWebp(file: Blob, name: string): Promise<{ blob: Blob; name: str
     return { blob: file, name };
 }
 
-const iconBtn = "flex h-8 w-8 items-center justify-center border-2 border-ink bg-paper text-ink hover:bg-ink hover:text-paper disabled:opacity-40 disabled:hover:bg-paper disabled:hover:text-ink";
+const iconBtn = "flex h-8 w-8 shrink-0 items-center justify-center border-2 border-ink bg-paper text-ink hover:bg-ink hover:text-paper disabled:cursor-not-allowed disabled:border-dashed disabled:opacity-40 disabled:hover:bg-paper disabled:hover:text-ink";
+const CARD_GRID = "grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-3";
 const isUrl = (v: string) => /^https:\/\/\S+$/.test(v) || /^\/\S+$/.test(v);
 
 export default function ImageManager({ label, kind, value, onChange, max, hint, error, sensitive = false }: Props) {
@@ -249,27 +250,27 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
 
     const sumProgress = items.reduce((a, x) => a + (x.status === "uploading" ? x.progress : 0), 0);
     const overall = batch.total ? Math.min(1, (batch.done + sumProgress) / batch.total) : 0;
-    const smallBtn = "btn !min-h-8 !px-2 !py-0.5 !text-xs !shadow-none";
+    const smallBtn = "btn !min-h-8 min-w-0 !px-2 !py-0.5 !text-xs !shadow-none";
 
     return (
-        <fieldset className="space-y-3" aria-describedby={error ? `${uid}-err` : undefined}>
+        <fieldset className="min-w-0 max-w-full space-y-3" aria-describedby={error ? `${uid}-err` : undefined}>
             <legend className="eyebrow flex w-full justify-between gap-3">
                 <span>{label}</span>
                 {max !== undefined && <span className="font-mono text-muted">{value.length}/{max}</span>}
             </legend>
 
             {value.length > 0 && (
-                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                <ul className={CARD_GRID}>
                     {value.map((url, i) => (
-                        <li key={`${url}-${i}`} className="window !shadow-none">
-                            <div className="dither aspect-video overflow-hidden border-b-2 border-ink">
+                        <li key={`${url}-${i}`} className="window min-w-0 overflow-hidden !shadow-none">
+                            <div className="dither relative aspect-video overflow-hidden border-b-2 border-ink">
+                                <span className="absolute left-0 top-0 z-10 bg-ink px-1.5 py-0.5 font-mono text-[11px] font-bold leading-none text-paper">{i + 1}</span>
                                 {isImage
                                     ? <img src={url} alt={`${label} ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
                                     : <video src={url} muted preload="metadata" className="h-full w-full object-cover" aria-label={`${label} ${i + 1}`} />}
                             </div>
-                            <div className="flex items-center justify-between gap-1 p-1.5">
-                                <span className="font-mono text-[11px] text-muted">{i + 1}</span>
-                                <span className="flex gap-1">
+                            <div className="p-1">
+                                <span className="flex items-center justify-center gap-0.5">
                                     {isImage && <button type="button" className={iconBtn} onClick={() => void editCopy(url)} aria-label={t("adminEditor.editCopyN", { label, n: i + 1 })} title={t("adminEditor.editCopy")}><Pencil size={14} strokeWidth={2.5} aria-hidden /></button>}
                                     <button type="button" className={iconBtn} disabled={i === 0} onClick={() => move(i, -1)} aria-label={t("admin.media.up", { label, n: i + 1 })}><ArrowUp size={14} strokeWidth={2.5} aria-hidden /></button>
                                     <button type="button" className={iconBtn} disabled={i === value.length - 1} onClick={() => move(i, 1)} aria-label={t("admin.media.down", { label, n: i + 1 })}><ArrowDown size={14} strokeWidth={2.5} aria-hidden /></button>
@@ -304,12 +305,12 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
             )}
 
             {items.length > 0 && (
-                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <ul className={CARD_GRID}>
                     {items.map((x) => {
                         const busy = x.status === "uploading" || x.status === "done";
                         const showUncensored = sensitive && x.editable && !x.censored;
                         return (
-                            <li key={x.id} className="window flex flex-col !shadow-none">
+                            <li key={x.id} className="window min-w-0 overflow-hidden !shadow-none">
                                 <div className="dither relative aspect-video overflow-hidden border-b-2 border-ink">
                                     <Thumb blob={x.edited ?? x.file} alt={x.name} video={!isImage} />
                                     {busy && <span className="absolute bottom-1 right-1 bg-paper px-1 font-mono text-[11px] text-ink">{Math.round(x.progress * 100)}%</span>}
@@ -323,7 +324,7 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
                                     </span>
                                     {busy && <progress value={x.progress} max={1} aria-label={t("admin.media.uploading", { name: x.name })} className="block h-2 w-full accent-[var(--ink)]" />}
                                     {x.status === "error" && x.error && <p role="alert" className="font-extrabold">{x.error}</p>}
-                                    <span className="mt-auto flex flex-wrap gap-1">
+                                    <span className="mt-auto flex flex-wrap items-center gap-1">
                                         {x.editable && !busy && (
                                             <button type="button" className={smallBtn} onClick={() => setEditing({ source: x.file, item: x.id })} aria-label={t(sensitive ? "adminUpload.censorFile" : "adminEditor.editFile", { name: x.name })}>
                                                 <Pencil size={13} strokeWidth={2.5} aria-hidden /> {t(sensitive ? "adminUpload.censor" : "adminEditor.edit")}
@@ -373,7 +374,7 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
 
             <div
                 {...dropProps}
-                className={`flex flex-wrap items-center gap-3 border-2 border-dashed border-ink p-3 ${over ? "bg-ink text-paper" : ""}`}
+                className={`relative flex flex-wrap items-center gap-3 border-2 border-dashed border-ink p-3 ${over ? "bg-ink text-paper" : ""}`}
             >
                 <input ref={inputRef} id={`${uid}-file`} type="file" multiple accept={types.join(",")} className="sr-only" onChange={(e) => pick(e.target.files)} disabled={full} />
                 <label htmlFor={`${uid}-file`} className={`btn ${over ? "!bg-paper !text-ink" : ""} ${full ? "pointer-events-none opacity-40" : ""} has-[:focus-visible]:outline-2`}>
