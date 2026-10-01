@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import type { PublicProject } from "../types/content";
 import Tag from "./Tag";
 import GistModal from "./GistModal";
-import { ActiveBadge, PrivateBadge, ProjectVisual } from "./ProjectCard";
+import { PrivateBadge, ProjectVisual } from "./ProjectCard";
+import ActiveBadge from "./ActiveBadge";
+import Lightbox, { type MediaItem } from "./Lightbox";
 import { fileNameOf, tagOf } from "./fileName";
 
 interface Props {
@@ -35,9 +37,10 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
     const [active, setActive] = useState(0);
     const [gistOpen, setGistOpen] = useState(false);
     const { demo, repo, gist } = project.links ?? {};
-    const media = [
-        ...project.images.map((src) => ({ type: 'image' as const, src })),
-        ...project.videos.map((src) => ({ type: 'video' as const, src })),
+    const [zoom, setZoom] = useState(false);
+    const media: MediaItem[] = [
+        ...project.images.map((src, i) => ({ type: 'image' as const, src, alt: t("projects.modal.shot", { title: project.title, n: i + 1 }) })),
+        ...project.videos.map((src, i) => ({ type: 'video' as const, src, alt: t("projects.modal.viewVideo", { n: i + 1 }) })),
     ];
     const current = media[active];
     const poster = project.images[0];
@@ -83,7 +86,7 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
             </div>
 
             <div className="flex flex-col gap-5 p-4">
-                <div className="aspect-[16/10] overflow-hidden border-[length:var(--line)] border-ink dither">
+                <div className="aspect-[16/10] overflow-hidden border-[length:var(--line)] border-ink bg-grey dither">
                     {current?.type === 'video' ? (
                         <video
                             key={current.src}
@@ -92,19 +95,26 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                             preload={poster ? "none" : "metadata"}
                             controls
                             playsInline
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                         />
                     ) : current ? (
-                        <img
-                            key={current.src}
-                            src={current.src}
-                            alt={t("projects.modal.shot", { title: project.title, n: active + 1 })}
-                            width={1280}
-                            height={800}
-                            loading="lazy"
-                            decoding="async"
-                            className="h-full w-full object-cover"
-                        />
+                        <button
+                            type="button"
+                            onClick={() => setZoom(true)}
+                            aria-label={t("projects.modal.zoomShot", { n: active + 1 })}
+                            className="block h-full w-full cursor-zoom-in"
+                        >
+                            <img
+                                key={current.src}
+                                src={current.src}
+                                alt={current.alt}
+                                width={1280}
+                                height={800}
+                                loading="lazy"
+                                decoding="async"
+                                className="h-full w-full object-contain"
+                            />
+                        </button>
                     ) : (
                         <ProjectVisual project={project} large />
                     )}
@@ -119,10 +129,10 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                                     onClick={() => setActive(i)}
                                     aria-label={t(item.type === 'video' ? "projects.modal.viewVideo" : "projects.modal.viewShot", { n: i + 1 })}
                                     aria-current={i === active}
-                                    className={`block h-14 w-20 overflow-hidden border-2 ${i === active ? 'border-ink shadow-[var(--shadow-hard-sm)]' : 'border-ink opacity-60 hover:opacity-100'}`}
+                                    className={`block h-14 w-20 overflow-hidden border-2 bg-grey ${i === active ? 'border-ink shadow-[var(--shadow-hard-sm)]' : 'border-ink opacity-60 hover:opacity-100'}`}
                                 >
                                     {item.type === 'video' && !poster ? (
-                                        <video src={item.src} muted playsInline preload="metadata" aria-hidden="true" className="h-full w-full object-cover" />
+                                        <video src={item.src} muted playsInline preload="metadata" aria-hidden="true" className="h-full w-full object-contain" />
                                     ) : (
                                         <img
                                             src={item.type === 'video' ? poster : item.src}
@@ -131,7 +141,7 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                                             height={56}
                                             loading="lazy"
                                             decoding="async"
-                                            className="h-full w-full object-cover"
+                                            className="h-full w-full object-contain"
                                         />
                                     )}
                                 </button>
@@ -207,6 +217,7 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                 )}
             </div>
 
+            {zoom && <Lightbox items={media} start={active} poster={poster} onClose={(i) => { setActive(i); setZoom(false); }} />}
             {gistOpen && gist && <GistModal gistUrl={gist} project={project} onClose={() => setGistOpen(false)} />}
         </dialog>
     );

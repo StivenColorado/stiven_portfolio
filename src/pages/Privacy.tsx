@@ -48,7 +48,7 @@ const Privacy: React.FC = () => {
       <h2 className={h2}>{t("privacy.rightsTitle")}</h2>
       <p className="mt-3 text-muted">
         {t("privacy.rightsBefore")}
-        <Link to="/#contacto" className="underline underline-offset-4 hover:bg-ink hover:text-paper">
+        <Link to="/contact" className="underline underline-offset-4 hover:bg-ink hover:text-paper">
           {t("privacy.rightsLink")}
         </Link>
         {t("privacy.rightsAfter")}

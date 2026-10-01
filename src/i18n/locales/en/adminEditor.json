@@ -35,7 +35,7 @@
     "applying": "Processing…",
     "result": "Result: {{w}} × {{h}} px · {{size}} · WebP",
     "metaNote": "Metadata (EXIF/GPS) is removed. Only the final image is uploaded.",
-    "keys": "Arrow keys move the zone (Shift: 10 px). Delete removes it. Ctrl+Z undoes, Ctrl+Shift+Z redoes.",
+    "keys": "Drag on the image to draw a zone. Shift/Ctrl+click selects several; Ctrl+A selects all. Ctrl+D duplicates, Ctrl+C copies, Ctrl+V pastes (also in another image). Arrow keys move (Shift: 10 px). Delete removes. Ctrl+Z undoes, Ctrl+Shift+Z redoes.",
     "edit": "Edit / censor",
     "editCopy": "Edit copy",
     "editCopyN": "Edit copy of {{label}} {{n}}",
@@ -50,6 +50,11 @@
     "copyFailed": "The image could not be downloaded for editing.",
     "copyForeign": "Only copies of images hosted on this same site can be edited.",
     "staged": "Waiting to upload",
-    "discard": "Discard {{name}}"
+    "discard": "Discard {{name}}",
+    "duplicate": "Duplicate",
+    "copyZones": "Copy zones",
+    "pasteZones": "Paste zones ({{n}})",
+    "selectedN": "{{n}} zones selected: changes apply to all.",
+    "applyAll": "Apply to all"
   }
 }

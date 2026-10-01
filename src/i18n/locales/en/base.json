@@ -1,7 +1,9 @@
 {
   "nav": {
     "home": "Home",
+    "services": "Services",
     "projects": "Projects",
+    "experience": "Experience",
     "about": "About",
     "contact": "Contact",
     "homeAria": "Stiven, home",

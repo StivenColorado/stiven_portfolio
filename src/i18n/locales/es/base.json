@@ -1,7 +1,9 @@
 {
   "nav": {
     "home": "Inicio",
+    "services": "Servicios",
     "projects": "Proyectos",
+    "experience": "Experiencia",
     "about": "Acerca",
     "contact": "Contacto",
     "homeAria": "Stiven, inicio",

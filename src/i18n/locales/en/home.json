@@ -12,7 +12,8 @@
       "services": "Services",
       "projects": "Projects",
       "about": "About",
-      "contact": "Contact"
+      "contact": "Contact",
+      "experience": "Experience"
     },
     "projects": {
       "title": "Projects",
@@ -23,6 +24,11 @@
       "title": "Let's talk",
       "intro": "Have a project in mind? Write to me and I'll reply to your email.",
       "windowTitle": "contact.form"
+    },
+    "cta": {
+      "title": "Shall we work together?",
+      "text": "Tell me your idea and we will figure out how to ship it.",
+      "button": "Go to contact"
     }
   }
 }

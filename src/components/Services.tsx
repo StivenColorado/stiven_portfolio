@@ -10,8 +10,8 @@ export default function Services() {
     const services = data?.services ?? [];
     return (
         <div className="dither">
-            <section id="servicios" data-scene="services" className="section scroll-mt-10">
-                <h2 className="text-4xl text-ink md:text-5xl">{t("services.title")}</h2>
+            <section className="section">
+                <h1 className="text-5xl text-ink md:text-7xl">{t("services.title")}</h1>
                 <p className="mt-3 max-w-2xl text-muted">{t("services.intro")}</p>
                 <div data-slot="t" className="h-28 md:hidden" aria-hidden="true" />
 
@@ -60,9 +60,9 @@ export default function Services() {
                 </ol>
 
                 <div className="mt-8">
-                    <a href="#contacto" className="btn btn-primary">
+                    <Link to="/contact" className="btn btn-primary">
                         {t("services.talk")}
-                    </a>
+                    </Link>
                 </div>
             </section>
         </div>

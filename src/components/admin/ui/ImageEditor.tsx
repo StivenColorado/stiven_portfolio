@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { PointerEvent as RPointerEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Redo2, Trash2, Undo2 } from "lucide-react";
+import { ClipboardPaste, Copy, CopyPlus, Plus, Redo2, Trash2, Undo2, Wand2 } from "lucide-react";
 
 const MAX_WIDTH = 1600;
 const QUALITY = 0.82;
 const MIN_CROP = 16;
 const MIN_ZONE = 8;
 const LOW_BLUR = 35;
+const MIN_DRAW_CSS = 12;
+const DUP_OFFSET = 16;
+const PREFS_KEY = "adminEditor.censorPrefs";
 const HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"] as const;
 
 type Handle = (typeof HANDLES)[number];
@@ -15,6 +18,8 @@ type Mode = "blur" | "pixelate" | "box";
 type Tab = "crop" | "censor";
 interface Rect { x: number; y: number; w: number; h: number }
 interface Zone extends Rect { id: number; mode: Mode; blur: number; block: number }
+interface Prefs { mode: Mode; blur: number; block: number }
+interface ClipZone extends Rect { mode: Mode; blur: number; block: number }
 interface Doc { crop: Rect; zones: Zone[] }
 interface Drag { target: "crop" | number; handle: Handle | "move"; px: number; py: number; rect: Rect; before: Doc }
 type Source = ImageBitmap;
@@ -33,6 +38,23 @@ const RATIOS: { key: string; value: number | null }[] = [
     { key: "4:3", value: 4 / 3 },
     { key: "1:1", value: 1 },
 ];
+
+let clipboard: ClipZone[] = [];
+
+function loadPrefs(fallback: Mode): Prefs {
+    const base: Prefs = { mode: fallback, blur: 80, block: 16 };
+    try {
+        const raw = JSON.parse(localStorage.getItem(PREFS_KEY) ?? "null") as Partial<Prefs> | null;
+        if (!raw) return base;
+        return {
+            mode: raw.mode === "blur" || raw.mode === "pixelate" || raw.mode === "box" ? raw.mode : base.mode,
+            blur: typeof raw.blur === "number" ? clamp(raw.blur, 0, 100) : base.blur,
+            block: typeof raw.block === "number" ? clamp(raw.block, 4, 64) : base.block,
+        };
+    } catch {
+        return base;
+    }
+}
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
 const rounded = (x: number, y: number, w: number, h: number): Rect => ({ x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h) });
@@ -187,6 +209,7 @@ const handleCursor: Record<Handle, string> = { nw: "nwse-resize", se: "nwse-resi
 
 const tabBtn = "btn !min-h-9 !px-3 !py-1 flex-1 justify-center";
 const tabOn = "!bg-ink !text-paper";
+const actBtn = "btn !min-h-9 !flex-col !gap-0.5 !px-1.5 !py-1 text-center text-xs leading-tight disabled:opacity-50 pointer-coarse:!min-h-14";
 const sliderCls = "block w-full accent-[var(--ink)]";
 
 export default function ImageEditor({ source, sensitive, onDone, onCancel }: Props) {
@@ -200,7 +223,9 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
     const [doc, setDoc] = useState<Doc | null>(null);
     const [hist, setHist] = useState<{ past: Doc[]; future: Doc[] }>({ past: [], future: [] });
     const [tab, setTab] = useState<Tab>(sensitive ? "censor" : "crop");
-    const [sel, setSel] = useState<number | null>(null);
+    const [sel, setSel] = useState<number[]>([]);
+    const [draft, setDraft] = useState<Rect | null>(null);
+    const [clipCount, setClipCount] = useState(clipboard.length);
     const [ratio, setRatio] = useState<string>("free");
     const [box, setBox] = useState({ w: 0, h: 0 });
     const [sheet, setSheet] = useState(true);
@@ -210,6 +235,9 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
     const dragRef = useRef<Drag | null>(null);
     const editBefore = useRef<Doc | null>(null);
     const nextId = useRef(1);
+    const prefsRef = useRef<Prefs>(loadPrefs(sensitive ? "box" : "blur"));
+    const drawRef = useRef<{ ox: number; oy: number } | null>(null);
+    const draftRef = useRef<Rect | null>(null);
 
     const setLive = useCallback((d: Doc) => { docRef.current = d; setDoc(d); }, []);
     const commitFrom = useCallback((before: Doc, after: Doc | null = docRef.current) => {
@@ -274,36 +302,79 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
     }, [img, doc]);
 
     const zones = doc?.zones ?? [];
-    const selected = zones.find((z) => z.id === sel) ?? null;
+    const selected = zones.find((z) => z.id === sel[sel.length - 1]) ?? null;
+    const selZones = zones.filter((z) => sel.includes(z.id));
     const lowBlur = zones.some((z) => z.mode === "blur" && z.blur < LOW_BLUR);
     const ratioValue = RATIOS.find((r) => r.key === ratio)?.value ?? null;
 
-    const patchZone = (id: number, p: Partial<Zone>, live = false) => {
+    const remember = (p: Partial<Zone>) => {
+        const { mode, blur, block } = p;
+        prefsRef.current = { ...prefsRef.current, ...(mode && { mode }), ...(blur !== undefined && { blur }), ...(block !== undefined && { block }) };
+        try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefsRef.current)); } catch { /* sin almacenamiento */ }
+    };
+    const patchZones = (ids: number[], p: Partial<Zone>, live = false) => {
         if (!doc) return;
-        const next = { ...doc, zones: doc.zones.map((z) => (z.id === id ? { ...z, ...p } : z)) };
+        const next = { ...doc, zones: doc.zones.map((z) => (ids.includes(z.id) ? { ...z, ...p } : z)) };
+        remember(p);
         if (live) {
             editBefore.current ??= docRef.current;
             setLive(next);
         } else apply(next);
     };
+    const toggleSel = (id: number) => setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
     const endEdit = () => {
         if (editBefore.current) commitFrom(editBefore.current);
         editBefore.current = null;
     };
 
+    const newZone = (r: Rect): Zone => ({ id: nextId.current++, ...r, ...prefsRef.current });
     const addZone = () => {
         if (!doc) return;
         const c = doc.crop;
         const w = Math.max(MIN_ZONE, Math.round(c.w * 0.35)), h = Math.max(MIN_ZONE, Math.round(c.h * 0.18));
-        const zone: Zone = { id: nextId.current++, x: Math.round(c.x + (c.w - w) / 2), y: Math.round(c.y + (c.h - h) / 2), w, h, mode: sensitive ? "box" : "blur", blur: 80, block: 16 };
+        const zone = newZone({ x: Math.round(c.x + (c.w - w) / 2), y: Math.round(c.y + (c.h - h) / 2), w, h });
         apply({ ...doc, zones: [...doc.zones, zone] });
-        setSel(zone.id);
+        setSel([zone.id]);
         setTab("censor");
     };
-    const removeZone = (id: number) => {
-        if (!doc) return;
-        apply({ ...doc, zones: doc.zones.filter((z) => z.id !== id) });
-        setSel(null);
+    const removeZones = (ids: number[]) => {
+        if (!doc || !ids.length) return;
+        apply({ ...doc, zones: doc.zones.filter((z) => !ids.includes(z.id)) });
+        setSel([]);
+    };
+    const addCopies = (items: Zone[]) => {
+        if (!doc || !items.length) return;
+        apply({ ...doc, zones: [...doc.zones, ...items] });
+        setSel(items.map((z) => z.id));
+        setTab("censor");
+    };
+    const duplicate = () => {
+        if (!selZones.length) return;
+        addCopies(selZones.map((z) => ({ ...z, id: nextId.current++, x: clamp(z.x + DUP_OFFSET, 0, W - z.w), y: clamp(z.y + DUP_OFFSET, 0, H - z.h) })));
+    };
+    const copyZones = () => {
+        const src = selZones.length ? selZones : zones;
+        if (!src.length) return;
+        clipboard = src.map((z) => ({ x: z.x / W, y: z.y / H, w: z.w / W, h: z.h / H, mode: z.mode, blur: z.blur, block: z.block }));
+        setClipCount(clipboard.length);
+    };
+    const pasteZones = () => {
+        if (!doc || !clipboard.length) return;
+        const occupied = (x: number, y: number) => doc.zones.some((z) => z.x === x && z.y === y);
+        let shift = 0;
+        const place = (c: ClipZone) => {
+            const w = clamp(Math.round(c.w * W), MIN_ZONE, W), h = clamp(Math.round(c.h * H), MIN_ZONE, H);
+            return { w, h, x: clamp(Math.round(c.x * W), 0, W - w), y: clamp(Math.round(c.y * H), 0, H - h) };
+        };
+        while (shift < 40 && clipboard.some((c) => { const r = place(c); return occupied(clamp(r.x + shift, 0, W - r.w), clamp(r.y + shift, 0, H - r.h)); })) shift += DUP_OFFSET;
+        addCopies(clipboard.map((c) => {
+            const r = place(c);
+            return { id: nextId.current++, ...r, x: clamp(r.x + shift, 0, W - r.w), y: clamp(r.y + shift, 0, H - r.h), mode: c.mode, blur: c.blur, block: c.block };
+        }));
+    };
+    const applyToAll = () => {
+        if (!selected) return;
+        patchZones(zones.map((z) => z.id), { mode: selected.mode, blur: selected.blur, block: selected.block });
     };
     const chooseRatio = (key: string) => {
         setRatio(key);
@@ -325,7 +396,7 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
         const prev = hist.past[hist.past.length - 1];
         setHist({ past: hist.past.slice(0, -1), future: [cur, ...hist.future] });
         setLive(prev);
-        if (!prev.zones.some((z) => z.id === sel)) setSel(null);
+        setSel((s) => s.filter((id) => prev.zones.some((z) => z.id === id)));
     };
     const redo = () => {
         const cur = docRef.current;
@@ -333,13 +404,13 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
         const [next, ...rest] = hist.future;
         setHist({ past: [...hist.past, cur], future: rest });
         setLive(next);
-        if (!next.zones.some((z) => z.id === sel)) setSel(null);
+        setSel((s) => s.filter((id) => next.zones.some((z) => z.id === id)));
     };
 
     const nudge = (dx: number, dy: number) => {
         if (!doc) return;
-        if (tab === "censor" && selected) {
-            patchZone(selected.id, { x: clamp(selected.x + dx, 0, W - selected.w), y: clamp(selected.y + dy, 0, H - selected.h) });
+        if (tab === "censor" && selZones.length) {
+            apply({ ...doc, zones: doc.zones.map((z) => (sel.includes(z.id) ? { ...z, x: clamp(z.x + dx, 0, W - z.w), y: clamp(z.y + dy, 0, H - z.h) } : z)) });
         } else if (tab === "crop") {
             const c = doc.crop;
             apply({ ...doc, crop: { ...c, x: clamp(c.x + dx, 0, W - c.w), y: clamp(c.y + dy, 0, H - c.h) } });
@@ -358,13 +429,21 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
             return redo();
         }
         if (typing) return;
-        if ((e.key === "Delete" || e.key === "Backspace") && tab === "censor" && selected) {
+        const mod = e.ctrlKey || e.metaKey;
+        if (mod && tab === "censor") {
+            const k = e.key.toLowerCase();
+            if (k === "a") { e.preventDefault(); return setSel(zones.map((z) => z.id)); }
+            if (k === "d") { e.preventDefault(); return duplicate(); }
+            if (k === "c") { e.preventDefault(); return copyZones(); }
+            if (k === "v") { e.preventDefault(); return pasteZones(); }
+        }
+        if ((e.key === "Delete" || e.key === "Backspace") && tab === "censor" && selZones.length) {
             e.preventDefault();
-            return removeZone(selected.id);
+            return removeZones(sel);
         }
         const step = e.shiftKey ? 10 : 1;
         const dir: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
-        if (dir[e.key] && (tab === "crop" || selected)) {
+        if (dir[e.key] && (tab === "crop" || selZones.length)) {
             e.preventDefault();
             nudge(...dir[e.key]);
         }
@@ -383,10 +462,11 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
             if (!doc || e.button > 0) return;
             e.preventDefault();
             e.stopPropagation();
+            if (target !== "crop" && handle === "move" && (e.shiftKey || e.ctrlKey || e.metaKey)) return toggleSel(target);
             e.currentTarget.setPointerCapture(e.pointerId);
             const rect = target === "crop" ? doc.crop : doc.zones.find((z) => z.id === target)!;
             dragRef.current = { target, handle, px: e.clientX, py: e.clientY, rect: { x: rect.x, y: rect.y, w: rect.w, h: rect.h }, before: doc };
-            if (target !== "crop") setSel(target);
+            if (target !== "crop") setSel((s) => (s.includes(target) ? s : [target]));
         },
         onPointerMove: (e: RPointerEvent<HTMLElement>) => {
             const d = dragRef.current;
@@ -411,6 +491,42 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
             if (d) commitFrom(d.before);
         },
     });
+
+    const toImage = (e: RPointerEvent<HTMLElement>) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        return { x: clamp(((e.clientX - r.left) / r.width) * W, 0, W), y: clamp(((e.clientY - r.top) / r.height) * H, 0, H) };
+    };
+    const setDraftBoth = (r: Rect | null) => { draftRef.current = r; setDraft(r); };
+    const drawProps = {
+        onPointerDown: (e: RPointerEvent<HTMLElement>) => {
+            if (!doc || e.button > 0) return;
+            e.preventDefault();
+            e.currentTarget.setPointerCapture(e.pointerId);
+            const p = toImage(e);
+            drawRef.current = { ox: p.x, oy: p.y };
+            if (!(e.shiftKey || e.ctrlKey || e.metaKey)) setSel([]);
+        },
+        onPointerMove: (e: RPointerEvent<HTMLElement>) => {
+            const d = drawRef.current;
+            if (!d) return;
+            const p = toImage(e);
+            setDraftBoth(rounded(Math.min(d.ox, p.x), Math.min(d.oy, p.y), Math.abs(p.x - d.ox), Math.abs(p.y - d.oy)));
+        },
+        onPointerUp: () => {
+            const r = draftRef.current;
+            drawRef.current = null;
+            setDraftBoth(null);
+            const min = Math.max(MIN_ZONE, MIN_DRAW_CSS / fit);
+            if (!doc || !r || r.w < min || r.h < min) return;
+            const zone = newZone(r);
+            apply({ ...doc, zones: [...doc.zones, zone] });
+            setSel([zone.id]);
+        },
+        onPointerCancel: () => {
+            drawRef.current = null;
+            setDraftBoth(null);
+        },
+    };
 
     const finish = async () => {
         if (!img || !doc || busy) return;
@@ -459,8 +575,10 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
                                     <span key={h} role="presentation" aria-label={handleLabel(h)} className={`${handleCls} touch-none`} style={{ ...handleStyle(h), cursor: handleCursor[h] }} {...dragProps("crop", h)} />
                                 ))}
                             </div>
+                            {tab === "censor" && <div className="absolute inset-0 cursor-crosshair touch-none" {...drawProps} />}
+                            {draft && <div className="pointer-events-none absolute border-2 border-dashed border-lens bg-lens/10" style={pct(draft)} />}
                             {zones.map((z, i) => {
-                                const on = z.id === sel && tab === "censor";
+                                const on = sel.includes(z.id) && tab === "censor";
                                 return (
                                     <div
                                         key={z.id}
@@ -468,13 +586,13 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
                                         role="button"
                                         aria-label={t("adminEditor.zoneBox", { n: i + 1 })}
                                         aria-pressed={on}
-                                        onFocus={() => tab === "censor" && setSel(z.id)}
+                                        onFocus={() => tab === "censor" && setSel((s) => (s.includes(z.id) ? s : [z.id]))}
                                         className={`absolute touch-none border-2 ${tab === "censor" ? "cursor-move" : "pointer-events-none"} ${on ? "border-lens" : "border-dashed border-lens/80"} focus-visible:outline-2 focus-visible:outline-lens`}
                                         style={pct(z)}
                                         {...dragProps(z.id, "move")}
                                     >
                                         <span className="absolute left-0 top-0 bg-lens px-1 font-mono text-[10px] font-bold leading-4 text-white">{i + 1}</span>
-                                        {on && HANDLES.map((h) => (
+                                        {on && z.id === selected?.id && HANDLES.map((h) => (
                                             <span key={h} role="presentation" className={`${handleCls} touch-none`} style={{ ...handleStyle(h), cursor: handleCursor[h] }} {...dragProps(z.id, h)} />
                                         ))}
                                     </div>
@@ -515,6 +633,17 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
                                 <button type="button" className="btn btn-primary !min-h-9 !px-3 !py-1" onClick={addZone} disabled={!doc}>
                                     <Plus size={16} strokeWidth={2.5} aria-hidden /> {t("adminEditor.addZone")}
                                 </button>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button type="button" className={actBtn} onClick={duplicate} disabled={!selZones.length} title="Ctrl+D">
+                                        <CopyPlus size={16} strokeWidth={2.5} aria-hidden /> {t("adminEditor.duplicate")}
+                                    </button>
+                                    <button type="button" className={actBtn} onClick={copyZones} disabled={!zones.length} title="Ctrl+C">
+                                        <Copy size={16} strokeWidth={2.5} aria-hidden /> {t("adminEditor.copyZones")}
+                                    </button>
+                                    <button type="button" className={actBtn} onClick={pasteZones} disabled={!clipCount || !doc} title="Ctrl+V">
+                                        <ClipboardPaste size={16} strokeWidth={2.5} aria-hidden /> {t("adminEditor.pasteZones", { n: clipCount })}
+                                    </button>
+                                </div>
                                 <p className="eyebrow">{t("adminEditor.zones")}</p>
                                 {zones.length === 0
                                     ? <p className="text-sm text-muted">{t("adminEditor.noZones")}</p>
@@ -522,11 +651,11 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
                                         <ul className="space-y-1.5">
                                             {zones.map((z, i) => (
                                                 <li key={z.id} className="flex gap-1.5">
-                                                    <button type="button" aria-pressed={z.id === sel} onClick={() => setSel(z.id)} className={`btn !min-h-9 flex-1 justify-between !px-3 !py-1 text-left ${z.id === sel ? tabOn : ""}`}>
+                                                    <button type="button" aria-pressed={sel.includes(z.id)} onClick={(e) => (e.shiftKey || e.ctrlKey || e.metaKey ? toggleSel(z.id) : setSel([z.id]))} className={`btn !min-h-9 flex-1 justify-between !px-3 !py-1 text-left ${sel.includes(z.id) ? tabOn : ""}`}>
                                                         <span>{t("adminEditor.zoneN", { n: i + 1 })}</span>
                                                         <span className="font-mono text-[11px]">{modeLabel(z.mode)}</span>
                                                     </button>
-                                                    <button type="button" className="btn !min-h-9 !px-2 !py-1" onClick={() => removeZone(z.id)} aria-label={t("adminEditor.deleteZoneN", { n: i + 1 })}>
+                                                    <button type="button" className="btn !min-h-9 !px-2 !py-1" onClick={() => removeZones([z.id])} aria-label={t("adminEditor.deleteZoneN", { n: i + 1 })}>
                                                         <Trash2 size={14} strokeWidth={2.5} aria-hidden />
                                                     </button>
                                                 </li>
@@ -536,11 +665,12 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
 
                                 {selected && (
                                     <div className="space-y-3 border-2 border-ink p-3">
+                                        {selZones.length > 1 && <p className="font-mono text-xs font-bold">{t("adminEditor.selectedN", { n: selZones.length })}</p>}
                                         <fieldset className="space-y-1.5">
                                             <legend className="eyebrow">{t("adminEditor.mode")}</legend>
                                             <div className="flex flex-wrap gap-2">
                                                 {(["blur", "pixelate", "box"] as Mode[]).map((m) => (
-                                                    <button key={m} type="button" className={`btn !min-h-9 !px-3 !py-1 ${selected.mode === m ? tabOn : ""}`} aria-pressed={selected.mode === m} onClick={() => patchZone(selected.id, { mode: m })}>{modeLabel(m)}</button>
+                                                    <button key={m} type="button" className={`btn !min-h-9 !px-3 !py-1 ${selected.mode === m ? tabOn : ""}`} aria-pressed={selected.mode === m} onClick={() => patchZones(sel, { mode: m })}>{modeLabel(m)}</button>
                                                 ))}
                                             </div>
                                         </fieldset>
@@ -548,19 +678,26 @@ export default function ImageEditor({ source, sensitive, onDone, onCancel }: Pro
                                             <div className="space-y-1">
                                                 <label htmlFor={`${uid}-blur`} className="eyebrow flex justify-between"><span>{t("adminEditor.intensity")}</span><span>{selected.blur}%</span></label>
                                                 <input id={`${uid}-blur`} type="range" min={0} max={100} value={selected.blur} className={sliderCls}
-                                                    onChange={(e) => patchZone(selected.id, { blur: Number(e.target.value) }, true)} onPointerUp={endEdit} onKeyUp={endEdit} onBlur={endEdit} />
+                                                    onChange={(e) => patchZones(sel, { blur: Number(e.target.value) }, true)} onPointerUp={endEdit} onKeyUp={endEdit} onBlur={endEdit} />
                                             </div>
                                         )}
                                         {selected.mode === "pixelate" && (
                                             <div className="space-y-1">
                                                 <label htmlFor={`${uid}-block`} className="eyebrow flex justify-between"><span>{t("adminEditor.blockSize")}</span><span>{selected.block}px</span></label>
                                                 <input id={`${uid}-block`} type="range" min={4} max={64} value={selected.block} className={sliderCls}
-                                                    onChange={(e) => patchZone(selected.id, { block: Number(e.target.value) }, true)} onPointerUp={endEdit} onKeyUp={endEdit} onBlur={endEdit} />
+                                                    onChange={(e) => patchZones(sel, { block: Number(e.target.value) }, true)} onPointerUp={endEdit} onKeyUp={endEdit} onBlur={endEdit} />
                                             </div>
                                         )}
-                                        <button type="button" className="btn !min-h-9 !px-3 !py-1" onClick={() => removeZone(selected.id)}>
-                                            <Trash2 size={14} strokeWidth={2.5} aria-hidden /> {t("adminEditor.deleteZone")}
-                                        </button>
+                                        <div className="flex flex-wrap gap-2">
+                                            {zones.length > 1 && (
+                                                <button type="button" className="btn !min-h-9 !px-3 !py-1 pointer-coarse:!min-h-12" onClick={applyToAll}>
+                                                    <Wand2 size={14} strokeWidth={2.5} aria-hidden /> {t("adminEditor.applyAll")}
+                                                </button>
+                                            )}
+                                            <button type="button" className="btn !min-h-9 !px-3 !py-1 pointer-coarse:!min-h-12" onClick={() => removeZones(sel)}>
+                                                <Trash2 size={14} strokeWidth={2.5} aria-hidden /> {t("adminEditor.deleteZone")}
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                                 {lowBlur && <p role="alert" className="border-2 border-dashed border-ink p-2 text-sm font-extrabold">{t("adminEditor.lowBlur")}</p>}

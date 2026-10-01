@@ -1,0 +1,22 @@
+{
+  "adminUpload": {
+    "uploadAll": "Subir todas ({{n}})",
+    "discardAll": "Descartar todas",
+    "confirmTitle": "{{n}} de {{m}} imágenes no tienen censura. ¿Subir de todos modos?",
+    "confirmBody": "El proyecto es confidencial: las imágenes sin censura se subirán con el contenido original.",
+    "confirmAll": "Subir todas",
+    "onlyCensored": "Solo las censuradas",
+    "uncensored": "Sin censura",
+    "censor": "Censurar",
+    "censorFile": "Censurar {{name}}",
+    "retry": "Reintentar",
+    "retryFile": "Reintentar {{name}}",
+    "queued": "En cola",
+    "uploadingN": "Subiendo {{done}}/{{total}}",
+    "ignored_one": "Se ignoró {{count}} archivo: no cabe en el máximo permitido.",
+    "ignored_other": "Se ignoraron {{count}} archivos: no caben en el máximo permitido.",
+    "dismiss": "Cerrar aviso",
+    "dropHint": "También puedes arrastrar y soltar los archivos aquí.",
+    "dropActive": "Suelta para añadir"
+  }
+}

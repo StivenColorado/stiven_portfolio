@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { isIP } from 'node:net'
 import type { DatabaseSync } from 'node:sqlite'
-import { randomBytes } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import {
   DUMMY_HASH, clearCookie, createSession, destroyOtherSessions, destroySession, hashPassword, readSid,
   sessionCookie, sessionEmail, sha256, verify,
@@ -513,9 +513,22 @@ export function createApp(config: Config, db: DatabaseSync): Server {
           : null
         return { ...project, workingOn: active, activity }
       })
-      return send(res, 200, { ...base, projects }, {
-        'Cache-Control': 'public, max-age=30, stale-while-revalidate=300',
-      })
+      const payload = JSON.stringify({ ...base, projects })
+      const etag = `"${createHash('sha1').update(payload).digest('hex')}"`
+      const headers = {
+        'Cache-Control': 'no-cache',
+        ETag: etag,
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'no-referrer',
+      }
+      if (req.headers['if-none-match'] === etag) {
+        res.writeHead(304, headers)
+        res.end()
+        return
+      }
+      res.writeHead(200, { ...headers, 'Content-Type': 'application/json; charset=utf-8' })
+      res.end(payload)
+      return
     }
 
     if (route === 'GET /api/health') {

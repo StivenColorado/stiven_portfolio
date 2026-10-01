@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Briefcase, Code, ExternalLink, Github, Lock } from "lucide-react";
 import type { PublicProject } from "../types/content";
 import Tag from "./Tag";
+import ActiveBadge from "./ActiveBadge";
+import Lightbox, { type MediaItem } from "./Lightbox";
 import { fileNameOf, tagOf } from "./fileName";
 
 interface Props {
@@ -20,16 +22,6 @@ export const PrivateBadge: React.FC<{ nda?: boolean }> = ({ nda }) => {
     );
 };
 
-export const ActiveBadge: React.FC = () => {
-    const { t } = useTranslation();
-    return (
-        <span className="tag">
-            <span className="size-2 bg-ink motion-safe:animate-pulse" aria-hidden="true" />
-            {t("projects.badge.active")}
-        </span>
-    );
-};
-
 /** Sin capturas se muestra un visual genérico para que tarjeta y modal no queden vacíos. */
 export const ProjectVisual: React.FC<{ project: PublicProject; large?: boolean }> = ({ project, large }) => {
     const { t } = useTranslation();
@@ -43,7 +35,7 @@ export const ProjectVisual: React.FC<{ project: PublicProject; large?: boolean }
                 height={800}
                 loading="lazy"
                 decoding="async"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
             />
         );
     }
@@ -99,6 +91,11 @@ export const ProjectsError: React.FC = () => {
 const ProjectCard: React.FC<Props> = ({ project, onOpen }) => {
     const { t } = useTranslation();
     const { demo, repo } = project.links ?? {};
+    const [zoom, setZoom] = useState(false);
+    const media: MediaItem[] = [
+        ...project.images.map((src, i) => ({ type: "image" as const, src, alt: t("projects.modal.shot", { title: project.title, n: i + 1 }) })),
+        ...project.videos.map((src, i) => ({ type: "video" as const, src, alt: t("projects.modal.viewVideo", { n: i + 1 }) })),
+    ];
 
     return (
         <article className="window group/card h-full">
@@ -107,11 +104,22 @@ const ProjectCard: React.FC<Props> = ({ project, onOpen }) => {
                 <span className="window-dot" aria-hidden="true" />
                 <span className="flex-1 truncate text-center">{fileNameOf(project)}</span>
             </div>
-            <div className="aspect-[16/10] overflow-hidden border-b-[length:var(--line)] border-ink">
-                <ProjectVisual project={project} />
+            <div className="aspect-[16/10] overflow-hidden border-b-[length:var(--line)] border-ink dither">
+                {project.images.length > 0 ? (
+                    <button
+                        type="button"
+                        onClick={() => setZoom(true)}
+                        aria-label={t("projects.card.zoomAria", { title: project.title })}
+                        className="block h-full w-full cursor-zoom-in"
+                    >
+                        <ProjectVisual project={project} />
+                    </button>
+                ) : (
+                    <ProjectVisual project={project} />
+                )}
             </div>
             <div className="flex flex-1 flex-col gap-3 p-4">
-                {project.workingOn && <div><ActiveBadge /></div>}
+                {project.workingOn && <div><ActiveBadge size="sm" /></div>}
                 <h3 className="text-xl text-ink">{project.title}</h3>
                 <p className="line-clamp-3 text-sm text-muted">{project.summary}</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -135,6 +143,7 @@ const ProjectCard: React.FC<Props> = ({ project, onOpen }) => {
                     )}
                 </div>
             </div>
+            {zoom && <Lightbox items={media} start={0} poster={project.images[0]} onClose={() => setZoom(false)} />}
         </article>
     );
 };

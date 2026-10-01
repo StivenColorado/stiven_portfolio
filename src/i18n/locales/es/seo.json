@@ -11,6 +11,18 @@
     "privacy": {
       "title": "Aviso de privacidad | Stiven Colorado",
       "description": "Qué datos de navegación se recogen en este sitio, para qué, por cuánto tiempo y cómo ejercer tus derechos (Ley 1581 de 2012)."
+    },
+    "services": {
+      "title": "Servicios | Stiven Colorado",
+      "description": "Software a medida, inteligencia artificial y seguridad para pymes y grandes empresas, de la definición técnica a producción."
+    },
+    "experience": {
+      "title": "Experiencia profesional | Stiven Colorado",
+      "description": "Trayectoria profesional de Stiven Colorado: roles, proyectos y tecnologías en desarrollo full-stack."
+    },
+    "contact": {
+      "title": "Contacto | Stiven Colorado",
+      "description": "Escríbeme para tu proyecto de software a medida, IA o seguridad. Te respondo a tu correo o por WhatsApp."
     }
   }
 }

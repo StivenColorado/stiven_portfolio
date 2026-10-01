@@ -11,6 +11,18 @@
     "privacy": {
       "title": "Privacy notice | Stiven Colorado",
       "description": "What browsing data this site collects, why, for how long and how to exercise your rights (Colombian Law 1581 of 2012)."
+    },
+    "services": {
+      "title": "Services | Stiven Colorado",
+      "description": "Custom software, artificial intelligence and security for small businesses and large companies, from technical definition to production."
+    },
+    "experience": {
+      "title": "Professional experience | Stiven Colorado",
+      "description": "Stiven Colorado's career: roles, projects and technologies in full-stack development."
+    },
+    "contact": {
+      "title": "Contact | Stiven Colorado",
+      "description": "Write to me about your custom software, AI or security project. I reply by email or on WhatsApp."
     }
   }
 }

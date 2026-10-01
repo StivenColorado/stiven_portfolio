@@ -35,7 +35,8 @@
       "viewAria": "View details of {{title}}",
       "demo": "Demo",
       "repo": "Repository",
-      "cover": "Screenshot of {{title}}"
+      "cover": "Screenshot of {{title}}",
+      "zoomAria": "Enlarge image of {{title}}"
     },
     "carousel": {
       "hint": "// swipe to see the projects",
@@ -59,12 +60,26 @@
       "commitsWeek_other": "{{count}} commits this week",
       "recentCommits": "Latest commits",
       "viewCommit": "view",
-      "viewCommitAria": "View commit: {{message}}"
+      "viewCommitAria": "View commit: {{message}}",
+      "zoomShot": "Enlarge screenshot {{n}}"
     },
     "gist": {
       "title": "Code on GitHub Gist",
       "frame": "GitHub Gist",
       "open": "View on GitHub Gist"
+    },
+    "lightbox": {
+      "label": "Image gallery",
+      "title": "gallery.app",
+      "counter": "{{n}} / {{total}}",
+      "close": "Close gallery",
+      "prev": "Previous image",
+      "next": "Next image",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "reset": "Reset zoom to 1:1",
+      "thumbs": "Thumbnails",
+      "goTo": "Go to item {{n}}"
     }
   }
 }

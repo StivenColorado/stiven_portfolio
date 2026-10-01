@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useContent } from "../lib/content";
+import ActiveBadge from "./ActiveBadge";
 
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
     ["year", 31536000],
@@ -43,10 +44,7 @@ export default function NowWorking() {
                                 >
                                     {p.title}
                                 </Link>
-                                <span className="tag !px-2 !py-0.5 !text-[11px]">
-                                    <span className="mr-1.5 inline-block h-2 w-2 bg-ink motion-safe:animate-pulse" aria-hidden="true" />
-                                    {t("experience.now.active")}
-                                </span>
+                                <ActiveBadge size="md" />
                             </div>
                             {p.activity && (
                                 <p className="font-mono text-xs text-muted">

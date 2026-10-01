@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useId, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, ImagePlus, Pencil, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ImagePlus, Pencil, RotateCcw, Upload, X } from "lucide-react";
 import { uploadMedia, isUnauthorized } from "../../../lib/adminApi";
 import { ApiError } from "../../../lib/api";
 import ImageEditor from "./ImageEditor";
@@ -23,22 +23,32 @@ interface Props {
     sensitive?: boolean;
 }
 
-interface Job { key: number; name: string; progress: number; error?: string }
-interface Staged { id: number; file: File; edited?: Blob; censored: boolean; auto: boolean }
-interface Editing { source: Blob; staged?: number; copyOf?: string }
+type Status = "pending" | "queued" | "uploading" | "done" | "error";
+interface Item {
+    id: number; name: string; file: Blob; edited?: Blob; censored: boolean; editable: boolean;
+    status: Status; progress: number; error?: string; replace?: string; url?: string;
+}
+interface Reject { key: number; name: string; msg: string }
+interface Editing { source: Blob; item?: number; copyOf?: string }
+interface Confirm { ids: number[]; uncensored: number; total: number }
 
-function StagedThumb({ blob, alt }: { blob: Blob; alt: string }) {
+const PARALLEL = 2;
+
+function Thumb({ blob, alt, video }: { blob: Blob; alt: string; video: boolean }) {
     const [url, setUrl] = useState("");
     useEffect(() => {
         const u = URL.createObjectURL(blob);
         setUrl(u);
         return () => URL.revokeObjectURL(u);
     }, [blob]);
-    return url ? <img src={url} alt={alt} className="h-full w-full object-cover" /> : null;
+    if (!url) return null;
+    return video
+        ? <video src={url} muted preload="metadata" className="h-full w-full object-cover" aria-label={alt} />
+        : <img src={url} alt={alt} className="h-full w-full object-cover" />;
 }
 
-async function toWebp(file: File): Promise<{ blob: Blob; name: string }> {
-    if (file.type === "image/gif" || (file.type === "image/webp" && file.size <= MAX_IMAGE_BYTES)) return { blob: file, name: file.name };
+async function toWebp(file: Blob, name: string): Promise<{ blob: Blob; name: string }> {
+    if (file.type === "image/gif" || (file.type === "image/webp" && file.size <= MAX_IMAGE_BYTES)) return { blob: file, name };
     try {
         const bitmap = await createImageBitmap(file);
         const scale = Math.min(1, MAX_WIDTH / bitmap.width);
@@ -48,9 +58,9 @@ async function toWebp(file: File): Promise<{ blob: Blob; name: string }> {
         canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
         bitmap.close();
         const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/webp", 0.82));
-        if (blob && blob.type === "image/webp") return { blob, name: file.name.replace(/\.[^.]+$/, "") + ".webp" };
+        if (blob && blob.type === "image/webp") return { blob, name: name.replace(/\.[^.]+$/, "") + ".webp" };
     } catch { /* se sube el original */ }
-    return { blob: file, name: file.name };
+    return { blob: file, name };
 }
 
 const iconBtn = "flex h-8 w-8 items-center justify-center border-2 border-ink bg-paper text-ink hover:bg-ink hover:text-paper disabled:opacity-40 disabled:hover:bg-paper disabled:hover:text-ink";
@@ -59,78 +69,136 @@ const isUrl = (v: string) => /^https:\/\/\S+$/.test(v) || /^\/\S+$/.test(v);
 export default function ImageManager({ label, kind, value, onChange, max, hint, error, sensitive = false }: Props) {
     const { t } = useTranslation();
     const uid = useId();
-    const [jobs, setJobs] = useState<Job[]>([]);
     const [manual, setManual] = useState("");
     const [manualError, setManualError] = useState("");
     const current = useRef(value);
     current.current = value;
     const seq = useRef(0);
     const inputRef = useRef<HTMLInputElement>(null);
-    const [staged, setStaged] = useState<Staged[]>([]);
+    const [items, setItems] = useState<Item[]>([]);
+    const [rejects, setRejects] = useState<Reject[]>([]);
+    const [notice, setNotice] = useState("");
+    const [batch, setBatch] = useState({ total: 0, done: 0 });
     const [editing, setEditing] = useState<Editing | null>(null);
-    const [confirmId, setConfirmId] = useState<number | null>(null);
+    const [confirm, setConfirm] = useState<Confirm | null>(null);
+    const [over, setOver] = useState(false);
 
     const isImage = kind === "image";
     const types = isImage ? IMAGE_TYPES : VIDEO_TYPES;
     const limit = isImage ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES;
     const noun = t(isImage ? "admin.media.images" : "admin.media.videos");
-    const full = max !== undefined && value.length + jobs.length + staged.length >= max;
+    const full = max !== undefined && value.length + items.length >= max;
+    const pending = items.filter((x) => x.status === "pending");
+    const active = items.filter((x) => x.status === "queued" || x.status === "uploading");
 
-    const patch = (key: number, p: Partial<Job>) => setJobs((prev) => prev.map((j) => (j.key === key ? { ...j, ...p } : j)));
-    const drop = (key: number) => setJobs((prev) => prev.filter((j) => j.key !== key));
+    const patch = (id: number, p: Partial<Item>) => setItems((prev) => prev.map((x) => (x.id === id ? { ...x, ...p } : x)));
+    const removeItem = (id: number) => setItems((prev) => prev.filter((x) => x.id !== id));
     const commit = (urls: string[]) => { current.current = urls; onChange(urls); };
 
-    async function send(blob: Blob, name: string, replace?: string) {
-        const key = ++seq.current;
-        setJobs((prev) => [...prev, { key, name, progress: 0 }]);
+    function errorText(err: unknown) {
+        if (!(err instanceof ApiError)) return t("admin.media.uploadFailed");
+        return err.status === 413 ? t("admin.media.server413")
+            : err.status === 415 ? t("admin.media.server415")
+            : err.status === 429 ? t("admin.media.server429")
+            : t("admin.media.uploadFailed");
+    }
+
+    async function run(it: Item) {
         try {
-            if (blob.size > limit) return patch(key, { error: t("admin.media.overMax", { mb: limit / 1024 / 1024 }) });
-            const up = await uploadMedia(blob, name, (f) => patch(key, { progress: f }));
-            const at = replace === undefined ? -1 : current.current.indexOf(replace);
-            if (at >= 0) commit(current.current.map((u, i) => (i === at ? up.url : u)));
-            else if (max === undefined || current.current.length < max) commit([...current.current, up.url]);
-            drop(key);
+            let blob = it.edited ?? it.file;
+            let name = it.name;
+            if (isImage && !it.edited) ({ blob, name } = await toWebp(it.file, it.name));
+            if (it.edited) name = it.name.replace(/\.[^.]+$/, "") + (it.edited.type === "image/webp" ? ".webp" : ".jpg");
+            if (blob.size > limit) return patch(it.id, { status: "error", error: t("admin.media.overMax", { mb: limit / 1024 / 1024 }) });
+            const up = await uploadMedia(blob, name, (f) => patch(it.id, { progress: f }));
+            patch(it.id, { status: "done", progress: 1, url: up.url });
+            setBatch((b) => ({ ...b, done: b.done + 1 }));
         } catch (err) {
-            if (isUnauthorized(err)) return;
-            patch(key, {
-                error: err instanceof ApiError
-                    ? err.status === 413 ? t("admin.media.server413")
-                        : err.status === 415 ? t("admin.media.server415")
-                        : err.status === 429 ? t("admin.media.server429")
-                        : t("admin.media.uploadFailed")
-                    : t("admin.media.uploadFailed"),
-            });
+            patch(it.id, { status: "error", error: isUnauthorized(err) ? undefined : errorText(err) });
         }
     }
+    const runRef = useRef(run);
+    runRef.current = run;
 
-    async function handle(file: File) {
-        if (!types.includes(file.type) || file.size > 40 * 1024 * 1024) {
-            const key = ++seq.current;
-            const msg = !types.includes(file.type) ? t("admin.media.badType", { types: types.map((m) => m.split("/")[1]).join(", ") }) : t("admin.media.tooBig");
-            return setJobs((prev) => [...prev, { key, name: file.name, progress: 0, error: msg }]);
-        }
-        if (isImage && file.type !== "image/gif") {
-            return setStaged((prev) => [...prev, { id: ++seq.current, file, censored: false, auto: sensitive }]);
-        }
-        const { blob, name } = isImage ? await toWebp(file) : { blob: file, name: file.name };
-        await send(blob, name);
-    }
-
-    const pendingAuto = staged.find((s) => s.auto);
     useEffect(() => {
-        if (editing || !pendingAuto) return;
-        setStaged((prev) => prev.map((s) => (s.id === pendingAuto.id ? { ...s, auto: false } : s)));
-        setEditing({ source: pendingAuto.file, staged: pendingAuto.id });
-    }, [editing, pendingAuto]);
+        const running = items.filter((x) => x.status === "uploading").length;
+        const next = items.filter((x) => x.status === "queued" && x.id !== editing?.item).slice(0, PARALLEL - running);
+        if (!next.length) return;
+        setItems((prev) => prev.map((x) => (next.some((n) => n.id === x.id) ? { ...x, status: "uploading", progress: 0 } : x)));
+        next.forEach((n) => void runRef.current(n));
+    }, [items, editing]);
 
-    async function uploadStaged(s: Staged) {
-        setStaged((prev) => prev.filter((x) => x.id !== s.id));
-        if (s.edited) return send(s.edited, s.file.name.replace(/\.[^.]+$/, "") + (s.edited.type === "image/webp" ? ".webp" : ".jpg"));
-        const { blob, name } = await toWebp(s.file);
-        await send(blob, name);
+    useEffect(() => {
+        const ready: Item[] = [];
+        let blocked = false;
+        for (const x of items) {
+            if (x.status === "done") { if (!blocked) ready.push(x); }
+            else if (x.status === "queued" || x.status === "uploading") blocked = true;
+        }
+        if (!ready.length) return;
+        const urls = [...current.current];
+        for (const r of ready) {
+            const at = r.replace ? urls.indexOf(r.replace) : -1;
+            if (at >= 0) urls[at] = r.url as string;
+            else if (max === undefined || urls.length < max) urls.push(r.url as string);
+        }
+        current.current = urls;
+        onChange(urls);
+        setItems((prev) => prev.filter((x) => !ready.some((r) => r.id === x.id)));
+    }, [items, max, onChange]);
+
+    const idle = active.length === 0;
+    useEffect(() => {
+        if (idle) setBatch((b) => (b.total === 0 ? b : { total: 0, done: 0 }));
+    }, [idle]);
+
+    function queue(ids: number[]) {
+        if (!ids.length) return;
+        setItems((prev) => prev.map((x) => (ids.includes(x.id) ? { ...x, status: "queued", progress: 0, error: undefined } : x)));
+        setBatch((b) => ({ ...b, total: b.total + ids.length }));
     }
 
-    const requestUpload = (s: Staged) => (sensitive && !s.censored ? setConfirmId(s.id) : void uploadStaged(s));
+    const reject = (name: string, msg: string) => setRejects((prev) => [...prev, { key: ++seq.current, name, msg }]);
+
+    function addFiles(list: FileList | File[]) {
+        const files = [...list];
+        if (!files.length) return;
+        const room = max === undefined ? files.length : Math.max(0, max - value.length - items.length);
+        const fresh: Item[] = [];
+        let ignored = 0;
+        for (const f of files) {
+            const typeOk = types.includes(f.type);
+            const sizeOk = f.size <= (isImage ? 40 * 1024 * 1024 : MAX_VIDEO_BYTES);
+            if (!typeOk) reject(f.name, t("admin.media.badType", { types: types.map((m) => m.split("/")[1]).join(", ") }));
+            else if (!sizeOk) reject(f.name, t("admin.media.tooBig"));
+            else if (fresh.length >= room) ignored++;
+            else {
+                const editable = isImage && f.type !== "image/gif";
+                const hold = sensitive && editable;
+                fresh.push({ id: ++seq.current, name: f.name, file: f, censored: false, editable, status: hold ? "pending" : "queued", progress: 0 });
+            }
+        }
+        setNotice(ignored ? t("adminUpload.ignored", { count: ignored }) : "");
+        if (!fresh.length) return;
+        setItems((prev) => [...prev, ...fresh]);
+        const auto = fresh.filter((x) => x.status === "queued").length;
+        if (auto) setBatch((b) => ({ ...b, total: b.total + auto }));
+        if (files.length === 1 && fresh[0].status === "pending") setEditing({ source: fresh[0].file, item: fresh[0].id });
+    }
+
+    const pick = (files: FileList | null) => {
+        if (files) addFiles(files);
+        if (inputRef.current) inputRef.current.value = "";
+    };
+
+    const requestOne = (it: Item) => (sensitive && it.editable && !it.censored ? setConfirm({ ids: [it.id], uncensored: 1, total: 1 }) : queue([it.id]));
+
+    function requestAll() {
+        const unc = pending.filter((x) => x.editable && !x.censored).length;
+        const ids = pending.map((x) => x.id);
+        if (sensitive && unc > 0) setConfirm({ ids, uncensored: unc, total: pending.length });
+        else queue(ids);
+    }
 
     async function editCopy(url: string) {
         try {
@@ -139,9 +207,7 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
             if (!res.ok) throw new Error("fetch");
             setEditing({ source: await res.blob(), copyOf: url });
         } catch (err) {
-            const key = ++seq.current;
-            const msg = err instanceof Error && err.message === "origin" ? t("adminEditor.copyForeign") : t("adminEditor.copyFailed");
-            setJobs((prev) => [...prev, { key, name: url, progress: 0, error: msg }]);
+            reject(url, err instanceof Error && err.message === "origin" ? t("adminEditor.copyForeign") : t("adminEditor.copyFailed"));
         }
     }
 
@@ -149,16 +215,14 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
         const e = editing;
         setEditing(null);
         if (!e) return;
-        if (e.copyOf) return void send(blob, "edit.webp", e.copyOf);
-        setStaged((prev) => prev.map((s) => (s.id === e.staged ? { ...s, edited: blob, censored } : s)));
+        if (e.copyOf) {
+            const id = ++seq.current;
+            setItems((prev) => [...prev, { id, name: "edit.webp", file: blob, edited: blob, censored, editable: false, status: "queued", progress: 0, replace: e.copyOf }]);
+            setBatch((b) => ({ ...b, total: b.total + 1 }));
+            return;
+        }
+        patch(e.item as number, { edited: blob, censored });
     }
-
-    const pick = (files: FileList | null) => {
-        if (!files) return;
-        const room = max === undefined ? files.length : Math.max(0, max - value.length - jobs.length - staged.length);
-        [...files].slice(0, room).forEach((f) => void handle(f));
-        if (inputRef.current) inputRef.current.value = "";
-    };
 
     const move = (i: number, d: -1 | 1) => {
         const next = [...value];
@@ -174,6 +238,18 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
         setManual("");
         setManualError("");
     };
+
+    const hasFiles = (e: React.DragEvent) => [...e.dataTransfer.types].includes("Files");
+    const dropProps = full ? {} : {
+        onDragEnter: (e: React.DragEvent) => { if (hasFiles(e)) { e.preventDefault(); setOver(true); } },
+        onDragOver: (e: React.DragEvent) => { if (hasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; } },
+        onDragLeave: (e: React.DragEvent) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver(false); },
+        onDrop: (e: React.DragEvent) => { if (!hasFiles(e)) return; e.preventDefault(); setOver(false); addFiles(e.dataTransfer.files); },
+    };
+
+    const sumProgress = items.reduce((a, x) => a + (x.status === "uploading" ? x.progress : 0), 0);
+    const overall = batch.total ? Math.min(1, (batch.done + sumProgress) / batch.total) : 0;
+    const smallBtn = "btn !min-h-8 !px-2 !py-0.5 !text-xs !shadow-none";
 
     return (
         <fieldset className="space-y-3" aria-describedby={error ? `${uid}-err` : undefined}>
@@ -205,57 +281,106 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
                 </ul>
             )}
 
-            {staged.length > 0 && (
-                <div className="space-y-2">
-                    <p className="eyebrow">{t("adminEditor.staged")}</p>
-                    <ul className="space-y-2">
-                        {staged.map((s) => (
-                            <li key={s.id} className="flex flex-wrap items-center gap-3 border-2 border-ink p-2 text-sm">
-                                <span className="dither block h-14 w-24 shrink-0 overflow-hidden border-2 border-ink"><StagedThumb blob={s.edited ?? s.file} alt={s.file.name} /></span>
-                                <span className="min-w-0 flex-1">
-                                    <span className="block truncate">{s.file.name}</span>
-                                    {s.edited && <span className="tag mt-1">{s.censored ? t("adminEditor.censored") : t("adminEditor.edited")}</span>}
-                                </span>
-                                <span className="flex flex-wrap gap-2">
-                                    <button type="button" className="btn !min-h-9 !px-3 !py-1" onClick={() => setEditing({ source: s.file, staged: s.id })} aria-label={t("adminEditor.editFile", { name: s.file.name })}>
-                                        <Pencil size={14} strokeWidth={2.5} aria-hidden /> {t("adminEditor.edit")}
-                                    </button>
-                                    <button type="button" className="btn btn-primary !min-h-9 !px-3 !py-1" onClick={() => requestUpload(s)} aria-label={t("adminEditor.uploadFile", { name: s.file.name })}>
-                                        <Upload size={14} strokeWidth={2.5} aria-hidden /> {t("adminEditor.upload")}
-                                    </button>
-                                    <button type="button" className={iconBtn} onClick={() => setStaged((prev) => prev.filter((x) => x.id !== s.id))} aria-label={t("adminEditor.discard", { name: s.file.name })}><X size={14} strokeWidth={2.5} aria-hidden /></button>
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
+            {(pending.length > 0 || (active.length > 0 && batch.total > 1)) && (
+                <div className="space-y-2 border-2 border-ink p-2">
+                    {pending.length > 0 && (
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="eyebrow">{t("adminEditor.staged")}</p>
+                            <span className="flex flex-wrap gap-2">
+                                <button type="button" className="btn btn-primary !min-h-9 !px-3 !py-1" onClick={requestAll}>
+                                    <Upload size={14} strokeWidth={2.5} aria-hidden /> {t("adminUpload.uploadAll", { n: pending.length })}
+                                </button>
+                                <button type="button" className="btn !min-h-9 !px-3 !py-1" onClick={() => setItems((prev) => prev.filter((x) => x.status !== "pending"))}>{t("adminUpload.discardAll")}</button>
+                            </span>
+                        </div>
+                    )}
+                    {active.length > 0 && batch.total > 1 && (
+                        <div aria-live="polite">
+                            <div className="flex justify-between font-mono text-xs"><span>{t("adminUpload.uploadingN", { done: batch.done, total: batch.total })}</span><span>{Math.round(overall * 100)}%</span></div>
+                            <progress value={overall} max={1} aria-label={t("adminUpload.uploadingN", { done: batch.done, total: batch.total })} className="mt-1 block h-2 w-full accent-[var(--ink)]" />
+                        </div>
+                    )}
                 </div>
             )}
 
-            {jobs.length > 0 && (
+            {items.length > 0 && (
+                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {items.map((x) => {
+                        const busy = x.status === "uploading" || x.status === "done";
+                        const showUncensored = sensitive && x.editable && !x.censored;
+                        return (
+                            <li key={x.id} className="window flex flex-col !shadow-none">
+                                <div className="dither relative aspect-video overflow-hidden border-b-2 border-ink">
+                                    <Thumb blob={x.edited ?? x.file} alt={x.name} video={!isImage} />
+                                    {busy && <span className="absolute bottom-1 right-1 bg-paper px-1 font-mono text-[11px] text-ink">{Math.round(x.progress * 100)}%</span>}
+                                </div>
+                                <div className="flex flex-1 flex-col gap-1.5 p-1.5 text-xs">
+                                    <span className="block truncate font-mono" title={x.name}>{x.name}</span>
+                                    <span className="flex flex-wrap gap-1">
+                                        {x.edited && <span className="tag">{x.censored ? t("adminEditor.censored") : t("adminEditor.edited")}</span>}
+                                        {showUncensored && <span className="tag">{t("adminUpload.uncensored")}</span>}
+                                        {x.status === "queued" && <span className="tag">{t("adminUpload.queued")}</span>}
+                                    </span>
+                                    {busy && <progress value={x.progress} max={1} aria-label={t("admin.media.uploading", { name: x.name })} className="block h-2 w-full accent-[var(--ink)]" />}
+                                    {x.status === "error" && x.error && <p role="alert" className="font-extrabold">{x.error}</p>}
+                                    <span className="mt-auto flex flex-wrap gap-1">
+                                        {x.editable && !busy && (
+                                            <button type="button" className={smallBtn} onClick={() => setEditing({ source: x.file, item: x.id })} aria-label={t(sensitive ? "adminUpload.censorFile" : "adminEditor.editFile", { name: x.name })}>
+                                                <Pencil size={13} strokeWidth={2.5} aria-hidden /> {t(sensitive ? "adminUpload.censor" : "adminEditor.edit")}
+                                            </button>
+                                        )}
+                                        {x.status === "pending" && (
+                                            <button type="button" className={`${smallBtn} btn-primary`} onClick={() => requestOne(x)} aria-label={t("adminEditor.uploadFile", { name: x.name })}>
+                                                <Upload size={13} strokeWidth={2.5} aria-hidden /> {t("adminEditor.upload")}
+                                            </button>
+                                        )}
+                                        {x.status === "error" && (
+                                            <button type="button" className={`${smallBtn} btn-primary`} onClick={() => queue([x.id])} aria-label={t("adminUpload.retryFile", { name: x.name })}>
+                                                <RotateCcw size={13} strokeWidth={2.5} aria-hidden /> {t("adminUpload.retry")}
+                                            </button>
+                                        )}
+                                        {!busy && (
+                                            <button type="button" className={iconBtn} onClick={() => removeItem(x.id)} aria-label={t("adminEditor.discard", { name: x.name })}><X size={14} strokeWidth={2.5} aria-hidden /></button>
+                                        )}
+                                    </span>
+                                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+
+            {rejects.length > 0 && (
                 <ul className="space-y-2" aria-live="polite">
-                    {jobs.map((j) => (
-                        <li key={j.key} className="border-2 border-ink p-2 text-sm">
+                    {rejects.map((r) => (
+                        <li key={r.key} className="border-2 border-ink p-2 text-sm">
                             <div className="flex items-center justify-between gap-2">
-                                <span className="min-w-0 truncate">{j.name}</span>
-                                {j.error
-                                    ? <button type="button" className="eyebrow !text-ink underline" onClick={() => drop(j.key)}>{t("admin.media.discard")}</button>
-                                    : <span className="font-mono text-xs">{Math.round(j.progress * 100)}%</span>}
+                                <span className="min-w-0 truncate">{r.name}</span>
+                                <button type="button" className="eyebrow !text-ink underline" onClick={() => setRejects((prev) => prev.filter((x) => x.key !== r.key))}>{t("admin.media.discard")}</button>
                             </div>
-                            {j.error
-                                ? <p role="alert" className="mt-1 font-extrabold">{j.error}</p>
-                                : <progress value={j.progress} max={1} aria-label={t("admin.media.uploading", { name: j.name })} className="mt-1 block h-2 w-full accent-[var(--ink)]" />}
+                            <p role="alert" className="mt-1 font-extrabold">{r.msg}</p>
                         </li>
                     ))}
                 </ul>
             )}
 
-            <div className="flex flex-wrap items-center gap-3">
+            {notice && (
+                <p role="status" className="flex items-start justify-between gap-2 border-2 border-dashed border-ink p-2 text-sm">
+                    <span>{notice}</span>
+                    <button type="button" className={iconBtn} onClick={() => setNotice("")} aria-label={t("adminUpload.dismiss")}><X size={14} strokeWidth={2.5} aria-hidden /></button>
+                </p>
+            )}
+
+            <div
+                {...dropProps}
+                className={`flex flex-wrap items-center gap-3 border-2 border-dashed border-ink p-3 ${over ? "bg-ink text-paper" : ""}`}
+            >
                 <input ref={inputRef} id={`${uid}-file`} type="file" multiple accept={types.join(",")} className="sr-only" onChange={(e) => pick(e.target.files)} disabled={full} />
-                <label htmlFor={`${uid}-file`} className={`btn ${full ? "pointer-events-none opacity-40" : ""} has-[:focus-visible]:outline-2`}>
+                <label htmlFor={`${uid}-file`} className={`btn ${over ? "!bg-paper !text-ink" : ""} ${full ? "pointer-events-none opacity-40" : ""} has-[:focus-visible]:outline-2`}>
                     <ImagePlus size={16} strokeWidth={2.5} aria-hidden /> {t("admin.media.upload", { noun })}
                 </label>
-                <span className="text-xs text-muted">
-                    {t(isImage ? "admin.media.imageHint" : "admin.media.videoHint")}
+                <span className={`min-w-[12rem] flex-1 text-xs ${over ? "" : "text-muted"}`}>
+                    {over ? t("adminUpload.dropActive") : <><span className="block">{t(isImage ? "admin.media.imageHint" : "admin.media.videoHint")}</span><span className="block">{t("adminUpload.dropHint")}</span></>}
                 </span>
             </div>
 
@@ -284,18 +409,31 @@ export default function ImageManager({ label, kind, value, onChange, max, hint, 
                 />
             )}
             <ConfirmDialog
-                open={confirmId !== null}
-                title={t("adminEditor.noCensorTitle")}
-                confirmLabel={t("adminEditor.uploadAnyway")}
+                open={confirm !== null}
+                title={confirm && confirm.total > 1 ? t("adminUpload.confirmTitle", { n: confirm.uncensored, m: confirm.total }) : t("adminEditor.noCensorTitle")}
+                confirmLabel={confirm && confirm.total > 1 ? t("adminUpload.confirmAll") : t("adminEditor.uploadAnyway")}
                 destructive
-                onCancel={() => setConfirmId(null)}
+                onCancel={() => setConfirm(null)}
                 onConfirm={() => {
-                    const s = staged.find((x) => x.id === confirmId);
-                    setConfirmId(null);
-                    if (s) void uploadStaged(s);
+                    const c = confirm;
+                    setConfirm(null);
+                    if (c) queue(c.ids);
                 }}
             >
-                {t("adminEditor.noCensorBody")}
+                <p>{confirm && confirm.total > 1 ? t("adminUpload.confirmBody") : t("adminEditor.noCensorBody")}</p>
+                {confirm && confirm.uncensored < confirm.total && (
+                    <button
+                        type="button"
+                        className="btn mt-3"
+                        onClick={() => {
+                            const c = confirm;
+                            setConfirm(null);
+                            queue(pending.filter((x) => c.ids.includes(x.id) && (!x.editable || x.censored)).map((x) => x.id));
+                        }}
+                    >
+                        {t("adminUpload.onlyCensored")}
+                    </button>
+                )}
             </ConfirmDialog>
 
             {hint && <p className="text-xs text-muted">{hint}</p>}

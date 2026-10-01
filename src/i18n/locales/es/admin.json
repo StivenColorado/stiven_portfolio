@@ -86,7 +86,10 @@
     "audit": {
       "title": "Auditoría",
       "tablist": "Secciones de auditoría",
-      "tabs": { "visitors": "Visitantes", "actions": "Acciones" }
+      "tabs": {
+        "visitors": "Visitantes",
+        "actions": "Acciones"
+      }
     },
     "actions": {
       "action": "Acción",
@@ -195,10 +198,30 @@
       "paths": "Rutas top",
       "referrers": "Referrers top"
     },
-    "ranges": { "d1": "24 h", "d7": "7 d", "d30": "30 d" },
-    "os": { "windows": "Windows", "macos": "macOS", "android": "Android", "ios": "iOS", "linux": "Linux", "other": "Otro" },
-    "devices": { "mobile": "Móvil", "tablet": "Tableta", "desktop": "Escritorio", "bot": "Bot" },
-    "status": { "published": "Publicado", "hidden": "Oculto", "archived": "Archivado" },
+    "ranges": {
+      "d1": "24 h",
+      "d7": "7 d",
+      "d30": "30 d"
+    },
+    "os": {
+      "windows": "Windows",
+      "macos": "macOS (Mac)",
+      "android": "Android",
+      "ios": "iOS (iPhone / iPad)",
+      "linux": "Linux",
+      "other": "Otro"
+    },
+    "devices": {
+      "mobile": "Móvil",
+      "tablet": "Tableta",
+      "desktop": "Escritorio",
+      "bot": "Bot"
+    },
+    "status": {
+      "published": "Publicado",
+      "hidden": "Oculto",
+      "archived": "Archivado"
+    },
     "dialogDefaults": {
       "confirm": "Confirmar",
       "busy": "Procesando…",
@@ -228,7 +251,12 @@
       "deleteTitle": "Eliminar {{noun}} para siempre",
       "deleting": "Eliminando…",
       "deleteBody": "Se eliminará definitivamente \"{{title}}\". Esta acción no se puede deshacer.",
-      "filters": { "all": "Todos", "published": "Publicados", "hidden": "Ocultos", "archived": "Archivados" }
+      "filters": {
+        "all": "Todos",
+        "published": "Publicados",
+        "hidden": "Ocultos",
+        "archived": "Archivados"
+      }
     },
     "list": {
       "item": "elemento",

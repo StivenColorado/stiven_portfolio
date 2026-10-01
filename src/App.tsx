@@ -2,10 +2,13 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router';
 import Layout from './components/Layout';
 import Home from './pages/Home';
-import Projects from './pages/Projects';
-import About from './pages/About';
-import Privacy from './pages/Privacy';
 
+const Projects = lazy(() => import('./pages/Projects'));
+const About = lazy(() => import('./pages/About'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const ExperiencePage = lazy(() => import('./pages/ExperiencePage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Auditoria = lazy(() => import('./pages/admin/Auditoria'));
 const Cuenta = lazy(() => import('./pages/admin/Cuenta'));
@@ -21,6 +24,9 @@ const App: React.FC = () => (
   <Routes>
     <Route element={<Layout />}>
       <Route path="/" element={<Home />} />
+      <Route path="/services" element={<ServicesPage />} />
+      <Route path="/experience" element={<ExperiencePage />} />
+      <Route path="/contact" element={<ContactPage />} />
       <Route path="/projects" element={<Projects />} />
       <Route path="/about" element={<About />} />
       <Route path="/privacidad" element={<Privacy />} />

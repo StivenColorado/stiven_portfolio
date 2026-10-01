@@ -160,7 +160,7 @@ test('reorder cambia el orden y valida ids', async () => {
 test('/api/content solo publicado, con caché invalidada tras escribir', async () => {
   const get = async () => app.json(await fetch(`${app.base}/api/content`))
   const res = await fetch(`${app.base}/api/content`)
-  assert.equal(res.headers.get('cache-control'), 'public, max-age=30, stale-while-revalidate=300')
+  assert.equal(res.headers.get('cache-control'), 'no-cache')
   const total = (await get()).projects.length
   const { item } = await app.json(await call('POST', '/api/admin/projects', project('visible-luego')))
   assert.equal((await get()).projects.length, total)
@@ -172,4 +172,31 @@ test('/api/content solo publicado, con caché invalidada tras escribir', async (
   assert.equal((await get()).projects.at(-1).title, 'Editado')
   await call('POST', `/api/admin/projects/${item.id}/status`, { status: 'hidden' })
   assert.equal((await get()).projects.length, total)
+})
+
+test('/api/content usa ETag, responde 304 y cambia el ETag al editar o cambiar el estado', async () => {
+  const get = (inm?: string) => fetch(`${app.base}/api/content?lang=es`, { headers: inm ? { 'If-None-Match': inm } : {} })
+  const first = await get()
+  const etag = first.headers.get('etag')
+  assert.ok(etag)
+  assert.equal(first.headers.get('cache-control'), 'no-cache')
+  const again = await get(etag)
+  assert.equal(again.status, 304)
+  assert.equal(await again.text(), '')
+
+  const created = await app.json(await call('POST', '/api/admin/projects', project('etag-demo')))
+  const id = created.item.id as number
+  await call('POST', `/api/admin/projects/${id}/status`, { status: 'published' })
+  const afterCreate = (await get()).headers.get('etag')
+  assert.notEqual(afterCreate, etag)
+  assert.equal((await get(etag!)).status, 200)
+
+  await call('PUT', `/api/admin/projects/${id}`, project('etag-demo', { title: 'Otro título' }))
+  const afterEdit = (await get()).headers.get('etag')
+  assert.notEqual(afterEdit, afterCreate)
+
+  await call('POST', `/api/admin/projects/${id}/status`, { status: 'hidden' })
+  assert.notEqual((await get()).headers.get('etag'), afterEdit)
+
+  assert.equal((await call('GET', '/api/admin/projects')).headers.get('cache-control'), 'no-store')
 })

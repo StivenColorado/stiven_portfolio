@@ -8,7 +8,13 @@ import { useTrack } from "../lib/track";
 
 const SceneCanvas = lazy(() => import("../three/SceneCanvas"));
 
-const SCENE_ROUTES = new Set(["/", "/projects", "/about"]);
+const SCENE_ROUTES = new Set(["/", "/projects", "/services", "/experience", "/contact"]);
+
+const PageFallback: React.FC = () => (
+    <div className="min-h-dvh flex items-center justify-center font-mono text-sm" role="status">
+        <span className="animate-pulse">▮</span>
+    </div>
+);
 
 const Layout: React.FC = () => {
     useTrack();
@@ -26,7 +32,9 @@ const Layout: React.FC = () => {
             <ScrollToTop />
             {!isAdmin && <Navbar />}
             <main className="relative">
-                <Outlet />
+                <Suspense fallback={<PageFallback />}>
+                    <Outlet />
+                </Suspense>
             </main>
             {!isAdmin && <Footer />}
             {!isAdmin && <WhatsAppButton />}

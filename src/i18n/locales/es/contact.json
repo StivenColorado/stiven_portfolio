@@ -15,6 +15,10 @@
     "failed": "No se pudo enviar el mensaje. Intenta de nuevo.",
     "network": "Error de red. Revisa tu conexión e intenta de nuevo.",
     "whatsappAria": "Escríbeme por WhatsApp",
-    "whatsappMessage": "¡Hola Stiven! Vi tu portafolio y me gustaría hablar contigo."
+    "whatsappMessage": "¡Hola Stiven! Vi tu portafolio y me gustaría hablar contigo.",
+    "whatsappPromo": {
+      "title": "¿Prefieres WhatsApp?",
+      "text": "Escríbeme directo y te respondo por ahí."
+    }
   }
 }

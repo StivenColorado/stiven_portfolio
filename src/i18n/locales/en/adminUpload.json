@@ -1,0 +1,22 @@
+{
+  "adminUpload": {
+    "uploadAll": "Upload all ({{n}})",
+    "discardAll": "Discard all",
+    "confirmTitle": "{{n}} of {{m}} images have no censoring. Upload anyway?",
+    "confirmBody": "The project is confidential: uncensored images will be uploaded with their original content.",
+    "confirmAll": "Upload all",
+    "onlyCensored": "Only the censored ones",
+    "uncensored": "Not censored",
+    "censor": "Censor",
+    "censorFile": "Censor {{name}}",
+    "retry": "Retry",
+    "retryFile": "Retry {{name}}",
+    "queued": "Queued",
+    "uploadingN": "Uploading {{done}}/{{total}}",
+    "ignored_one": "{{count}} file was ignored: it does not fit the allowed maximum.",
+    "ignored_other": "{{count}} files were ignored: they do not fit the allowed maximum.",
+    "dismiss": "Dismiss notice",
+    "dropHint": "You can also drag and drop files here.",
+    "dropActive": "Drop to add"
+  }
+}

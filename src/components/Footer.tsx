@@ -26,14 +26,22 @@ const Footer: React.FC = () => {
             {t("footer.by")}{" "}
             <a href="https://sketchfab.com/Marius.Eder" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Marius.Eder
-            </a>{" "}
-            {t("footer.and")}{" "}
+            </a>
+            ,{" "}
             <a href="https://sketchfab.com/3d-models/macbook-laptop-7ceb46a1425b475fa7f6bf192e01ed74" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 «MacBook Laptop»
             </a>{" "}
             {t("footer.by")}{" "}
             <a href="https://sketchfab.com/sheshhh" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Issac Ghazanfar
+            </a>{" "}
+            {t("footer.and")}{" "}
+            <a href="https://sketchfab.com/3d-models/macbook-289c013e6c0541f498d4c6b40045db88" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                «MacBook»
+            </a>{" "}
+            {t("footer.by")}{" "}
+            <a href="https://sketchfab.com/imamulhasan" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                M I H
             </a>
             ,{" "}
             <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" className={linkClass}>

@@ -3,9 +3,6 @@ import { Link } from "react-router"
 import { motion, useReducedMotion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import EmblaCarousel from "../components/EmblaCarousel"
-import ExperienceTimeline from "../components/ExperienceItemTimeline"
-import ContactForm from "../components/ContactForm"
-import Services from "../components/Services"
 import NowWorking from "../components/NowWorking"
 import { useDocumentMeta } from "../lib/seo"
 
@@ -40,29 +37,26 @@ const Home: React.FC = () => {
             {t("home.hero.tagline")}
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
-            <a href="#servicios" className="btn">
+            <Link to="/services" className="btn">
               {t("home.hero.cta")}
-            </a>
+            </Link>
           </div>
         </motion.div>
 
-        <div className="mt-10 md:mt-14">
+        <div className="mt-10 hidden md:mt-14 md:block">
           <h2 className="mb-3 text-lg leading-none">{t("home.quickLinksTitle")}</h2>
           <nav aria-label={t("home.quickLinksAria")} className="quicklinks">
-            <a href="#servicios" className="quicklink">{t("home.quick.services")}</a>
-            <a href="#proyectos" className="quicklink">{t("home.quick.projects")}</a>
-            <Link to="/about" className="quicklink">{t("home.quick.about")}</Link>
-            <a href="#contacto" className="quicklink">{t("home.quick.contact")}</a>
+            <Link to="/services" className="quicklink">{t("home.quick.services")}</Link>
+            <Link to="/projects" className="quicklink">{t("home.quick.projects")}</Link>
+            <Link to="/experience" className="quicklink">{t("home.quick.experience")}</Link>
+            <Link to="/contact" className="quicklink">{t("home.quick.contact")}</Link>
           </nav>
         </div>
         <NowWorking />
       </section>
 
       <div className="divider" />
-      <Services />
-      <div className="divider" />
-
-      <section id="proyectos" data-scene="projects" className="section scroll-mt-10">
+      <section data-scene="projects" className="section">
         <motion.div {...reveal}>
           <h2 className="text-4xl md:text-5xl">{t("home.projects.title")}</h2>
           <p className="mt-3 max-w-xl text-muted">{t("home.projects.intro")}</p>
@@ -79,26 +73,14 @@ const Home: React.FC = () => {
       </section>
 
       <div className="divider" />
-      <section data-scene="experience" className="dither">
-        <div data-slot="g" className="h-40 md:hidden" aria-hidden="true" />
-        <ExperienceTimeline />
-      </section>
-      <div className="divider" />
-
-      <section id="contacto" data-scene="contact" className="section scroll-mt-10">
-        <motion.div {...reveal} className="mx-auto max-w-2xl">
-          <h2 className="text-4xl md:text-5xl">{t("home.contact.title")}</h2>
-          <p className="mt-3 text-muted">{t("home.contact.intro")}</p>
-          <div data-slot="l" className="h-36 md:hidden" aria-hidden="true" />
-          <div className="window mt-8">
-            <div className="window-bar">
-              <span className="window-dot" aria-hidden="true" />
-              <span className="window-dot" aria-hidden="true" />
-              <span className="flex-1 truncate text-center">{t("home.contact.windowTitle")}</span>
-            </div>
-            <div className="window-body">
-              <ContactForm />
-            </div>
+      <section className="section">
+        <motion.div {...reveal} className="mx-auto max-w-2xl text-center">
+          <h2 className="text-4xl md:text-5xl">{t("home.cta.title")}</h2>
+          <p className="mt-3 text-muted">{t("home.cta.text")}</p>
+          <div className="mt-6">
+            <Link to="/contact" className="btn btn-primary">
+              {t("home.cta.button")} <span className="font-mono">→</span>
+            </Link>
           </div>
         </motion.div>
       </section>

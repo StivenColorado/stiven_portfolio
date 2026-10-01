@@ -200,7 +200,7 @@ export default function ServiceEditor() {
                     </section>
                 </div>
 
-                <aside aria-label={t("adminContent.services.preview")} className="space-y-2 lg:sticky lg:top-4 lg:self-start">
+                <aside aria-label={t("adminContent.services.preview")} className="space-y-2 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain [&_.window-bar]:sticky [&_.window-bar]:top-0 [&_.window-bar]:z-10">
                     <p className="eyebrow">{t("adminContent.services.preview")}</p>
                     <div className="window">
                         <div className="window-bar">

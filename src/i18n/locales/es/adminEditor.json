@@ -35,7 +35,7 @@
     "applying": "Procesando…",
     "result": "Resultado: {{w}} × {{h}} px · {{size}} · WebP",
     "metaNote": "Se eliminan los metadatos (EXIF/GPS). Solo se sube la imagen final.",
-    "keys": "Flechas mueven la zona (Mayús: 10 px). Supr la borra. Ctrl+Z deshace, Ctrl+Mayús+Z rehace.",
+    "keys": "Arrastra sobre la imagen para dibujar una zona. Mayús/Ctrl+clic selecciona varias; Ctrl+A todas. Ctrl+D duplica, Ctrl+C copia, Ctrl+V pega (también en otra imagen). Flechas mueven (Mayús: 10 px). Supr borra. Ctrl+Z deshace, Ctrl+Mayús+Z rehace.",
     "edit": "Editar / censurar",
     "editCopy": "Editar copia",
     "editCopyN": "Editar copia de {{label}} {{n}}",
@@ -50,6 +50,11 @@
     "copyFailed": "No se pudo descargar la imagen para editarla.",
     "copyForeign": "Solo se pueden editar copias de imágenes alojadas en este mismo sitio.",
     "staged": "Pendientes de subir",
-    "discard": "Descartar {{name}}"
+    "discard": "Descartar {{name}}",
+    "duplicate": "Duplicar",
+    "copyZones": "Copiar zonas",
+    "pasteZones": "Pegar zonas ({{n}})",
+    "selectedN": "{{n}} zonas seleccionadas: los cambios aplican a todas.",
+    "applyAll": "Aplicar a todas"
   }
 }

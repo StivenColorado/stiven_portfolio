@@ -245,7 +245,7 @@ export default function ProjectEditor() {
                                 />
                                 {err("kind") && <p role="alert" className="text-sm font-extrabold text-ink">{err("kind")}</p>}
                             </div>
-                            <Field label={t("adminProjects.basic.year")} type="number" value={form.year} onChange={(v) => set("year", v)} error={err("year")} />
+                            <Field label={t("adminProjects.basic.year")} type="number" min={1990} max={2100} value={form.year} onChange={(v) => set("year", v.replace(/\D/g, "").slice(0, 4))} error={err("year")} />
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="flex items-start gap-3">
@@ -377,7 +377,7 @@ export default function ProjectEditor() {
                     </Section>
                 </div>
 
-                <aside className="space-y-3 lg:sticky lg:top-4">
+                <aside className="space-y-3 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain [&_.window-bar]:sticky [&_.window-bar]:top-0 [&_.window-bar]:z-10">
                     <Section id="sec-preview" title={t("adminProjects.sections.preview")}>
                         <p className="text-xs text-muted">{t("adminProjects.preview.hint")}</p>
                         <ProjectPreview form={form} lang={lang} />

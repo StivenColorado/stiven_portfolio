@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://negocioempresarial.online/</loc></url>
+  <url><loc>https://negocioempresarial.online/services</loc></url>
   <url><loc>https://negocioempresarial.online/projects</loc></url>
+  <url><loc>https://negocioempresarial.online/experience</loc></url>
   <url><loc>https://negocioempresarial.online/about</loc></url>
+  <url><loc>https://negocioempresarial.online/contact</loc></url>
   <url><loc>https://negocioempresarial.online/privacidad</loc></url>
 </urlset>

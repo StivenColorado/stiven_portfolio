@@ -32,9 +32,9 @@ const ExperienceTimeline: React.FC = () => {
         transition={{ duration: 0.8 }}
         className="mb-10"
       >
-        <h2 className="mb-3 text-4xl text-ink md:text-5xl">
+        <h1 className="mb-3 text-5xl text-ink md:text-7xl">
           {t('experience.title')}
-        </h2>
+        </h1>
         <p className="text-base text-ink">
           {t('experience.intro')}
         </p>
@@ -54,6 +54,7 @@ const ExperienceTimeline: React.FC = () => {
         />
 
         <motion.ol
+          key={loading ? "loading" : "ready"}
           variants={container}
           initial="hidden"
           whileInView="show"

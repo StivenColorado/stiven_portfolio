@@ -16,13 +16,15 @@ interface Props {
     disabled?: boolean;
     id?: string;
     autoComplete?: string;
+    min?: number;
+    max?: number;
 }
 
 const CONTROL = "field";
 
 export default function Field({
     label, value, onChange, as = "input", type = "text", hint, error, maxLength, required,
-    rows = 4, placeholder, disabled, id, autoComplete,
+    rows = 4, placeholder, disabled, id, autoComplete, min, max,
 }: Props) {
     const uid = useId();
     const fieldId = id ?? uid;
@@ -52,7 +54,7 @@ export default function Field({
             {as === "textarea" ? (
                 <textarea {...common} rows={rows} maxLength={maxLength} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
             ) : (
-                <input {...common} type={type} maxLength={maxLength} placeholder={placeholder} autoComplete={autoComplete} onChange={(e) => onChange(e.target.value)} />
+                <input {...common} className={`${common.className} h-11 py-0`} type={type} maxLength={maxLength} placeholder={placeholder} autoComplete={autoComplete} min={min} max={max} inputMode={type === "number" ? "numeric" : undefined} onChange={(e) => onChange(e.target.value)} />
             )}
             {hint && <p id={hintId} className="text-xs text-muted">{hint}</p>}
             {error && <p id={errId} role="alert" className="text-sm font-extrabold text-ink">{error}</p>}

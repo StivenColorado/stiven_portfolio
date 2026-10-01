@@ -86,7 +86,10 @@
     "audit": {
       "title": "Audit",
       "tablist": "Audit sections",
-      "tabs": { "visitors": "Visitors", "actions": "Actions" }
+      "tabs": {
+        "visitors": "Visitors",
+        "actions": "Actions"
+      }
     },
     "actions": {
       "action": "Action",
@@ -195,10 +198,30 @@
       "paths": "Top paths",
       "referrers": "Top referrers"
     },
-    "ranges": { "d1": "24 h", "d7": "7 d", "d30": "30 d" },
-    "os": { "windows": "Windows", "macos": "macOS", "android": "Android", "ios": "iOS", "linux": "Linux", "other": "Other" },
-    "devices": { "mobile": "Mobile", "tablet": "Tablet", "desktop": "Desktop", "bot": "Bot" },
-    "status": { "published": "Published", "hidden": "Hidden", "archived": "Archived" },
+    "ranges": {
+      "d1": "24 h",
+      "d7": "7 d",
+      "d30": "30 d"
+    },
+    "os": {
+      "windows": "Windows",
+      "macos": "macOS (Mac)",
+      "android": "Android",
+      "ios": "iOS (iPhone / iPad)",
+      "linux": "Linux",
+      "other": "Other"
+    },
+    "devices": {
+      "mobile": "Mobile",
+      "tablet": "Tablet",
+      "desktop": "Desktop",
+      "bot": "Bot"
+    },
+    "status": {
+      "published": "Published",
+      "hidden": "Hidden",
+      "archived": "Archived"
+    },
     "dialogDefaults": {
       "confirm": "Confirm",
       "busy": "Working…",
@@ -228,7 +251,12 @@
       "deleteTitle": "Permanently delete {{noun}}",
       "deleting": "Deleting…",
       "deleteBody": "\"{{title}}\" will be permanently deleted. This action cannot be undone.",
-      "filters": { "all": "All", "published": "Published", "hidden": "Hidden", "archived": "Archived" }
+      "filters": {
+        "all": "All",
+        "published": "Published",
+        "hidden": "Hidden",
+        "archived": "Archived"
+      }
     },
     "list": {
       "item": "item",

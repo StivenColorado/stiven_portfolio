@@ -15,6 +15,10 @@
     "failed": "The message could not be sent. Please try again.",
     "network": "Network error. Check your connection and try again.",
     "whatsappAria": "Message me on WhatsApp",
-    "whatsappMessage": "Hi Stiven! I saw your portfolio and I'd like to talk with you."
+    "whatsappMessage": "Hi Stiven! I saw your portfolio and I'd like to talk with you.",
+    "whatsappPromo": {
+      "title": "Prefer WhatsApp?",
+      "text": "Message me directly and I will reply there."
+    }
   }
 }

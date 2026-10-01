@@ -12,7 +12,8 @@
       "services": "Servicios",
       "projects": "Proyectos",
       "about": "Acerca",
-      "contact": "Contacto"
+      "contact": "Contacto",
+      "experience": "Experiencia"
     },
     "projects": {
       "title": "Projects",
@@ -23,6 +24,11 @@
       "title": "Hablemos",
       "intro": "¿Tienes un proyecto en mente? Escríbeme y te respondo a tu correo.",
       "windowTitle": "contacto.form"
+    },
+    "cta": {
+      "title": "¿Trabajamos juntos?",
+      "text": "Cuéntame tu idea y vemos cómo llevarla a producción.",
+      "button": "Ir a contacto"
     }
   }
 }

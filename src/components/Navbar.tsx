@@ -8,9 +8,11 @@ import LanguageSwitcher from "./LanguageSwitcher";
 
 const NAV = [
     { to: "/", key: "home" },
+    { to: "/services", key: "services" },
     { to: "/projects", key: "projects" },
+    { to: "/experience", key: "experience" },
     { to: "/about", key: "about" },
-    { to: "/#contacto", key: "contact" },
+    { to: "/contact", key: "contact" },
 ];
 
 const squareBtn =
@@ -129,17 +131,11 @@ const Navbar: React.FC = () => {
                     </button>
                 </div>
                 <div className="flex flex-col">
-                    {NAV.map(({ to, key }) =>
-                        to.includes("#") ? (
-                            <Link key={to} to={to} onClick={() => setIsOpen(false)} className={drawerLink({ isActive: false })}>
-                                {t(`nav.${key}`)}
-                            </Link>
-                        ) : (
-                            <NavLink key={to} to={to} end={to === "/"} onClick={() => setIsOpen(false)} className={drawerLink}>
-                                {t(`nav.${key}`)}
-                            </NavLink>
-                        ),
-                    )}
+                    {NAV.map(({ to, key }) => (
+                        <NavLink key={to} to={to} end={to === "/"} onClick={() => setIsOpen(false)} className={drawerLink}>
+                            {t(`nav.${key}`)}
+                        </NavLink>
+                    ))}
                 </div>
             </nav>
         </header>

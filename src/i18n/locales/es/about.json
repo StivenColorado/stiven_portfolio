@@ -129,6 +129,119 @@
           "Aprendizaje Continuo"
         ]
       }
-    ]
+    ],
+    "navAria": "Capítulos de la página",
+    "nav": [
+      "Intro",
+      "Bio",
+      "Método",
+      "Stack",
+      "Contacto"
+    ],
+    "navGo": "Ir al capítulo",
+    "scroll": "Desliza",
+    "howEyebrow": "Cómo trabajo",
+    "howTitle": "Arquitectura limpia, APIs claras",
+    "archWindow": "arquitectura.md",
+    "archTitle": "Arquitectura y patrones",
+    "softWindow": "equipo.txt",
+    "softTitle": "Habilidades blandas",
+    "stackEyebrow": "Stack tecnológico",
+    "stackTitle": "Mi caja de herramientas",
+    "stackLead": "Lo que uso a diario, agrupado por capa.",
+    "stackWindow": "stack.sh",
+    "stackNext": "Sigue deslizando",
+    "stackTabs": "Grupos del stack",
+    "stackPrompt": "Stack por capas",
+    "stack": [
+      {
+        "id": "frontend",
+        "short": "UI",
+        "cmd": "stack --frontend",
+        "title": "Frontend",
+        "desc": "Interfaces rápidas, accesibles y cuidadas.",
+        "items": [
+          "JavaScript",
+          "TypeScript",
+          "React",
+          "React Native",
+          "TailwindCSS",
+          "Redux",
+          "MobX",
+          "HTML5",
+          "CSS3"
+        ]
+      },
+      {
+        "id": "backend",
+        "short": "API",
+        "cmd": "stack --backend",
+        "title": "Backend",
+        "desc": "APIs mantenibles, seguras y bien documentadas.",
+        "items": [
+          "Python",
+          "Django",
+          "PHP",
+          "Laravel",
+          "Node.js",
+          "NestJS",
+          "REST APIs",
+          "JWT",
+          "OAuth"
+        ]
+      },
+      {
+        "id": "data",
+        "short": "DB",
+        "cmd": "stack --data",
+        "title": "Bases de datos",
+        "desc": "Modelado, índices y consultas eficientes.",
+        "items": [
+          "MySQL",
+          "MongoDB",
+          "Redis",
+          "DynamoDB",
+          "SQLite",
+          "Supabase",
+          "Prisma"
+        ]
+      },
+      {
+        "id": "devops",
+        "short": "OPS",
+        "cmd": "stack --infra",
+        "title": "DevOps e infraestructura",
+        "desc": "Despliegues repetibles y entornos controlados.",
+        "items": [
+          "AWS",
+          "EC2",
+          "S3",
+          "API Gateway",
+          "Docker",
+          "Git",
+          "Nginx",
+          "CI/CD",
+          "IaC"
+        ]
+      },
+      {
+        "id": "ai",
+        "short": "IA",
+        "cmd": "stack --ai",
+        "title": "IA y automatización",
+        "desc": "Flujos que ahorran horas de trabajo manual.",
+        "items": [
+          "n8n",
+          "IA generativa",
+          "Agentes de IA",
+          "Automatización",
+          "Webhooks",
+          "Integración de APIs"
+        ]
+      }
+    ],
+    "closeEyebrow": "Contacto",
+    "closeTitle": "¿Construimos algo juntos?",
+    "closeLead": "Cuéntame tu idea o revisa mi código: respondo rápido."
   }
 }

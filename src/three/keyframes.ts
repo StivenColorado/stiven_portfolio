@@ -28,7 +28,7 @@ export const POSES = {
         t: OFF,
         l: OFF,
     },
-    services: {
+    "route:services": {
         g: { p: [1.75, 1.98, 0], r: FLAT_GLASSES, s: 0.7 },
         k: OFF,
         m: OFF,
@@ -42,14 +42,14 @@ export const POSES = {
         t: OFF,
         l: OFF,
     },
-    experience: {
+    "route:experience": {
         g: { p: [3.95, 0.2, -0.5], r: FLAT_GLASSES, s: 0.8 },
         k: { p: [-3.95, -1.9, 0], r: DESK, s: 0.26 },
         m: OFF,
         t: { p: [-3.5, 1.2, 0], s: 0.6 },
         l: OFF,
     },
-    contact: {
+    "route:contact": {
         g: { p: [-3.55, 0.35, 0], r: FLAT_GLASSES, s: 0.8 },
         k: { p: [3.5, -1.7, 0], r: DESK, s: 0.4 },
         m: OFF,
@@ -63,13 +63,6 @@ export const POSES = {
         t: OFF,
         l: OFF,
     },
-    "route:about": {
-        g: OFF,
-        k: OFF,
-        m: OFF,
-        t: OFF,
-        l: OFF,
-    },
 } satisfies Record<string, ScenePose>;
 
 const TABLET_POSES: Partial<Record<SceneName, ScenePose>> = {
@@ -80,10 +73,10 @@ const TABLET_POSES: Partial<Record<SceneName, ScenePose>> = {
         t: OFF,
         l: OFF,
     },
-    services: { g: OFF, k: OFF, m: OFF, t: OFF, l: { p: [1.85, 2.0, 0.3], r: [0.55, -0.5, 0], s: 0.22 } },
+    "route:services": { g: OFF, k: OFF, m: OFF, t: OFF, l: { p: [1.55, 2.0, 0.3], r: [0.55, -0.5, 0], s: 0.22 } },
     projects: { g: OFF, k: { p: [1.5, 2.25, 0], r: DESK, s: 0.3 }, m: OFF, t: OFF, l: OFF },
-    experience: { g: OFF, k: OFF, m: OFF, t: { p: [1.55, 2.15, 0], s: 0.4 }, l: OFF },
-    contact: { g: OFF, k: OFF, m: OFF, t: OFF, l: OFF },
+    "route:experience": { g: OFF, k: OFF, m: OFF, t: { p: [1.55, 2.15, 0], s: 0.4 }, l: OFF },
+    "route:contact": { g: OFF, k: OFF, m: OFF, t: OFF, l: OFF },
 };
 
 export const OBJECT_KEYS: ObjectKey[] = ["g", "k", "m", "t", "l"];
@@ -137,7 +130,9 @@ export function readAnchors(): Anchor[] {
 
 export function sceneForPath(pathname: string): SceneName | null {
     if (pathname.startsWith("/projects")) return "route:projects";
-    if (pathname.startsWith("/about")) return "route:about";
+    if (pathname.startsWith("/services")) return "route:services";
+    if (pathname.startsWith("/experience")) return "route:experience";
+    if (pathname.startsWith("/contact")) return "route:contact";
     return pathname === "/" ? null : "hero";
 }
 

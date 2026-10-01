@@ -129,6 +129,119 @@
           "Continuous Learning"
         ]
       }
-    ]
+    ],
+    "navAria": "Page chapters",
+    "nav": [
+      "Intro",
+      "Bio",
+      "Method",
+      "Stack",
+      "Contact"
+    ],
+    "navGo": "Go to chapter",
+    "scroll": "Scroll",
+    "howEyebrow": "How I work",
+    "howTitle": "Clean architecture, clear APIs",
+    "archWindow": "architecture.md",
+    "archTitle": "Architecture and patterns",
+    "softWindow": "team.txt",
+    "softTitle": "Soft skills",
+    "stackEyebrow": "Tech stack",
+    "stackTitle": "My toolbox",
+    "stackLead": "What I use every day, grouped by layer.",
+    "stackWindow": "stack.sh",
+    "stackNext": "Keep scrolling",
+    "stackTabs": "Stack groups",
+    "stackPrompt": "Stack by layer",
+    "stack": [
+      {
+        "id": "frontend",
+        "short": "UI",
+        "cmd": "stack --frontend",
+        "title": "Frontend",
+        "desc": "Fast, accessible, polished interfaces.",
+        "items": [
+          "JavaScript",
+          "TypeScript",
+          "React",
+          "React Native",
+          "TailwindCSS",
+          "Redux",
+          "MobX",
+          "HTML5",
+          "CSS3"
+        ]
+      },
+      {
+        "id": "backend",
+        "short": "API",
+        "cmd": "stack --backend",
+        "title": "Backend",
+        "desc": "Maintainable, secure, well-documented APIs.",
+        "items": [
+          "Python",
+          "Django",
+          "PHP",
+          "Laravel",
+          "Node.js",
+          "NestJS",
+          "REST APIs",
+          "JWT",
+          "OAuth"
+        ]
+      },
+      {
+        "id": "data",
+        "short": "DB",
+        "cmd": "stack --data",
+        "title": "Databases",
+        "desc": "Modeling, indexes and efficient queries.",
+        "items": [
+          "MySQL",
+          "MongoDB",
+          "Redis",
+          "DynamoDB",
+          "SQLite",
+          "Supabase",
+          "Prisma"
+        ]
+      },
+      {
+        "id": "devops",
+        "short": "OPS",
+        "cmd": "stack --infra",
+        "title": "DevOps and infrastructure",
+        "desc": "Repeatable deployments and controlled environments.",
+        "items": [
+          "AWS",
+          "EC2",
+          "S3",
+          "API Gateway",
+          "Docker",
+          "Git",
+          "Nginx",
+          "CI/CD",
+          "IaC"
+        ]
+      },
+      {
+        "id": "ai",
+        "short": "AI",
+        "cmd": "stack --ai",
+        "title": "AI and automation",
+        "desc": "Workflows that save hours of manual work.",
+        "items": [
+          "n8n",
+          "Generative AI",
+          "AI agents",
+          "Automation",
+          "Webhooks",
+          "API integration"
+        ]
+      }
+    ],
+    "closeEyebrow": "Contact",
+    "closeTitle": "Shall we build something together?",
+    "closeLead": "Tell me your idea or browse my code: I reply fast."
   }
 }

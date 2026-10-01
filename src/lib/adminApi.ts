@@ -1,4 +1,5 @@
 import { ApiError } from "./api";
+import { invalidateContent } from "./content";
 import type {
     AdminExperience, AdminProject, AdminService, AuditEntry, ExperienceInput, MediaUpload, ProjectInput,
     ServiceInput, Status, StatusFilter,
@@ -23,6 +24,14 @@ function toError(status: number, retryHeader: string | null, body: ErrorBody | n
 }
 
 async function request<T>(path: string, method = "GET", body?: unknown): Promise<T> {
+    const result = await send<T>(path, method, body);
+    if (method !== "GET" && CONTENT_PATH.test(path)) invalidateContent();
+    return result;
+}
+
+const CONTENT_PATH = /^(projects|services|experience)(\/|$)/;
+
+async function send<T>(path: string, method: string, body?: unknown): Promise<T> {
     const res = await fetch(`/api/admin/${path}`, {
         method,
         credentials: "same-origin",
