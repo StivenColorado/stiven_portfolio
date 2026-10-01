@@ -1,0 +1,27 @@
+{
+  "privacy": {
+    "eyebrow": "Legal",
+    "title": "Aviso de privacidad",
+    "intro": "Este aviso se emite en cumplimiento de la Ley 1581 de 2012 de Colombia sobre protección de datos personales. No usamos cookies de seguimiento ni mostramos banner de cookies.",
+    "dataTitle": "Qué datos se recogen",
+    "data": [
+      "Dirección IP.",
+      "País y ciudad aproximados, deducidos de la IP.",
+      "Sistema operativo y tipo de dispositivo.",
+      "Navegador (user agent).",
+      "Ruta visitada y referrer.",
+      "Fecha y hora de la visita."
+    ],
+    "purposeTitle": "Finalidad",
+    "purpose": "Estos datos se usan únicamente para estadísticas de tráfico del sitio.",
+    "retentionTitle": "Retención y terceros",
+    "retention": "Los registros se conservan 30 días y luego se eliminan. No se comparten ni se venden a terceros. Respetamos la señal Global Privacy Control: si tu navegador la envía, no se registra tu visita.",
+    "geoTitle": "Geolocalización",
+    "geoLink": "IP Geolocation by DB-IP",
+    "geoAfter": ". La consulta se hace localmente sobre una base de datos descargada; tu IP no se envía a ningún servicio externo.",
+    "rightsTitle": "Tus derechos",
+    "rightsBefore": "Como titular puedes conocer, actualizar, rectificar y solicitar la supresión de tus datos, o revocar la autorización. Para ejercer estos derechos escríbeme desde el ",
+    "rightsLink": "formulario de contacto",
+    "rightsAfter": "."
+  }
+}

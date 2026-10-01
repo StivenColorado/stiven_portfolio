@@ -1,17 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 import { Github } from 'lucide-react';
-import type { ProjectType } from '../types/types'
+import { useTranslation } from 'react-i18next';
+import type { PublicProject } from '../types/content'
 
 interface GistModalProps {
     gistUrl: string;
     onClose: () => void;
-    project?: ProjectType;
+    project?: PublicProject;
 }
 
 const GIST_OWNER = 'StivenColorado';
 
 /** Panel lateral con <dialog> nativo: el foco vuelve al disparador al desmontarse. */
 const GistModal: React.FC<GistModalProps> = ({ gistUrl, onClose, project }) => {
+    const { t } = useTranslation();
     const dialogRef = useRef<HTMLDialogElement>(null);
     const match = gistUrl.match(/gist\.github\.com\/([^/]+\/)?([a-f0-9]+)/i);
     const gistId = match?.[2] ?? gistUrl;
@@ -32,7 +34,7 @@ const GistModal: React.FC<GistModalProps> = ({ gistUrl, onClose, project }) => {
             ref={dialogRef}
             onClose={onClose}
             onClick={(e) => e.target === dialogRef.current && dialogRef.current?.close()}
-            aria-label={project?.title ?? 'Código en GitHub Gist'}
+            aria-label={project?.title ?? t('projects.gist.title')}
             className="window m-0 ml-auto h-dvh max-h-none w-full max-w-2xl p-0 backdrop:bg-paper/60 backdrop:dither-dense [&:not([open])]:hidden"
         >
             <div className="flex h-full flex-col">
@@ -44,7 +46,7 @@ const GistModal: React.FC<GistModalProps> = ({ gistUrl, onClose, project }) => {
                     type="button"
                     onClick={() => dialogRef.current?.close()}
                     className="flex h-5 w-5 shrink-0 items-center justify-center border-2 border-ink bg-paper text-sm leading-none hover:bg-ink hover:text-paper"
-                    aria-label="Cerrar modal"
+                    aria-label={t('projects.modal.close')}
                 >
                     <span aria-hidden="true">×</span>
                 </button>
@@ -53,7 +55,7 @@ const GistModal: React.FC<GistModalProps> = ({ gistUrl, onClose, project }) => {
                     <iframe
                         src={`https://gist.github.com/${GIST_OWNER}/${gistId}.pibb`}
                         className="h-full w-full border-0"
-                        title="Github Gist"
+                        title={t('projects.gist.frame')}
                         sandbox="allow-scripts allow-same-origin"
                         loading="lazy"
                     />
@@ -66,7 +68,7 @@ const GistModal: React.FC<GistModalProps> = ({ gistUrl, onClose, project }) => {
                         className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:bg-ink hover:text-paper"
                     >
                         <Github className="h-4 w-4" aria-hidden="true" />
-                        Ver en GitHub Gist
+                        {t('projects.gist.open')}
                     </a>
                 </div>
             </div>

@@ -1,0 +1,134 @@
+{
+  "about": {
+    "eyebrow": "Acerca de mí",
+    "title": "Hola, soy Stiven Colorado",
+    "paragraphs": [
+      "Soy analista y desarrollador de software con sólida experiencia en desarrollo Full Stack, utilizando tecnologías como Python, PHP, JavaScript, TailwindCSS y Node.js.",
+      "He trabajado implementando arquitecturas limpias como Domain-Driven Design (DDD) y Hexagonal, organizando proyectos por dominios, controladores, repositorios, servicios y adaptadores, lo que garantiza mantenibilidad y escalabilidad.",
+      "Tengo experiencia desarrollando APIs RESTful, integración con JWT, CORS, y configuraciones avanzadas en Django con bases de datos MySQL y almacenamiento de archivos en local y en la nube (S3).",
+      "En frontend, manejo ReactJS - React Native, integrando Redux/mobX para la gestión de estados, creando hooks personalizados para centralizar peticiones HTTP y optimizando la experiencia del usuario."
+    ],
+    "talk": "Hablemos",
+    "photoAlt": "Stiven Colorado",
+    "backendTitle": "Stack backend",
+    "backendWindow": "stack.backend",
+    "backend": [
+      {
+        "name": "Python",
+        "note": "FastAPI, Django, asincronía, typing, testing (pytest)."
+      },
+      {
+        "name": "PHP",
+        "note": "Laravel (Eloquent, Queues, Events), Composer, PSR-12."
+      },
+      {
+        "name": "Node.js",
+        "note": "Express/NestJS, middlewares, streams, PM2."
+      },
+      {
+        "name": "Django",
+        "note": "DRF, ORM avanzado, signals, admin, config por entornos."
+      },
+      {
+        "name": "MySQL",
+        "note": "Índices, EXPLAIN, migraciones, transacciones y locks."
+      },
+      {
+        "name": "MongoDB",
+        "note": "Agregaciones, índices compuestos, TTL, diseño de esquemas."
+      },
+      {
+        "name": "RESTful APIs",
+        "note": "Versionado, paginación, validación, OpenAPI/Swagger."
+      },
+      {
+        "name": "JWT",
+        "note": "Auth stateless, refresh, rotación segura, expiración."
+      },
+      {
+        "name": "OAuth",
+        "note": "Authorization Code/PKCE, scopes, permisos granulares."
+      },
+      {
+        "name": "AWS",
+        "note": "IAM, CloudWatch, costos, mejores prácticas de seguridad."
+      },
+      {
+        "name": "S3",
+        "note": "Multipart upload, políticas de acceso, pre-signed URLs, lifecycle, Conciliate S3."
+      },
+      {
+        "name": "API Gateway",
+        "note": "Diseño de APIs con etapas y despliegues, rate limiting, API keys, autorizadores (JWT/Lambda), integración con Lambda/ALB."
+      },
+      {
+        "name": "DynamoDB",
+        "note": "Modelado single-table, particiones/throughput, GSIs/LSIs, streams, patrones de acceso y consultas eficientes."
+      },
+      {
+        "name": "EC2 - EBS",
+        "note": "Provisionamiento, SG, volúmenes, backups, escalabilidad."
+      },
+      {
+        "name": "Redis",
+        "note": "Caches, locks distribuidos, pub/sub, expiración y eviction."
+      },
+      {
+        "name": "Docker",
+        "note": "Dockerfiles multi-stage, compose, optimización de layers."
+      },
+      {
+        "name": "Git",
+        "note": "Git flow, Branching, PRs, code review, tagging y releases."
+      },
+      {
+        "name": "Vps",
+        "note": "Nginx/Apache, SSL Let’s Encrypt, deploys y CI/CD básico."
+      }
+    ],
+    "groups": [
+      {
+        "title": "Stack frontend",
+        "items": [
+          "JavaScript",
+          "TypeScript",
+          "React",
+          "React Native",
+          "TailwindCSS",
+          "MobX",
+          "Redux",
+          "HTML5",
+          "CSS3"
+        ]
+      },
+      {
+        "title": "Arquitectura y patrones",
+        "items": [
+          "Patrones de Diseño",
+          "Principios SOLID",
+          "Domain-Driven Design (DDD)",
+          "Arquitectura Hexagonal",
+          "Arquitectura de Software",
+          "Levantamiento de Información",
+          "Análisis de Requerimientos",
+          "Patrón Backend for Frontend",
+          "IaC"
+        ]
+      },
+      {
+        "title": "Habilidades blandas",
+        "items": [
+          "Trabajo en Equipo",
+          "Comunicación Efectiva",
+          "Resolución de Problemas",
+          "Pensamiento Analítico",
+          "Adaptabilidad",
+          "Liderazgo",
+          "Gestión del Tiempo",
+          "Atención al Detalle",
+          "Aprendizaje Continuo"
+        ]
+      }
+    ]
+  }
+}

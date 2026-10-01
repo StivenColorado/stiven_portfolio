@@ -1,0 +1,160 @@
+{
+  "adminProjects": {
+    "meta": { "list": "Proyectos · Admin", "editor": "Editor de proyecto · Admin" },
+    "list": {
+      "eyebrow": "Contenido",
+      "title": "Proyectos",
+      "noun": "proyecto",
+      "nounPlural": "proyectos",
+      "featured": "Destacado",
+      "workingOn": "Trabajando ahora",
+      "feature": "Destacar",
+      "unfeature": "Quitar destacado",
+      "featureAria": "Destacar {{title}}",
+      "unfeatureAria": "Quitar destacado de {{title}}",
+      "tagsCount_one": "{{count}} tecnología",
+      "tagsCount_other": "{{count}} tecnologías",
+      "loadError": "No se pudieron cargar los proyectos.",
+      "actionError": "No se pudo completar la acción.",
+      "deleteError": "No se pudo eliminar. Solo se pueden eliminar proyectos archivados.",
+      "deleted": "Proyecto eliminado.",
+      "reordered": "Orden actualizado.",
+      "statusDone": {
+        "published": "Proyecto publicado.",
+        "hidden": "Proyecto oculto.",
+        "archived": "Proyecto archivado."
+      },
+      "featuredOn": "Proyecto destacado.",
+      "featuredOff": "Proyecto sin destacar."
+    },
+    "kinds": { "demo": "Demo", "oss": "Código abierto", "case-study": "Caso de estudio" },
+    "editor": {
+      "eyebrow": "Proyectos",
+      "newTitle": "Nuevo proyecto",
+      "editTitle": "Editar proyecto",
+      "loading": "Cargando…",
+      "notFound": "Proyecto no encontrado",
+      "notFoundBody": "No existe o ya fue eliminado.",
+      "loadError": "No se pudo cargar el proyecto.",
+      "backToList": "Volver a proyectos",
+      "retry": "Reintentar",
+      "unsaved": "Cambios sin guardar",
+      "requiredHint": "Los campos con * son obligatorios.",
+      "genericErrors": "Revisa estos campos: {{fields}}"
+    },
+    "sections": {
+      "basic": "Básico",
+      "content": "Contenido",
+      "links": "Enlaces",
+      "tech": "Tecnologías",
+      "media": "Media",
+      "github": "GitHub",
+      "preview": "Vista previa"
+    },
+    "basic": {
+      "slug": "Slug",
+      "slugHint": "Se usa en la URL. Solo minúsculas, números y guiones.",
+      "slugAuto": "Se genera desde el título hasta que lo edites.",
+      "kind": "Tipo",
+      "year": "Año",
+      "private": "Código privado",
+      "privateHint": "Oculta el repositorio y marca el proyecto como privado.",
+      "nda": "Bajo NDA",
+      "ndaHint": "Muestra el proyecto como confidencial del cliente."
+    },
+    "content": {
+      "tabsLabel": "Idioma del contenido",
+      "es": "Español",
+      "en": "English",
+      "optional": "opcional",
+      "enHint": "Opcional. Si lo dejas vacío, el sitio en inglés muestra el texto en español.",
+      "title": "Título",
+      "summary": "Resumen",
+      "description": "Descripción",
+      "client": "Cliente",
+      "highlights": "Destacados",
+      "highlightsItem": "destacado",
+      "highlightsPlaceholder": "Un logro o característica…",
+      "highlightsHint": "Hasta 8 puntos cortos."
+    },
+    "links": {
+      "demo": "Demo",
+      "repo": "Repositorio",
+      "gist": "Gist",
+      "hint": "URL que empiece con https:// o una ruta que empiece con /."
+    },
+    "tech": {
+      "label": "Tecnologías",
+      "placeholder": "Elige tecnologías",
+      "search": "Buscar tecnología…",
+      "hint": "Hasta 20. Las del catálogo llevan ícono.",
+      "selected": "Seleccionadas",
+      "none": "Ninguna seleccionada.",
+      "remove": "Quitar {{name}}"
+    },
+    "media": {
+      "images": "Imágenes",
+      "videos": "Videos",
+      "imagesHint": "La primera es la portada. Hasta 12.",
+      "videosHint": "Hasta 3."
+    },
+    "github": {
+      "repo": "Repositorio",
+      "placeholder": "Sin repositorio",
+      "search": "Buscar repositorio…",
+      "private": "privado",
+      "public": "público",
+      "lastPush": "último push {{date}}",
+      "noPush": "sin pushes",
+      "notConfigured": "Conecta GitHub: añade GITHUB_TOKEN al servidor.",
+      "loadError": "No se pudo cargar la lista de repositorios.",
+      "manual": "Repositorio (owner/repo)",
+      "manualHint": "Escríbelo a mano, por ejemplo stivenColorado/portfolio.",
+      "manualInvalid": "Usa el formato owner/repo.",
+      "workingOn": "Trabajando en esto ahora",
+      "workingOnHint": "Muestra el badge de desarrollo activo y la actividad reciente en el sitio.",
+      "needsRepo": "Elige un repositorio para mostrar actividad.",
+      "privacy": "En repos privados nunca se muestran el nombre del repositorio ni los mensajes de commit."
+    },
+    "preview": {
+      "hint": "Así se verá la tarjeta en el sitio.",
+      "untitled": "Sin título",
+      "noSummary": "Sin resumen todavía.",
+      "view": "Ver proyecto",
+      "private": "Código privado",
+      "nda": "Cliente · confidencial (NDA)",
+      "workingOn": "En desarrollo activo",
+      "cover": "Portada de {{title}}"
+    },
+    "actions": {
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "saveAndPublish": "Guardar y publicar",
+      "cancel": "Cancelar",
+      "viewOnSite": "Ver en el sitio",
+      "shortcut": "Ctrl/Cmd + S",
+      "barLabel": "Acciones del editor"
+    },
+    "discard": {
+      "title": "¿Descartar los cambios?",
+      "body": "Tienes cambios sin guardar. Si sales ahora se perderán.",
+      "confirm": "Descartar",
+      "keep": "Seguir editando"
+    },
+    "toast": {
+      "created": "Proyecto creado.",
+      "saved": "Cambios guardados.",
+      "published": "Proyecto publicado.",
+      "invalid": "Hay campos con errores.",
+      "slugTaken": "Ese slug ya lo usa otro proyecto.",
+      "failed": "No se pudo guardar. Inténtalo de nuevo.",
+      "tooMany": "Demasiadas solicitudes, espera un momento."
+    },
+    "errors": {
+      "titleRequired": "El título es obligatorio.",
+      "slugRequired": "El slug es obligatorio.",
+      "slugFormat": "Solo minúsculas, números y guiones (sin espacios).",
+      "slugTaken": "Ese slug ya está en uso. Prueba con otro."
+    }
+  }
+}

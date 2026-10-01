@@ -1,0 +1,16 @@
+{
+  "seo": {
+    "home": {
+      "title": "Stiven Colorado | Custom software, AI and security",
+      "description": "Full-stack developer in Colombia. Custom software, artificial intelligence and security for small businesses and large companies."
+    },
+    "about": {
+      "title": "About | Stiven Colorado",
+      "description": "Full-stack analyst and developer in Colombia: clean architecture, APIs, cloud and web experiences."
+    },
+    "privacy": {
+      "title": "Privacy notice | Stiven Colorado",
+      "description": "What browsing data this site collects, why, for how long and how to exercise your rights (Colombian Law 1581 of 2012)."
+    }
+  }
+}

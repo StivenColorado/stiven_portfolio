@@ -1,0 +1,28 @@
+{
+  "home": {
+    "hero": {
+      "greeting": "Hi.",
+      "name": "I'm Stiven.",
+      "tagline": "Custom software, AI and security for your business.",
+      "cta": "See services"
+    },
+    "quickLinksTitle": "Quick links",
+    "quickLinksAria": "Quick links",
+    "quick": {
+      "services": "Services",
+      "projects": "Projects",
+      "about": "About",
+      "contact": "Contact"
+    },
+    "projects": {
+      "title": "Projects",
+      "intro": "Featured projects, including client work under non-disclosure agreements.",
+      "all": "See all projects"
+    },
+    "contact": {
+      "title": "Let's talk",
+      "intro": "Have a project in mind? Write to me and I'll reply to your email.",
+      "windowTitle": "contact.form"
+    }
+  }
+}

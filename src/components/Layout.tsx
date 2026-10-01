@@ -13,6 +13,7 @@ const SCENE_ROUTES = new Set(["/", "/projects", "/about"]);
 const Layout: React.FC = () => {
     useTrack();
     const { pathname } = useLocation();
+    const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
     const showScene = SCENE_ROUTES.has(pathname.replace(/\/+$/, "") || "/");
 
     return (
@@ -23,12 +24,12 @@ const Layout: React.FC = () => {
                 </Suspense>
             )}
             <ScrollToTop />
-            <Navbar />
+            {!isAdmin && <Navbar />}
             <main className="relative">
                 <Outlet />
             </main>
-            <Footer />
-            <WhatsAppButton />
+            {!isAdmin && <Footer />}
+            {!isAdmin && <WhatsAppButton />}
         </div>
     );
 };

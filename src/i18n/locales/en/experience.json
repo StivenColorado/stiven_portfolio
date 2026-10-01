@@ -1,0 +1,21 @@
+{
+  "experience": {
+    "title": "Professional Experience",
+    "intro": "A quick look at my career · tap any role for details",
+    "viewDetailAria": "View details for {{name}}",
+    "viewDetail": "View details",
+    "close": "Close details",
+    "visit": "Visit site",
+    "reference": "Reference: {{contact}}",
+    "now": {
+      "title": "Currently working on…",
+      "windowTitle": "now.log",
+      "active": "Under active development",
+      "lastActivity": "Last activity {{when}}",
+      "commitsWeek_one": "{{count}} commit this week",
+      "commitsWeek_other": "{{count}} commits this week",
+      "listAria": "Projects under active development",
+      "openProject": "View {{title}} in projects"
+    }
+  }
+}

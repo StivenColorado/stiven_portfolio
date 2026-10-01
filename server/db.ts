@@ -19,9 +19,39 @@ export function openDb(path: string): DatabaseSync {
       email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, updated INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS reset_tokens (
       hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0);
+    CREATE TABLE IF NOT EXISTS projects (
+      id INTEGER PRIMARY KEY, slug TEXT, status TEXT NOT NULL DEFAULT 'hidden',
+      sort_order INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
+      data TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS projects_order ON projects(status, sort_order, id);
+    CREATE TABLE IF NOT EXISTS services (
+      id INTEGER PRIMARY KEY, slug TEXT, status TEXT NOT NULL DEFAULT 'hidden',
+      sort_order INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
+      data TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS services_order ON services(status, sort_order, id);
+    CREATE TABLE IF NOT EXISTS experience (
+      id INTEGER PRIMARY KEY, slug TEXT, status TEXT NOT NULL DEFAULT 'hidden',
+      sort_order INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
+      data TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS experience_order ON experience(status, sort_order, id);
+    CREATE UNIQUE INDEX IF NOT EXISTS projects_slug ON projects(slug);
+    CREATE UNIQUE INDEX IF NOT EXISTS services_slug ON services(slug);
+    CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, email TEXT, ip TEXT NOT NULL,
+      action TEXT NOT NULL, entity TEXT, entity_id INTEGER, summary TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS audit_ts ON audit_log(ts);
   `)
   migrateSessions(db)
+  migrateI18nColumn(db)
   return db
+}
+
+function migrateI18nColumn(db: DatabaseSync): void {
+  for (const table of ['projects', 'services', 'experience']) {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]
+    if (!cols.some((c) => c.name === 'i18n')) db.exec(`ALTER TABLE ${table} ADD COLUMN i18n TEXT NOT NULL DEFAULT '{}'`)
+  }
 }
 
 /** Las sesiones son desechables: si vienen del esquema viejo (sin email) se recrean. */

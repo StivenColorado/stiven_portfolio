@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 /**
@@ -16,6 +17,7 @@ const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_KEY as string | undefined;
 type Status = "idle" | "sending" | "success" | "error";
 
 const ContactForm: React.FC = () => {
+    const { t } = useTranslation();
     const [status, setStatus] = useState<Status>("idle");
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -23,9 +25,7 @@ const ContactForm: React.FC = () => {
         e.preventDefault();
         if (!ACCESS_KEY) {
             setStatus("error");
-            setErrorMsg(
-                "Falta configurar VITE_WEB3FORMS_KEY. Crea una key gratis en web3forms.com y agrégala al archivo .env."
-            );
+            setErrorMsg(t("contact.missingKey"));
             return;
         }
 
@@ -49,11 +49,11 @@ const ContactForm: React.FC = () => {
                 form.reset();
             } else {
                 setStatus("error");
-                setErrorMsg(data.message || "No se pudo enviar el mensaje. Intenta de nuevo.");
+                setErrorMsg(data.message || t("contact.failed"));
             }
         } catch {
             setStatus("error");
-            setErrorMsg("Error de red. Revisa tu conexión e intenta de nuevo.");
+            setErrorMsg(t("contact.network"));
         }
     };
 
@@ -64,18 +64,14 @@ const ContactForm: React.FC = () => {
         return (
             <div role="status" className="flex flex-col items-center justify-center gap-3 p-4 text-center">
                 <CheckCircle2 className="h-12 w-12" strokeWidth={2.5} aria-hidden="true" />
-                <h3 className="text-2xl text-ink">
-                    ¡Mensaje enviado!
-                </h3>
-                <p className="text-muted">
-                    Gracias por escribir. Te responderé lo antes posible.
-                </p>
+                <h3 className="text-2xl text-ink">{t("contact.sentTitle")}</h3>
+                <p className="text-muted">{t("contact.sentText")}</p>
                 <button
                     type="button"
                     onClick={() => setStatus("idle")}
                     className="mt-2 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper"
                 >
-                    Enviar otro mensaje
+                    {t("contact.another")}
                 </button>
             </div>
         );
@@ -87,9 +83,7 @@ const ContactForm: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label htmlFor="cf-name" className={labelBase}>
-                        Nombre
-                    </label>
+                    <label htmlFor="cf-name" className={labelBase}>{t("contact.name")}</label>
                     <input
                         id="cf-name"
                         name="name"
@@ -97,14 +91,12 @@ const ContactForm: React.FC = () => {
                         autoComplete="name"
                         required
                         aria-describedby={status === "error" ? "cf-error" : undefined}
-                        placeholder="Tu nombre"
+                        placeholder={t("contact.namePh")}
                         className={inputBase}
                     />
                 </div>
                 <div>
-                    <label htmlFor="cf-email" className={labelBase}>
-                        Tu correo
-                    </label>
+                    <label htmlFor="cf-email" className={labelBase}>{t("contact.email")}</label>
                     <input
                         id="cf-email"
                         name="email"
@@ -113,16 +105,14 @@ const ContactForm: React.FC = () => {
                         inputMode="email"
                         required
                         aria-describedby={status === "error" ? "cf-error" : undefined}
-                        placeholder="tucorreo@ejemplo.com"
+                        placeholder={t("contact.emailPh")}
                         className={inputBase}
                     />
                 </div>
             </div>
 
             <div>
-                <label htmlFor="cf-message" className={labelBase}>
-                    Mensaje
-                </label>
+                <label htmlFor="cf-message" className={labelBase}>{t("contact.message")}</label>
                 <textarea
                     id="cf-message"
                     name="message"
@@ -130,7 +120,7 @@ const ContactForm: React.FC = () => {
                     required
                     aria-describedby={status === "error" ? "cf-error" : undefined}
                     rows={5}
-                    placeholder="Cuéntame en qué puedo ayudarte..."
+                    placeholder={t("contact.messagePh")}
                     className={`${inputBase} resize-y`}
                 />
             </div>
@@ -149,11 +139,11 @@ const ContactForm: React.FC = () => {
             >
                 {status === "sending" ? (
                     <>
-                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> Enviando...
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> {t("contact.sending")}
                     </>
                 ) : (
                     <>
-                        <Send className="h-5 w-5" aria-hidden="true" /> Enviar mensaje
+                        <Send className="h-5 w-5" aria-hidden="true" /> {t("contact.send")}
                     </>
                 )}
             </button>

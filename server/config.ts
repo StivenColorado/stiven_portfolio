@@ -12,6 +12,10 @@ export type Config = {
   isProd: boolean
   trustProxy: boolean
   retentionDays: number
+  auditRetentionDays: number
+  mediaDir: string
+  publicDir: string
+  githubToken: string
   sessionHours: number
   cookieSecure: boolean
 }
@@ -36,6 +40,10 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     isProd: env.NODE_ENV === 'production',
     trustProxy: env.TRUST_PROXY === '1',
     retentionDays: int(env.RETENTION_DAYS, 30),
+    auditRetentionDays: int(env.AUDIT_RETENTION_DAYS, 365),
+    mediaDir: env.MEDIA_DIR || 'server/data/media',
+    publicDir: env.PUBLIC_DIR ?? '',
+    githubToken: (env.GITHUB_TOKEN ?? '').trim(),
     sessionHours: int(env.SESSION_HOURS, 12),
     cookieSecure: env.COOKIE_SECURE !== '0',
   }

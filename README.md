@@ -17,7 +17,7 @@ pnpm dev                 # frontend (Vite, proxy de /api al backend)
 pnpm server              # backend en otra terminal
 ```
 
-Otros scripts: `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test:server`.
+Otros scripts: `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test:server`. Migrar imágenes viejas `/projects/` a media: `node --env-file=.env server/scripts/migrate-media.ts [publicDir]`.
 
 ## Variables de entorno (`.env`)
 

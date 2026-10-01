@@ -1,0 +1,20 @@
+{
+  "contact": {
+    "name": "Name",
+    "namePh": "Your name",
+    "email": "Your email",
+    "emailPh": "you@example.com",
+    "message": "Message",
+    "messagePh": "Tell me how I can help...",
+    "send": "Send message",
+    "sending": "Sending...",
+    "sentTitle": "Message sent!",
+    "sentText": "Thanks for writing. I'll get back to you as soon as possible.",
+    "another": "Send another message",
+    "missingKey": "VITE_WEB3FORMS_KEY is not configured. Create a free key at web3forms.com and add it to the .env file.",
+    "failed": "The message could not be sent. Please try again.",
+    "network": "Network error. Check your connection and try again.",
+    "whatsappAria": "Message me on WhatsApp",
+    "whatsappMessage": "Hi Stiven! I saw your portfolio and I'd like to talk with you."
+  }
+}

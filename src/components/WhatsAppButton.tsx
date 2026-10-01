@@ -1,18 +1,19 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const PHONE = "573218956487";
-const MESSAGE = "¡Hola Stiven! Vi tu portafolio y me gustaría hablar contigo.";
 
 const WhatsAppButton: React.FC = () => {
-    const href = `https://wa.me/${PHONE}?text=${encodeURIComponent(MESSAGE)}`;
+    const { t } = useTranslation();
+    const href = `https://wa.me/${PHONE}?text=${encodeURIComponent(t("contact.whatsappMessage"))}`;
 
     return (
         <a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Escríbeme por WhatsApp"
-            title="Escríbeme por WhatsApp"
+            aria-label={t("contact.whatsappAria")}
+            title={t("contact.whatsappAria")}
             className="btn group fixed bottom-5 right-5 z-50 !min-h-0 !p-3 md:!p-3.5"
         >
             <svg

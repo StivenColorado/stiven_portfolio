@@ -1,21 +1,6 @@
-export interface ExperienceItemType {
-  date: string
-  title: string
-  /** Cargo corto para la vista compacta (ej. "Desarrollador FullStack"). */
-  role?: string
-  /** Empresa para la vista compacta. */
-  company?: string
-  /** Resumen de una línea, pensado para escaneo rápido. */
-  summary?: string
-  /** Tecnologías clave (3-5) que se muestran como chips. */
-  stack?: string[]
-  /** Descripción completa, visible solo en el detalle. */
-  description: string
-  link: string
-  contact?: string
-}
+import type { SeedExperience } from '../validate.ts'
 
-export const EXPERIENCE: ExperienceItemType[] = [
+const BASE: Omit<SeedExperience, 'i18n'>[] = [
   {
     date: "Abril 2026 - Actualmente",
     title: "Desarrollador de Software FullStack - fuldei - Corprevenir",
@@ -62,7 +47,7 @@ export const EXPERIENCE: ExperienceItemType[] = [
     stack: ["Python", "OpenCV", "OCR", "Pandas"],
     description:
       "Automatización de procesos manuales mediante Python, OpenCV, OCR (tesseract), OpenPyXL y Pandas. Generación de informes desde archivos Excel. GUI con Tkinter para mejor usabilidad.",
-    link: "#",
+    link: null,
     contact: "+57 324 2818821",
   },
   {
@@ -75,7 +60,7 @@ export const EXPERIENCE: ExperienceItemType[] = [
     stack: ["React", "Node.js", "Python", "Django"],
     description:
       "Sistema de agendamiento desarrollado con React.js y Node.js para CámaraStudio. Se implementó automatización de asistencias mediante Python, utilizando códigos QR, Django y Pandas. El sistema fue desplegado en un VPS con Debian como sistema operativo, utilizando Nginx para servir archivos estáticos y Gunicorn como servidor de aplicaciones.",
-    link: "#",
+    link: null,
   },
   {
     date: "Abril 2024 - Junio 2024",
@@ -99,7 +84,7 @@ export const EXPERIENCE: ExperienceItemType[] = [
     stack: ["Django", "React", "Python", "JWT"],
     description:
       "Aplicación web de seguimiento ocular interactivo desarrollada con Django y React.js. Visualización de datos en gráficos y videos en tiempo real, gestión de grandes volúmenes de datos importados desde archivos Excel hacia la base de datos, y autenticación JWT con encriptación para la protección de la información.",
-    link: "#",
+    link: null,
   },
   {
     date: "Diciembre 2023",
@@ -111,7 +96,7 @@ export const EXPERIENCE: ExperienceItemType[] = [
     stack: ["Backend", "QR"],
     description:
       "Colaboración en registro de asistencia de eventos, agregación de contactos y lectura de QR.",
-    link: "#",
+    link: null,
     contact: "+57 317 5404432",
   },
   {
@@ -124,6 +109,76 @@ export const EXPERIENCE: ExperienceItemType[] = [
     stack: ["Game Dev"],
     description:
       "Desarrollo de juegos lógico-matemáticos para niños con discapacidades cognitivas.",
-    link: "#",
+    link: null,
   },
 ]
+
+type ExperienceEn = NonNullable<SeedExperience['i18n']['en']>
+
+const EXPERIENCE_EN: Record<string, ExperienceEn> = {
+  'Desarrollador de Software FullStack - fuldei - Corprevenir': {
+    date: 'April 2026 - Present',
+    title: 'FullStack Software Developer - fuldei - Corprevenir',
+    role: 'FullStack Developer',
+    summary: 'Fullstack web apps and analytics modules with Excel reports and secure JWT-based APIs.',
+    description: 'Design and development of fullstack web applications with React, TypeScript and TailwindCSS. Implementation of backend services in Node.js and Express, with PostgreSQL data modeling using Prisma ORM. Management of complex state through the Context API and custom hooks. Development of analytics modules with dynamic Excel report generation (ExcelJS) and data visualization. Integration of secure REST APIs with JWT authentication and schema validation with Joi. Application of clean architecture principles, centralized error handling and SQL query optimization. Work under agile methodologies (SCRUM) and version control with Git/Bitbucket, ensuring quality, traceability and continuous improvement.',
+  },
+  'Desarrollador de Software FullStack - Unlimitech Cloud': {
+    date: 'July 2025 - March 2026',
+    title: 'FullStack Software Developer - Unlimitech Cloud',
+    role: 'FullStack Developer',
+    summary: 'Frontend with React/MobX and backend in Node.js, PHP and WordPress (plugins and APIs).',
+    description: 'Development and maintenance of frontend features with React and MobX. Implementation of backend services in Node.js, PHP and WordPress (themes, plugins, APIs). Integration of REST APIs, management of complex state, work with databases (MySQL, PostgreSQL, MongoDB) and support with infrastructure and deployment. Use of Git and SCRUM agile methodologies to ensure software quality.',
+  },
+  'Desarrollador de Software FullStack - GS PRO MASTER MOVING': {
+    date: 'March 2025 - June 2025',
+    title: 'FullStack Software Developer - GS PRO MASTER MOVING',
+    role: 'FullStack Developer',
+    summary: 'RESTful APIs with Django and DDD, JWT authentication and deployment on DigitalOcean.',
+    description: 'Full Stack developer with experience in Python/Django for the backend and JavaScript/Tailwind CSS on the frontend. Implementation of RESTful APIs applying Domain-Driven Design (DDD), JWT authentication and MySQL persistence. Deployment on DigitalOcean, using Spaces (S3-compatible) for file storage. Design of responsive interfaces and automated documentation with DRF Spectacular.',
+  },
+  'Contratista Desarrollador en Comercializadora la rocka SAS.': {
+    date: 'November 2024 - December 2025',
+    title: 'Contract Developer at Comercializadora la rocka SAS.',
+    role: 'Developer · Automation',
+    summary: 'Automation of manual processes with Python, OCR and Excel report generation.',
+    description: 'Automation of manual processes using Python, OpenCV, OCR (tesseract), OpenPyXL and Pandas. Report generation from Excel files. GUI with Tkinter for better usability.',
+  },
+  'Practicante Desarrollador de Software - SENA Sennova': {
+    date: 'August 2024 - January 2025',
+    title: 'Software Developer Intern - SENA Sennova',
+    role: 'Developer Intern',
+    summary: 'Scheduling system (React/Node) and QR attendance tracking deployed on a VPS.',
+    description: 'Scheduling system developed with React.js and Node.js for CámaraStudio. Attendance automation was implemented with Python, using QR codes, Django and Pandas. The system was deployed on a VPS running Debian, using Nginx to serve static files and Gunicorn as the application server.',
+  },
+  'Practicante Desarrollador de Software - Accedo Technologies': {
+    date: 'April 2024 - June 2024',
+    title: 'Software Developer Intern - Accedo Technologies',
+    role: 'Developer Intern',
+    summary: 'Simulated store with authentication, Laravel migrations and DataTables with Vue.js.',
+    description: 'PHP, Laravel, migrations, entities and DataTables with Vue.js. Store simulation with authentication and a database.',
+  },
+  'Desarrollador Fullstack - Proyecto Eye Tracking': {
+    date: 'November 2023 - March 2024',
+    title: 'Fullstack Developer - Eye Tracking Project',
+    role: 'FullStack Developer',
+    summary: 'Eye tracking app with real-time data visualization and bulk loading from Excel.',
+    description: 'Interactive eye tracking web application built with Django and React.js. Visualization of data in charts and real-time videos, management of large volumes of data imported from Excel files into the database, and JWT authentication with encryption to protect the information.',
+  },
+  'Desarrollador Backend - Contratista ICA': {
+    date: 'December 2023',
+    title: 'Backend Developer - ICA Contractor',
+    role: 'Backend Developer',
+    summary: 'Event attendance registration, contact aggregation and QR scanning.',
+    description: 'Collaboration on event attendance registration, contact aggregation and QR scanning.',
+  },
+  'Desarrollador en Isilab Foundation': {
+    date: 'April 2021',
+    title: 'Developer at Isilab Foundation',
+    role: 'Developer',
+    summary: 'Logic and math games for children with cognitive disabilities.',
+    description: 'Development of logic and math games for children with cognitive disabilities.',
+  },
+}
+
+export const EXPERIENCE_SEED: SeedExperience[] = BASE.map((e) => ({ ...e, i18n: { en: EXPERIENCE_EN[e.title] ?? {} } }))

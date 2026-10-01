@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "home": "Home",
+    "projects": "Projects",
+    "about": "About",
+    "contact": "Contact",
+    "homeAria": "Stiven, home",
+    "menuTitle": "menu.app",
+    "mainMenu": "Main menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "toLight": "Switch to light mode",
+    "toDark": "Switch to dark mode"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Couldn't load the content.",
+    "retry": "Try again",
+    "close": "Close"
+  },
+  "lang": {
+    "es": "Spanish",
+    "en": "English",
+    "switchTo": "Switch language to {{language}}"
+  }
+}

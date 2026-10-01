@@ -1,0 +1,134 @@
+{
+  "about": {
+    "eyebrow": "About me",
+    "title": "Hi, I'm Stiven Colorado",
+    "paragraphs": [
+      "I'm a software analyst and developer with solid Full Stack experience, working with technologies such as Python, PHP, JavaScript, TailwindCSS and Node.js.",
+      "I have implemented clean architectures such as Domain-Driven Design (DDD) and Hexagonal, organizing projects into domains, controllers, repositories, services and adapters to keep them maintainable and scalable.",
+      "I have experience building RESTful APIs with JWT and CORS, and advanced Django setups with MySQL databases and file storage both locally and in the cloud (S3).",
+      "On the frontend, I work with ReactJS and React Native, using Redux/MobX for state management, building custom hooks to centralize HTTP requests and polishing the user experience."
+    ],
+    "talk": "Let's talk",
+    "photoAlt": "Stiven Colorado",
+    "backendTitle": "Backend stack",
+    "backendWindow": "stack.backend",
+    "backend": [
+      {
+        "name": "Python",
+        "note": "FastAPI, Django, async, typing, testing (pytest)."
+      },
+      {
+        "name": "PHP",
+        "note": "Laravel (Eloquent, Queues, Events), Composer, PSR-12."
+      },
+      {
+        "name": "Node.js",
+        "note": "Express/NestJS, middleware, streams, PM2."
+      },
+      {
+        "name": "Django",
+        "note": "DRF, advanced ORM, signals, admin, per-environment config."
+      },
+      {
+        "name": "MySQL",
+        "note": "Indexes, EXPLAIN, migrations, transactions and locks."
+      },
+      {
+        "name": "MongoDB",
+        "note": "Aggregations, compound indexes, TTL, schema design."
+      },
+      {
+        "name": "RESTful APIs",
+        "note": "Versioning, pagination, validation, OpenAPI/Swagger."
+      },
+      {
+        "name": "JWT",
+        "note": "Stateless auth, refresh, secure rotation, expiry."
+      },
+      {
+        "name": "OAuth",
+        "note": "Authorization Code/PKCE, scopes, granular permissions."
+      },
+      {
+        "name": "AWS",
+        "note": "IAM, CloudWatch, cost control, security best practices."
+      },
+      {
+        "name": "S3",
+        "note": "Multipart upload, access policies, pre-signed URLs, lifecycle, Conciliate S3."
+      },
+      {
+        "name": "API Gateway",
+        "note": "API design with stages and deployments, rate limiting, API keys, authorizers (JWT/Lambda), Lambda/ALB integration."
+      },
+      {
+        "name": "DynamoDB",
+        "note": "Single-table modeling, partitions/throughput, GSIs/LSIs, streams, access patterns and efficient queries."
+      },
+      {
+        "name": "EC2 - EBS",
+        "note": "Provisioning, security groups, volumes, backups, scalability."
+      },
+      {
+        "name": "Redis",
+        "note": "Caching, distributed locks, pub/sub, expiry and eviction."
+      },
+      {
+        "name": "Docker",
+        "note": "Multi-stage Dockerfiles, compose, layer optimization."
+      },
+      {
+        "name": "Git",
+        "note": "Git flow, branching, PRs, code review, tagging and releases."
+      },
+      {
+        "name": "Vps",
+        "note": "Nginx/Apache, Let’s Encrypt SSL, deployments and basic CI/CD."
+      }
+    ],
+    "groups": [
+      {
+        "title": "Frontend stack",
+        "items": [
+          "JavaScript",
+          "TypeScript",
+          "React",
+          "React Native",
+          "TailwindCSS",
+          "MobX",
+          "Redux",
+          "HTML5",
+          "CSS3"
+        ]
+      },
+      {
+        "title": "Architecture and patterns",
+        "items": [
+          "Design Patterns",
+          "SOLID Principles",
+          "Domain-Driven Design (DDD)",
+          "Hexagonal Architecture",
+          "Software Architecture",
+          "Requirements Gathering",
+          "Requirements Analysis",
+          "Backend for Frontend Pattern",
+          "IaC"
+        ]
+      },
+      {
+        "title": "Soft skills",
+        "items": [
+          "Teamwork",
+          "Effective Communication",
+          "Problem Solving",
+          "Analytical Thinking",
+          "Adaptability",
+          "Leadership",
+          "Time Management",
+          "Attention to Detail",
+          "Continuous Learning"
+        ]
+      }
+    ]
+  }
+}

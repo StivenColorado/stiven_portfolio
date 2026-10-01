@@ -1,211 +1,185 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router";
-import { ApiError, adminApi } from "../lib/api";
-import type { DeleteTarget, Stats, Visitor } from "../lib/api";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
+import { Briefcase, History, LogOut, Menu, Sparkles, UserCog, Wrench, X } from "lucide-react";
+import type { ComponentType } from "react";
+import { adminApi } from "../lib/api";
+import { onUnauthorized } from "../lib/adminApi";
 import { useDocumentMeta } from "../lib/seo";
-import ConfirmDelete from "../components/admin/ConfirmDelete";
-import type { PendingDelete } from "../components/admin/ConfirmDelete";
-import Filters from "../components/admin/Filters";
-import { FILTER_KEYS } from "../components/admin/filterState";
-import type { FilterKey, FilterOptions, FilterValues } from "../components/admin/filterState";
-import ChangePassword from "../components/admin/ChangePassword";
 import LoginForm from "../components/admin/LoginForm";
-import StatsCards from "../components/admin/StatsCards";
-import { RANGES } from "../components/admin/ranges";
-import VisitorDialog from "../components/admin/VisitorDialog";
-import VisitsTable from "../components/admin/VisitsTable";
-
-const PAGE = 50;
+import { AdminContext } from "../components/admin/adminContext";
+import ToastProvider from "../components/admin/ui/Toast";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useAdminLocales } from "../i18n/useAdminLocales";
 
 type Auth = "checking" | "out" | "in";
 
-function Dashboard({ onLogout }: { onLogout: () => void }) {
-    const [params, setParams] = useSearchParams();
-    const [stats, setStats] = useState<Stats | null>(null);
-    const [visitors, setVisitors] = useState<Visitor[]>([]);
-    const [known, setKnown] = useState<FilterOptions>({ os: [], device: [], country: [], path: [] });
-    const [detail, setDetail] = useState<Visitor | null>(null);
-    const [more, setMore] = useState(true);
-    const [loading, setLoading] = useState(false);
-    const [statsKey, setStatsKey] = useState(0);
-    const [selected, setSelected] = useState<Set<string>>(new Set());
-    const [pending, setPending] = useState<PendingDelete | null>(null);
-    const [busy, setBusy] = useState(false);
-    const [notice, setNotice] = useState("");
+const ITEMS: { to: string; labelKey: string; icon: ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }> }[] = [
+    { to: "/admin/auditoria", labelKey: "admin.shell.nav.audit", icon: History },
+    { to: "/admin/proyectos", labelKey: "admin.shell.nav.projects", icon: Sparkles },
+    { to: "/admin/servicios", labelKey: "admin.shell.nav.services", icon: Wrench },
+    { to: "/admin/experiencia", labelKey: "admin.shell.nav.experience", icon: Briefcase },
+    { to: "/admin/cuenta", labelKey: "admin.shell.nav.account", icon: UserCog },
+];
 
-    const requested = Number(params.get("days"));
-    const days = RANGES.some((r) => r.days === requested) ? requested : 7;
-    const filters = Object.fromEntries(FILTER_KEYS.map((k) => [k, params.get(k) ?? ""])) as FilterValues;
+const itemClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-3 border-b-2 border-ink px-4 py-3 font-extrabold no-underline last:border-b-0 ${isActive ? "bg-ink text-paper" : "text-ink hover:bg-grey"}`;
 
-    const setParam = useCallback((key: string, value: string) => {
-        setParams((prev) => {
-            const next = new URLSearchParams(prev);
-            if (value) next.set(key, value);
-            else next.delete(key);
-            return next;
-        }, { replace: true });
-    }, [setParams]);
+function NavItems({ onNavigate }: { onNavigate?: () => void }) {
+    const { t } = useTranslation();
+    return (
+        <>
+            {ITEMS.map(({ to, labelKey, icon: Icon }) => (
+                <NavLink key={to} to={to} onClick={onNavigate} className={itemClass}>
+                    <Icon size={18} strokeWidth={2.5} aria-hidden />
+                    {t(labelKey)}
+                </NavLink>
+            ))}
+        </>
+    );
+}
 
-    const expired = useCallback((err: unknown) => {
-        if (err instanceof ApiError && err.status === 401) onLogout();
-    }, [onLogout]);
+function Shell({ email, onLogout }: { email: string; onLogout: () => void }) {
+    const { t } = useTranslation();
+    const [open, setOpen] = useState(false);
+    const { pathname } = useLocation();
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLElement>(null);
+    const wasOpen = useRef(false);
 
-    useEffect(() => {
-        let live = true;
-        setStats(null);
-        adminApi.stats(days).then((s) => live && setStats(s)).catch(expired);
-        return () => { live = false; };
-    }, [days, expired, statsKey]);
-
-    const filterKey = FILTER_KEYS.map((k) => params.get(k) ?? "").join("\u0000");
-    const latest = useRef(0);
-
-    const load = useCallback(async (offset = 0) => {
-        const ticket = ++latest.current;
-        const active = Object.fromEntries(FILTER_KEYS.map((k, i) => [k, filterKey.split("\u0000")[i]]));
-        setLoading(true);
-        try {
-            const { visitors: page } = await adminApi.visitors(active, PAGE, offset);
-            if (ticket !== latest.current) return;
-            setVisitors((prev) => (offset === 0 ? page : [...prev, ...page]));
-            setMore(page.length === PAGE);
-            setKnown((prev) => {
-                const add = (k: FilterKey, xs: string[]) => [...new Set([...prev[k], ...xs])];
-                return {
-                    os: add("os", page.flatMap((v) => v.oses)),
-                    device: add("device", page.flatMap((v) => v.devices)),
-                    country: add("country", page.flatMap((v) => (v.country ? [v.country] : []))),
-                    path: add("path", page.flatMap((v) => v.paths.map((p) => p.key))),
-                };
-            });
-        } catch (err) {
-            expired(err);
-        } finally {
-            if (ticket === latest.current) setLoading(false);
-        }
-    }, [expired, filterKey]);
-
-    useEffect(() => { void load(); }, [load]);
-
-    const activeFilters = FILTER_KEYS.filter((k) => filters[k]);
-    const chosen = useMemo(() => visitors.filter((v) => selected.has(v.ip)).map((v) => v.ip), [visitors, selected]);
+    useEffect(() => setOpen(false), [pathname]);
 
     useEffect(() => {
-        if (!notice) return;
-        const t = setTimeout(() => setNotice(""), 4000);
-        return () => clearTimeout(t);
-    }, [notice]);
-
-    const ask = useCallback(async (target: DeleteTarget, scope: string, known?: number) => {
-        try {
-            const count = known ?? (await adminApi.countVisits(target)).matched;
-            setPending({
-                count,
-                scope,
-                run: async () => {
-                    setBusy(true);
-                    try {
-                        const { deleted } = await adminApi.deleteVisits(target);
-                        setPending(null);
-                        setSelected(new Set());
-                        setDetail(null);
-                        setNotice(deleted === 1 ? "1 visita borrada" : `${deleted} visitas borradas`);
-                        setStatsKey((n) => n + 1);
-                        await load();
-                    } catch (err) {
-                        setPending(null);
-                        expired(err);
-                        setNotice(err instanceof ApiError && err.status === 429 ? "Demasiados intentos, espera un momento" : "No se pudo borrar");
-                    } finally {
-                        setBusy(false);
-                    }
-                },
-            });
-        } catch (err) {
-            expired(err);
-            setNotice("No se pudo borrar");
+        if (open) {
+            panelRef.current?.querySelector<HTMLElement>("a")?.focus();
+            wasOpen.current = true;
+        } else if (wasOpen.current) {
+            buttonRef.current?.focus();
+            wasOpen.current = false;
         }
-    }, [expired, load]);
+    }, [open]);
 
-    const toggle = (ip: string, on: boolean) => setSelected((prev) => {
-        const next = new Set(prev);
-        if (on) next.add(ip);
-        else next.delete(ip);
-        return next;
-    });
-    const toggleAll = (on: boolean) => setSelected(on ? new Set(visitors.map((v) => v.ip)) : new Set());
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        window.addEventListener("keydown", onKey);
+        return () => {
+            window.removeEventListener("keydown", onKey);
+            document.body.style.overflow = prev;
+        };
+    }, [open]);
 
-    const deleteFiltered = () => {
-        const filter = Object.fromEntries(activeFilters.map((k) => [k, filters[k]]));
-        void ask({ filter }, `Coinciden con los filtros activos (${activeFilters.map((k) => `${k}: ${filters[k]}`).join(", ")}).`);
-    };
-
-    async function logout() {
-        try { await adminApi.logout(); } catch { /* sesión ya caducada */ }
-        onLogout();
-    }
+    const sq = "flex h-8 w-8 shrink-0 items-center justify-center border-2 border-ink bg-paper text-ink hover:bg-ink hover:text-paper lg:hidden";
 
     return (
-        <div className="space-y-8">
-            <header className="flex items-center justify-between gap-3">
-                <div>
-                    <p className="eyebrow">Admin</p>
-                    <h1 className="font-display text-3xl tracking-tight text-ink">Visitantes</h1>
-                </div>
-                <button type="button" onClick={logout} className="btn">Cerrar sesión</button>
-            </header>
-            <ChangePassword onUnauthorized={onLogout} />
-            <StatsCards stats={stats} days={days} onDays={(d) => setParam("days", String(d))} />
-            <section className="space-y-4">
-                <Filters values={filters} known={known} onChange={(k: FilterKey, v) => setParam(k, v)} />
-                {(chosen.length > 0 || activeFilters.length > 0) && (
-                    <div className="window window-body !flex-row flex-wrap items-center gap-3 !p-3">
-                        {chosen.length > 0 && (
-                            <button type="button" className="btn btn-primary" onClick={() => void ask({ ips: chosen }, `Son todas las visitas de ${chosen.length === 1 ? "la IP seleccionada" : `las ${chosen.length} IP seleccionadas`}.`)}>
-                                Borrar seleccionados ({chosen.length})
-                            </button>
-                        )}
-                        {activeFilters.length > 0 && (
-                            <button type="button" className="btn" onClick={deleteFiltered}>Borrar todo lo filtrado</button>
-                        )}
-                    </div>
-                )}
-                <VisitsTable visitors={visitors} selected={selected} onToggle={toggle} onToggleAll={toggleAll} onOpen={setDetail} />
-                {more && (
-                    <button type="button" disabled={loading} onClick={() => load(visitors.length)} className="btn w-full disabled:opacity-50 md:w-auto">
-                        {loading ? "Cargando…" : "Cargar más"}
-                    </button>
-                )}
-            </section>
-            <VisitorDialog
-                visitor={detail}
-                onClose={() => setDetail(null)}
-                onDelete={(v) => void ask({ ip: v.ip }, `Son todas las visitas de la IP ${v.ip}.`, v.visits)}
-                onUnauthorized={expired}
-            />
-            <ConfirmDelete pending={pending} busy={busy} onCancel={() => !busy && setPending(null)} />
-            <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-4 z-50 flex justify-center">
-                {notice && <p className="window window-body !px-4 !py-2 text-sm font-bold">{notice}</p>}
+        <div className="window">
+            <div className="window-bar">
+                <span className="window-dot" aria-hidden="true" />
+                <span className="window-dot" aria-hidden="true" />
+                <span className="flex-1 truncate text-center">admin.app</span>
             </div>
+            <div className="flex items-center gap-3 border-b-2 border-ink bg-grey px-3 py-2">
+                <button
+                    ref={buttonRef}
+                    type="button"
+                    className={sq}
+                    onClick={() => setOpen((v) => !v)}
+                    aria-expanded={open}
+                    aria-controls="admin-menu"
+                    aria-label={open ? t("admin.shell.closeMenu") : t("admin.shell.openMenu")}
+                >
+                    <Menu size={16} strokeWidth={2.5} aria-hidden />
+                </button>
+                <p className="min-w-0 flex-1 truncate text-sm" title={email}>{email}</p>
+                <LanguageSwitcher />
+                <button type="button" className="btn !min-h-8 !px-3 !py-1 !text-sm" onClick={onLogout}>
+                    <LogOut size={14} strokeWidth={2.5} aria-hidden /> {t("admin.shell.logout")}
+                </button>
+            </div>
+
+            <div className="lg:grid lg:grid-cols-[14rem_1fr]">
+                <nav aria-label={t("admin.shell.sections")} className="hidden border-r-2 border-ink lg:block">
+                    <NavItems />
+                </nav>
+                <div className="min-w-0 p-4 md:p-6">
+                    <Suspense fallback={<p className="text-sm text-muted">{t("admin.common.loading")}</p>}>
+                        <Outlet />
+                    </Suspense>
+                </div>
+            </div>
+
+            <div
+                aria-hidden="true"
+                onClick={() => setOpen(false)}
+                className={`fixed inset-0 z-[60] bg-black/40 transition-opacity duration-250 motion-reduce:transition-none lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+            />
+            <nav
+                ref={panelRef}
+                id="admin-menu"
+                role="dialog"
+                aria-modal="true"
+                aria-label={t("admin.shell.menu")}
+                data-open={open}
+                className="drawer-panel window lg:hidden"
+            >
+                <div className="window-bar">
+                    <span className="window-dot" aria-hidden="true" />
+                    <span className="flex-1 truncate text-center">admin.menu</span>
+                    <button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        aria-label={t("admin.shell.closeMenu")}
+                        tabIndex={open ? 0 : -1}
+                        className="flex h-5 w-5 shrink-0 items-center justify-center border-2 border-ink bg-paper hover:bg-ink hover:text-paper"
+                    >
+                        <X size={12} strokeWidth={3} aria-hidden />
+                    </button>
+                </div>
+                <div className="flex flex-col">
+                    <NavItems onNavigate={() => setOpen(false)} />
+                </div>
+            </nav>
         </div>
     );
 }
 
-const Admin = () => {
-    useDocumentMeta({ title: "Admin", noindex: true });
+const AdminContent = () => {
+    const { t } = useTranslation();
+    useDocumentMeta({ title: t("admin.meta.admin"), noindex: true });
     const [auth, setAuth] = useState<Auth>("checking");
+    const [email, setEmail] = useState("");
 
-    useEffect(() => {
-        adminApi.me().then(() => setAuth("in")).catch(() => setAuth("out"));
+    const check = useCallback(() => {
+        adminApi.me().then((me) => { setEmail(me.email); setAuth("in"); }).catch(() => setAuth("out"));
     }, []);
 
+    useEffect(() => { check(); }, [check]);
+    useEffect(() => onUnauthorized(() => setAuth("out")), []);
+
+    const expire = useCallback(() => setAuth("out"), []);
+    const logout = useCallback(async () => {
+        try { await adminApi.logout(); } catch { /* sesión ya caducada */ }
+        setAuth("out");
+    }, []);
+    const session = useMemo(() => ({ email, logout, expire }), [email, logout, expire]);
+
     return (
-        <div className="mx-auto w-full max-w-6xl bg-paper px-4 pb-16 pt-24 text-ink">
-            {auth === "checking" && <p className="text-sm text-muted">Cargando…</p>}
-            {auth === "out" && <LoginForm onSuccess={() => setAuth("in")} />}
-            {auth === "in" && <Dashboard onLogout={() => setAuth("out")} />}
+        <div className="mx-auto w-full max-w-6xl bg-paper px-4 pb-16 pt-10 text-ink">
+            {auth === "checking" && <p className="text-sm text-muted">{t("admin.common.loading")}</p>}
+            {auth === "out" && <LoginForm onSuccess={check} />}
+            {auth === "in" && (
+                <AdminContext.Provider value={session}>
+                    <ToastProvider>
+                        <Shell email={email} onLogout={() => void logout()} />
+                    </ToastProvider>
+                </AdminContext.Provider>
+            )}
         </div>
     );
 };
+
+const Admin = () => (useAdminLocales() ? <AdminContent /> : null);
 
 export default Admin;

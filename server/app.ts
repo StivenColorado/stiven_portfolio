@@ -1,3 +1,4 @@
+import { createReadStream } from 'node:fs'
 import { createServer } from 'node:http'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { isIP } from 'node:net'
@@ -7,19 +8,43 @@ import {
   DUMMY_HASH, clearCookie, createSession, destroyOtherSessions, destroySession, hashPassword, readSid,
   sessionCookie, sessionEmail, sha256, verify,
 } from './auth.ts'
+import { listAudit, recordAudit } from './audit.ts'
 import { clearCache, memo } from './cache.ts'
 import type { Config } from './config.ts'
+import {
+  SlugTakenError, createItem, migrateGithubRepos, getItem, listItems, publicContent, removeItem, reorder, seedContent, setFeatured,
+  setStatus, updateItem,
+} from './content.ts'
+import type { Entity } from './content.ts'
+import { parseLang } from './content.ts'
 import { seedAdmin } from './db.ts'
 import { geoReady } from './geo.ts'
+import { createGithub } from './github.ts'
 import { clientIp } from './ip.ts'
 import { sendResetMail } from './mail.ts'
+import {
+  MAX_IMAGE, MAX_VIDEO, MEDIA_NAME, detectMedia, extensionMatches, mediaSize, mimeOf, parseRange, saveMedia,
+} from './media.ts'
+import { migrateMediaOnce } from './media-migrate.ts'
 import { hit } from './ratelimit.ts'
+import {
+  STATUSES, validateExperience, validateFeatured, validateProject, validateReorder, validateService, validateStatus,
+} from './validate.ts'
+import type { Result } from './validate.ts'
 import {
   countMatching, deleteVisits, filterFromQuery, listVisitors, listVisits, parseDeleteSpec, recordVisit, stats, visitsOfIp,
 } from './visits.ts'
 
 const MAX_BODY = 1024
 const MAX_DELETE_BODY = 16 * 1024
+const MAX_CONTENT_BODY = 64 * 1024
+const MAX_UPLOAD = MAX_VIDEO + 64 * 1024
+const LABEL: Record<Entity, string> = { projects: 'proyecto', services: 'servicio', experience: 'experiencia' }
+const VALIDATORS: Record<Entity, (b: Record<string, unknown>) => Result<object>> = {
+  projects: validateProject,
+  services: validateService,
+  experience: validateExperience,
+}
 const MINUTE = 60_000
 const MIN_PASSWORD = 12
 const RESET_TTL_MS = 30 * MINUTE
@@ -68,6 +93,23 @@ function readJson(req: IncomingMessage, max = MAX_BODY): Promise<Body> {
   })
 }
 
+function readBuffer(req: IncomingMessage, max: number): Promise<Buffer | null> {
+  return new Promise((resolve) => {
+    const chunks: Buffer[] = []
+    let size = 0
+    let tooBig = false
+    req.on('data', (chunk: Buffer) => {
+      size += chunk.length
+      if (size > max) {
+        tooBig = true
+        chunks.length = 0
+      } else if (!tooBig) chunks.push(chunk)
+    })
+    req.on('error', () => resolve(null))
+    req.on('end', () => resolve(tooBig ? null : Buffer.concat(chunks)))
+  })
+}
+
 function header(req: IncomingMessage, name: string): string {
   const v = req.headers[name]
   return (Array.isArray(v) ? v[0] : v) ?? ''
@@ -97,6 +139,13 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export function createApp(config: Config, db: DatabaseSync): Server {
   seedAdmin(db, config.adminEmail, config.adminPasswordHash)
+  seedContent(db, config.mediaDir)
+  migrateMediaOnce(db, config.mediaDir, config.publicDir || null)
+  if (migrateGithubRepos(db) > 0) clearCache()
+  const github = createGithub(config.githubToken)
+
+  const audit = (email: string | null, ip: string, action: string, entity: string | null, entityId: number | null, summary: string) =>
+    recordAudit(db, { email, ip, action, entity, entityId, summary })
 
   async function track(req: IncomingMessage, res: ServerResponse, ip: string): Promise<void> {
     const body = await readJson(req)
@@ -146,10 +195,12 @@ export function createApp(config: Config, db: DatabaseSync): Server {
     const stored = adminHash(email)
     const valid = verify(typeof password === 'string' ? password : '', stored ?? DUMMY_HASH)
     if (!(stored !== null && typeof password === 'string' && valid)) {
+      audit(email, ip, 'login_failed', 'auth', null, `Intento de inicio de sesión fallido${email ? ` (${email})` : ''}`)
       await sleep(500)
       return send(res, 401, { error: 'unauthorized' })
     }
     const token = createSession(db, email as string, config.sessionHours)
+    audit(email, ip, 'login', 'auth', null, 'Inicio de sesión')
     send(res, 200, { ok: true, email }, { 'Set-Cookie': sessionCookie(token, config.sessionHours, config.cookieSecure) })
   }
 
@@ -194,6 +245,7 @@ export function createApp(config: Config, db: DatabaseSync): Server {
     if (typeof token !== 'string' || token.length > 100) return send(res, 400, { error: 'invalid_token' })
     const passwordHash = hashPassword(password)
     const now = Date.now()
+    let resetEmail = ''
     db.exec('BEGIN IMMEDIATE')
     try {
       const row = db
@@ -206,14 +258,16 @@ export function createApp(config: Config, db: DatabaseSync): Server {
       db.prepare('UPDATE admins SET password_hash = ?, updated = ? WHERE email = ?').run(passwordHash, now, row.email)
       db.prepare('DELETE FROM sessions WHERE email = ?').run(row.email)
       db.exec('COMMIT')
+      resetEmail = row.email
     } catch (err) {
       db.exec('ROLLBACK')
       throw err
     }
+    audit(resetEmail, ip, 'password_reset', 'auth', null, 'Contraseña restablecida con enlace de correo')
     send(res, 200, { ok: true }, { 'Set-Cookie': clearCookie(config.cookieSecure) })
   }
 
-  async function changePassword(req: IncomingMessage, res: ServerResponse, email: string, sid: string): Promise<void> {
+  async function changePassword(req: IncomingMessage, res: ServerResponse, email: string, sid: string, ip: string): Promise<void> {
     if (!hit(`password:${email}`, 5, 15 * MINUTE)) {
       req.resume()
       return send(res, 429, { error: 'too_many_requests' })
@@ -233,10 +287,11 @@ export function createApp(config: Config, db: DatabaseSync): Server {
     }
     db.prepare('UPDATE admins SET password_hash = ?, updated = ? WHERE email = ?').run(hashPassword(next), Date.now(), email)
     destroyOtherSessions(db, email, sid)
+    audit(email, ip, 'password_change', 'auth', null, 'Cambió su contraseña')
     send(res, 200, { ok: true })
   }
 
-  async function deleteRoute(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  async function deleteRoute(req: IncomingMessage, res: ServerResponse, email: string, ip: string): Promise<void> {
     if (!isSameOrigin(req)) {
       req.resume()
       return send(res, 403, { error: 'forbidden' })
@@ -250,19 +305,218 @@ export function createApp(config: Config, db: DatabaseSync): Server {
     if (body.json?.dryRun === true) return send(res, 200, { matched: countMatching(db, spec) })
     const deleted = deleteVisits(db, spec)
     clearCache()
+    audit(email, ip, 'visits_delete', 'visits', null, `Borró ${deleted} visita${deleted === 1 ? '' : 's'}`)
     send(res, 200, { deleted })
+  }
+
+  const invalid = (res: ServerResponse, fields: Record<string, string>) => send(res, 400, { error: 'invalid', fields })
+
+  async function jsonBody(req: IncomingMessage, res: ServerResponse): Promise<Record<string, unknown> | null> {
+    const body = await readJson(req, MAX_CONTENT_BODY)
+    if (body.tooBig) send(res, 413, { error: 'payload_too_large' })
+    else if (!body.json) invalid(res, { _: 'JSON inválido' })
+    return body.json
+  }
+
+  const githubNote = (entity: Entity, prev: Record<string, unknown> | null, item: Record<string, unknown>): string => {
+    if (entity !== 'projects') return ''
+    const repo = (i: Record<string, unknown> | null) => (typeof i?.githubRepo === 'string' ? i.githubRepo : null)
+    const parts: string[] = []
+    if (repo(prev) !== repo(item)) parts.push(`repo GitHub: ${repo(item) ?? 'ninguno'}`)
+    if ((prev?.workingOn === true) !== (item.workingOn === true)) parts.push(`en desarrollo activo: ${item.workingOn === true ? 'sí' : 'no'}`)
+    return parts.length > 0 ? ` (${parts.join('; ')})` : ''
+  }
+
+  const titleOf = (item: Record<string, unknown>) => String(item.title ?? '').slice(0, 80)
+
+  async function crud(
+    req: IncomingMessage, res: ServerResponse, entity: Entity, seg: string | undefined, sub: string | undefined,
+    email: string, ip: string,
+  ): Promise<void> {
+    const label = LABEL[entity]
+    const id = seg !== undefined && seg !== 'reorder' ? Number(seg) : null
+    const method = req.method
+    const url = new URL(req.url ?? '/', 'http://localhost')
+
+    if (method === 'GET' && seg === undefined) {
+      const raw = url.searchParams.get('status') ?? 'all'
+      if (raw !== 'all' && !(STATUSES as readonly string[]).includes(raw)) return send(res, 400, { error: 'invalid_request' })
+      const q = (url.searchParams.get('q') ?? '').slice(0, 100)
+      return send(res, 200, { items: listItems(db, entity, raw as 'all', q) })
+    }
+    if (method === 'GET') {
+      const item = getItem(db, entity, id as number)
+      return item ? send(res, 200, { item }) : send(res, 404, { error: 'not_found' })
+    }
+
+    if (!isSameOrigin(req)) {
+      req.resume()
+      return send(res, 403, { error: 'forbidden' })
+    }
+    if (method === 'DELETE') {
+      const item = getItem(db, entity, id as number)
+      const outcome = removeItem(db, entity, id as number)
+      if (outcome === 'not_found') return send(res, 404, { error: 'not_found' })
+      if (outcome === 'not_archived') return send(res, 409, { error: 'not_archived' })
+      clearCache()
+      audit(email, ip, 'delete', entity, id, `Eliminó ${label} «${titleOf(item ?? {})}»`)
+      return send(res, 204)
+    }
+
+    const body = await jsonBody(req, res)
+    if (!body) return
+    try {
+      if (seg === 'reorder') {
+        const r = validateReorder(body)
+        if (!r.ok) return invalid(res, r.fields)
+        if (!reorder(db, entity, r.value)) return invalid(res, { ids: 'Hay ids que no existen' })
+        clearCache()
+        audit(email, ip, 'reorder', entity, null, `Reordenó ${entity === 'experience' ? 'la experiencia' : `los ${LABEL[entity]}s`}`)
+        return send(res, 204)
+      }
+      if (sub === 'status') {
+        const r = validateStatus(body)
+        if (!r.ok) return invalid(res, r.fields)
+        const item = setStatus(db, entity, id as number, r.value)
+        if (!item) return send(res, 404, { error: 'not_found' })
+        clearCache()
+        const verb = { published: 'Publicó', hidden: 'Ocultó', archived: 'Archivó' }[r.value]
+        audit(email, ip, 'status', entity, id, `${verb} ${label} «${titleOf(item)}»`)
+        return send(res, 200, { item })
+      }
+      if (sub === 'featured') {
+        const r = validateFeatured(body)
+        if (!r.ok) return invalid(res, r.fields)
+        const item = setFeatured(db, id as number, r.value)
+        if (!item) return send(res, 404, { error: 'not_found' })
+        clearCache()
+        audit(email, ip, 'featured', entity, id, `${r.value ? 'Destacó' : 'Quitó el destacado de'} proyecto «${titleOf(item)}»`)
+        return send(res, 200, { item })
+      }
+      const r = VALIDATORS[entity](body)
+      if (!r.ok) return invalid(res, r.fields)
+      if (method === 'POST') {
+        const item = createItem(db, entity, r.value)
+        clearCache()
+        audit(email, ip, 'create', entity, item.id, `Creó ${label} «${titleOf(item)}»${githubNote(entity, null, item)}`)
+        return send(res, 201, { item })
+      }
+      const prev = getItem(db, entity, id as number)
+      const item = updateItem(db, entity, id as number, r.value)
+      if (!item) return send(res, 404, { error: 'not_found' })
+      clearCache()
+      audit(email, ip, 'update', entity, id, `Editó ${label} «${titleOf(item)}»${githubNote(entity, prev, item)}`)
+      return send(res, 200, { item })
+    } catch (err) {
+      if (err instanceof SlugTakenError) return send(res, 409, { error: 'slug_taken' })
+      throw err
+    }
+  }
+
+  async function upload(req: IncomingMessage, res: ServerResponse, email: string, ip: string): Promise<void> {
+    if (!isSameOrigin(req)) {
+      req.resume()
+      return send(res, 403, { error: 'forbidden' })
+    }
+    const contentType = header(req, 'content-type')
+    if (!/^multipart\/form-data;/i.test(contentType)) {
+      req.resume()
+      return send(res, 400, { error: 'invalid', fields: { file: 'Se esperaba multipart/form-data' } })
+    }
+    if (Number(req.headers['content-length'] ?? 0) > MAX_UPLOAD) {
+      req.resume()
+      return send(res, 413, { error: 'payload_too_large' }, { Connection: 'close' })
+    }
+    const raw = await readBuffer(req, MAX_UPLOAD)
+    if (!raw) return send(res, 413, { error: 'payload_too_large' }, { Connection: 'close' })
+    let file: unknown
+    try {
+      file = (await new Request('http://localhost/', { method: 'POST', headers: { 'content-type': contentType }, body: raw }).formData()).get('file')
+    } catch {
+      return send(res, 400, { error: 'invalid', fields: { file: 'Multipart inválido' } })
+    }
+    if (!(file instanceof File)) return send(res, 400, { error: 'invalid', fields: { file: 'Falta el archivo' } })
+    const data = Buffer.from(await file.arrayBuffer())
+    const kind = detectMedia(data)
+    if (!kind || !extensionMatches(file.name, kind)) return send(res, 415, { error: 'unsupported_media_type' })
+    if (data.length > (kind.type === 'image' ? MAX_IMAGE : MAX_VIDEO)) return send(res, 413, { error: 'payload_too_large' })
+    const { name } = saveMedia(config.mediaDir, data, kind)
+    const kb = Math.max(1, Math.round(data.length / 1024))
+    audit(email, ip, 'media_upload', 'media', null, `Subió ${kind.type === 'image' ? 'imagen' : 'video'} ${name} (${kb} KB)`)
+    send(res, 201, { url: `/api/media/${name}`, type: kind.type, size: data.length })
+  }
+
+  function serveMedia(req: IncomingMessage, res: ServerResponse, name: string): void {
+    const size = MEDIA_NAME.test(name) ? mediaSize(config.mediaDir, name) : null
+    if (size === null) return send(res, 404, { error: 'not_found' })
+    const headers = {
+      'Content-Type': mimeOf(name),
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+      'Content-Security-Policy': "default-src 'none'",
+      'Accept-Ranges': 'bytes',
+    }
+    const range = parseRange(header(req, 'range') || undefined, size)
+    if (range === 'invalid') {
+      res.writeHead(416, { ...headers, 'Content-Range': `bytes */${size}` })
+      return void res.end()
+    }
+    const [status, start, end] = range ? [206, range.start, range.end] : [200, 0, size - 1]
+    res.writeHead(status, {
+      ...headers,
+      'Content-Length': String(end - start + 1),
+      ...(range ? { 'Content-Range': `bytes ${start}-${end}/${size}` } : {}),
+    })
+    const stream = createReadStream(`${config.mediaDir}/${name}`, { start, end })
+    stream.on('error', () => res.destroy())
+    stream.pipe(res)
   }
 
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const ip = clientIp(req, config.trustProxy)
     const url = new URL(req.url ?? '/', 'http://localhost')
     const detail = req.method === 'GET' ? /^\/api\/admin\/visitors\/([^/]+)\/visits$/.exec(url.pathname) : null
-    const route = detail ? 'GET /api/admin/visitors/:ip/visits' : `${req.method} ${url.pathname}`
+    const crudMatch = /^\/api\/admin\/(projects|services|experience)(?:\/(reorder|\d+))?(?:\/(status|featured))?$/.exec(url.pathname)
+    const [, entity, seg, sub] = crudMatch ?? []
+    const crudRoute = crudMatch
+      ? `${req.method} /api/admin/:entity${seg === undefined ? '' : seg === 'reorder' ? '/reorder' : '/:id'}${sub ? `/${sub}` : ''}`
+      : null
+    const mediaMatch = req.method === 'GET' ? /^\/api\/media\/([^/]+)$/.exec(url.pathname) : null
+    const route = detail ? 'GET /api/admin/visitors/:ip/visits' : (crudRoute ?? `${req.method} ${url.pathname}`)
 
     if (route === 'POST /api/track') return track(req, res, ip)
     if (route === 'POST /api/admin/login') return login(req, res, ip)
     if (route === 'POST /api/admin/forgot') return forgot(req, res, ip)
     if (route === 'POST /api/admin/reset') return reset(req, res, ip)
+
+    if (mediaMatch) {
+      if (!hit(`media:${ip}`, 1200, MINUTE)) return send(res, 429, { error: 'too_many_requests' })
+      let name = ''
+      try {
+        name = decodeURIComponent(mediaMatch[1] ?? '')
+      } catch {
+        name = ''
+      }
+      return serveMedia(req, res, name)
+    }
+
+    if (route === 'GET /api/content') {
+      if (!hit(`content:${ip}`, 120, MINUTE)) return send(res, 429, { error: 'too_many_requests' })
+      const lang = parseLang(url.searchParams.get('lang'))
+      const base = memo(`content:${lang}`, 60_000, () => publicContent(db, lang))
+      const projects = base.projects.map(({ githubRepo, workingOn, ...project }) => {
+        const repo = typeof githubRepo === 'string' ? githubRepo : null
+        const active = workingOn === true
+        const found = active && repo ? github.cachedActivity(repo) : null
+        const activity = found
+          ? { pushedAt: found.pushedAt, commitsWeek: found.commitsWeek, commits: found.private ? [] : found.commits }
+          : null
+        return { ...project, workingOn: active, activity }
+      })
+      return send(res, 200, { ...base, projects }, {
+        'Cache-Control': 'public, max-age=30, stale-while-revalidate=300',
+      })
+    }
 
     if (route === 'GET /api/health') {
       if (!hit(`health:${ip}`, 60, MINUTE)) return send(res, 429, { error: 'too_many_requests' })
@@ -270,25 +524,43 @@ export function createApp(config: Config, db: DatabaseSync): Server {
       return send(res, 200, { ok: true, geo: geoReady(), visits: row.n })
     }
 
-    const admin = new Set(['POST /api/admin/logout', 'POST /api/admin/password', 'GET /api/admin/me', 'GET /api/admin/visits', 'GET /api/admin/visitors', 'GET /api/admin/visitors/:ip/visits', 'POST /api/admin/visits/delete', 'GET /api/admin/stats'])
+    const admin = new Set(['POST /api/admin/logout', 'POST /api/admin/password', 'GET /api/admin/me', 'GET /api/admin/visits', 'GET /api/admin/visitors', 'GET /api/admin/visitors/:ip/visits', 'POST /api/admin/visits/delete', 'GET /api/admin/stats', 'POST /api/admin/media', 'GET /api/admin/audit', 'GET /api/admin/github/repos', 'GET /api/admin/:entity', 'POST /api/admin/:entity', 'GET /api/admin/:entity/:id', 'PUT /api/admin/:entity/:id', 'DELETE /api/admin/:entity/:id', 'POST /api/admin/:entity/reorder', 'POST /api/admin/:entity/:id/status', 'POST /api/admin/:entity/:id/featured'])
     if (!admin.has(route)) return send(res, 404, { error: 'not_found' })
 
-    const limit = route === 'POST /api/admin/logout' ? 60 : route === 'POST /api/admin/visits/delete' ? 30 : 120
+    const limit = route === 'POST /api/admin/logout' ? 60 : route === 'POST /api/admin/visits/delete' ? 30 : route === 'POST /api/admin/media' ? 30 : 120
     if (!hit(`admin:${route}:${ip}`, limit, MINUTE)) return send(res, 429, { error: 'too_many_requests' })
 
     const sid = readSid(req.headers.cookie)
     const email = sessionEmail(db, sid)
     if (email === null) return send(res, 401, { error: 'unauthorized' })
 
+    if (crudMatch) {
+      if (sub === 'featured' && entity !== 'projects') return send(res, 404, { error: 'not_found' })
+      return crud(req, res, entity as Entity, seg, sub, email, ip)
+    }
+
     switch (route) {
+      case 'POST /api/admin/media':
+        return upload(req, res, email, ip)
+      case 'GET /api/admin/github/repos':
+        return send(res, 200, { configured: github.configured, repos: await github.listRepos() })
+      case 'GET /api/admin/audit': {
+        const lim = clampInt(url.searchParams.get('limit'), 1, 200, 50)
+        const beforeRaw = url.searchParams.get('before')
+        const before = beforeRaw === null ? null : clampInt(beforeRaw, 0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+        const action = url.searchParams.get('action')?.slice(0, 40) || null
+        const ent = url.searchParams.get('entity')?.slice(0, 40) || null
+        return send(res, 200, { items: listAudit(db, { limit: lim, before, action, entity: ent }) })
+      }
       case 'POST /api/admin/logout':
         if (!isSameOrigin(req)) return send(res, 403, { error: 'forbidden' })
         destroySession(db, sid as string)
+        audit(email, ip, 'logout', 'auth', null, 'Cierre de sesión')
         return send(res, 200, { ok: true }, { 'Set-Cookie': clearCookie(config.cookieSecure) })
       case 'POST /api/admin/password':
-        return changePassword(req, res, email, sid as string)
+        return changePassword(req, res, email, sid as string, ip)
       case 'POST /api/admin/visits/delete':
-        return deleteRoute(req, res)
+        return deleteRoute(req, res, email, ip)
       case 'GET /api/admin/me':
         return send(res, 200, { ok: true, email })
       case 'GET /api/admin/visits': {

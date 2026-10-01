@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from "react";
-import type { ExperienceItemType } from "../data/experience";
+import { useTranslation } from "react-i18next";
+import type { PublicExperience } from "../lib/content";
 
 interface Props {
-    experience: ExperienceItemType;
+    experience: PublicExperience;
     onClose: () => void;
 }
 
 /** Detalle completo de una experiencia con <dialog> nativo; devuelve el foco al disparador al desmontarse. */
 const ExperienceDetailModal: React.FC<Props> = ({ experience, onClose }) => {
+    const { t } = useTranslation();
     const { role, company, title, date, description, stack, link, contact } = experience;
     const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -38,7 +40,7 @@ const ExperienceDetailModal: React.FC<Props> = ({ experience, onClose }) => {
                     type="button"
                     onClick={() => dialogRef.current?.close()}
                     className="flex h-5 w-5 shrink-0 items-center justify-center border-2 border-ink bg-paper text-sm leading-none hover:bg-ink hover:text-paper"
-                    aria-label="Cerrar detalles"
+                    aria-label={t("experience.close")}
                 >
                     <span aria-hidden="true">×</span>
                 </button>
@@ -68,7 +70,7 @@ const ExperienceDetailModal: React.FC<Props> = ({ experience, onClose }) => {
                     <div className="flex flex-wrap gap-3 border-t-[length:var(--line)] border-ink pt-4">
                         {link && link !== "#" && (
                             <a href={link} target="_blank" rel="noopener noreferrer" className="btn btn-primary text-sm">
-                                Visitar sitio
+                                {t("experience.visit")}
                             </a>
                         )}
                         {contact && (
@@ -78,7 +80,7 @@ const ExperienceDetailModal: React.FC<Props> = ({ experience, onClose }) => {
                                 rel="noopener noreferrer"
                                 className="btn text-sm"
                             >
-                                Referencia: {contact}
+                                {t("experience.reference", { contact })}
                             </a>
                         )}
                     </div>

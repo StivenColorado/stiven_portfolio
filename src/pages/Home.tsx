@@ -1,19 +1,18 @@
 import React from "react"
 import { Link } from "react-router"
 import { motion, useReducedMotion } from "framer-motion"
+import { useTranslation } from "react-i18next"
 import EmblaCarousel from "../components/EmblaCarousel"
 import ExperienceTimeline from "../components/ExperienceItemTimeline"
 import ContactForm from "../components/ContactForm"
 import Services from "../components/Services"
+import NowWorking from "../components/NowWorking"
 import { useDocumentMeta } from "../lib/seo"
 
 const Home: React.FC = () => {
   const reduce = useReducedMotion()
-  useDocumentMeta({
-    title: "Stiven Colorado | Software a medida, IA y seguridad",
-    description:
-      "Desarrollador full-stack en Colombia. Software a medida, inteligencia artificial y seguridad para pymes y grandes empresas.",
-  })
+  const { t } = useTranslation()
+  useDocumentMeta({ title: t("seo.home.title"), description: t("seo.home.description") })
 
   const reveal = reduce
     ? {}
@@ -33,29 +32,30 @@ const Home: React.FC = () => {
         <div data-slot="k" className="h-[26svh] md:hidden" aria-hidden="true" />
         <motion.div {...reveal} className="md:w-1/2">
           <h1 className="text-[clamp(3rem,9vw,5.5rem)]">
-            Hola.
+            {t("home.hero.greeting")}
             <br />
-            Soy Stiven.
+            {t("home.hero.name")}
           </h1>
           <p className="mt-4 max-w-md text-lg leading-snug">
-            Software a medida, IA y seguridad para tu empresa.
+            {t("home.hero.tagline")}
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
             <a href="#servicios" className="btn">
-              Ver servicios
+              {t("home.hero.cta")}
             </a>
           </div>
         </motion.div>
 
         <div className="mt-10 md:mt-14">
-          <h2 className="mb-3 text-lg leading-none">Quick links</h2>
-          <nav aria-label="Accesos rápidos" className="quicklinks">
-            <a href="#servicios" className="quicklink">Servicios</a>
-            <a href="#proyectos" className="quicklink">Proyectos</a>
-            <Link to="/about" className="quicklink">Acerca</Link>
-            <a href="#contacto" className="quicklink">Contacto</a>
+          <h2 className="mb-3 text-lg leading-none">{t("home.quickLinksTitle")}</h2>
+          <nav aria-label={t("home.quickLinksAria")} className="quicklinks">
+            <a href="#servicios" className="quicklink">{t("home.quick.services")}</a>
+            <a href="#proyectos" className="quicklink">{t("home.quick.projects")}</a>
+            <Link to="/about" className="quicklink">{t("home.quick.about")}</Link>
+            <a href="#contacto" className="quicklink">{t("home.quick.contact")}</a>
           </nav>
         </div>
+        <NowWorking />
       </section>
 
       <div className="divider" />
@@ -64,15 +64,15 @@ const Home: React.FC = () => {
 
       <section id="proyectos" data-scene="projects" className="section scroll-mt-10">
         <motion.div {...reveal}>
-          <h2 className="text-4xl md:text-5xl">Projects</h2>
-          <p className="mt-3 max-w-xl text-muted">Proyectos destacados, incluidos trabajos para clientes bajo acuerdos de confidencialidad.</p>
+          <h2 className="text-4xl md:text-5xl">{t("home.projects.title")}</h2>
+          <p className="mt-3 max-w-xl text-muted">{t("home.projects.intro")}</p>
           <div className="mt-6">
             <EmblaCarousel />
           </div>
           <div data-slot="k" className="h-36 md:hidden" aria-hidden="true" />
           <div className="mt-8 text-center">
             <Link to="/projects" className="btn">
-              Ver todos los proyectos <span className="font-mono">→</span>
+              {t("home.projects.all")} <span className="font-mono">→</span>
             </Link>
           </div>
         </motion.div>
@@ -87,16 +87,14 @@ const Home: React.FC = () => {
 
       <section id="contacto" data-scene="contact" className="section scroll-mt-10">
         <motion.div {...reveal} className="mx-auto max-w-2xl">
-          <h2 className="text-4xl md:text-5xl">Hablemos</h2>
-          <p className="mt-3 text-muted">
-            ¿Tienes un proyecto en mente? Escríbeme y te respondo a tu correo.
-          </p>
+          <h2 className="text-4xl md:text-5xl">{t("home.contact.title")}</h2>
+          <p className="mt-3 text-muted">{t("home.contact.intro")}</p>
           <div data-slot="l" className="h-36 md:hidden" aria-hidden="true" />
           <div className="window mt-8">
             <div className="window-bar">
               <span className="window-dot" aria-hidden="true" />
               <span className="window-dot" aria-hidden="true" />
-              <span className="flex-1 truncate text-center">contacto.form</span>
+              <span className="flex-1 truncate text-center">{t("home.contact.windowTitle")}</span>
             </div>
             <div className="window-body">
               <ContactForm />

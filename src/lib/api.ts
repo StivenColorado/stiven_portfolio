@@ -55,11 +55,13 @@ export class ApiError extends Error {
     status: number;
     retryAfter?: number;
     code?: string;
-    constructor(status: number, retryAfter?: number, code?: string) {
+    fields?: Record<string, string>;
+    constructor(status: number, retryAfter?: number, code?: string, fields?: Record<string, string>) {
         super(`api_${status}`);
         this.status = status;
         this.retryAfter = retryAfter;
         this.code = code;
+        this.fields = fields;
     }
 }
 

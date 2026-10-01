@@ -1,0 +1,70 @@
+{
+  "projects": {
+    "seo": {
+      "title": "Projects · Stiven Colorado",
+      "description": "Software projects I have built: custom applications, demos and open source."
+    },
+    "eyebrow": "Projects",
+    "heading": "What I've built",
+    "filter": {
+      "label": "Interests",
+      "search": "Search type or technology…",
+      "groupKind": "Type",
+      "groupTags": "Technologies",
+      "remove": "Remove {{label}}",
+      "clear": "Clear all",
+      "empty": "No project matches these filters."
+    },
+    "kind": {
+      "case-study": "Confidential",
+      "demo": "Demos",
+      "oss": "Open source"
+    },
+    "count_one": "{{count}} project",
+    "count_other": "{{count}} projects",
+    "loadingLabel": "Loading projects",
+    "error": "Projects could not be loaded.",
+    "retry": "Retry",
+    "badge": {
+      "nda": "Client · confidential (NDA)",
+      "private": "Private code",
+      "active": "Under active development"
+    },
+    "card": {
+      "view": "View project",
+      "viewAria": "View details of {{title}}",
+      "demo": "Demo",
+      "repo": "Repository",
+      "cover": "Screenshot of {{title}}"
+    },
+    "carousel": {
+      "hint": "// swipe to see the projects",
+      "prev": "Previous",
+      "next": "Next",
+      "goTo": "Go to project {{n}}"
+    },
+    "modal": {
+      "close": "Close modal",
+      "clientNda": "Client project · NDA",
+      "personalPrivate": "Personal project · private",
+      "project": "Project",
+      "shot": "{{title}}, screenshot {{n}}",
+      "viewShot": "View screenshot {{n}}",
+      "viewVideo": "View video {{n}}",
+      "demo": "View demo",
+      "repo": "Repository",
+      "code": "Code",
+      "lastActivity": "Last activity: {{when}}",
+      "commitsWeek_one": "{{count}} commit this week",
+      "commitsWeek_other": "{{count}} commits this week",
+      "recentCommits": "Latest commits",
+      "viewCommit": "view",
+      "viewCommitAria": "View commit: {{message}}"
+    },
+    "gist": {
+      "title": "Code on GitHub Gist",
+      "frame": "GitHub Gist",
+      "open": "View on GitHub Gist"
+    }
+  }
+}

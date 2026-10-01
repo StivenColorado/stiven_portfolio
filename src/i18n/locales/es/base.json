@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "projects": "Proyectos",
+    "about": "Acerca",
+    "contact": "Contacto",
+    "homeAria": "Stiven, inicio",
+    "menuTitle": "menu.app",
+    "mainMenu": "Menú principal",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "toLight": "Cambiar a modo claro",
+    "toDark": "Cambiar a modo oscuro"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "error": "No se pudo cargar el contenido.",
+    "retry": "Reintentar",
+    "close": "Cerrar"
+  },
+  "lang": {
+    "es": "español",
+    "en": "inglés",
+    "switchTo": "Cambiar idioma a {{language}}"
+  }
+}

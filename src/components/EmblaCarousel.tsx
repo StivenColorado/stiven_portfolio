@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
-import { PROJECTS } from '../data/projects'
-import type { ProjectType } from '../types/types'
-import ProjectCard from './ProjectCard'
+import { useTranslation } from 'react-i18next'
+import { useContent } from '../lib/content'
+import type { PublicProject } from '../types/content'
+import ProjectCard, { ProjectCardSkeleton, ProjectsError } from './ProjectCard'
 import ProjectDetailModal from './ProjectDetailModal'
-
-const FEATURED = PROJECTS.filter(p => p.featured)
 
 const useIntersectionObserver = (callback: () => void) => {
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -75,7 +74,10 @@ const TypewriterText: React.FC<{ text: string; className?: string }> = ({ text, 
 const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const EmblaCarousel: React.FC = () => {
-  const [detailProject, setDetailProject] = useState<ProjectType | null>(null)
+  const { t } = useTranslation()
+  const { data, loading, error } = useContent()
+  const featured = data?.projects.filter(p => p.featured) ?? []
+  const [detailProject, setDetailProject] = useState<PublicProject | null>(null)
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: true,
@@ -122,14 +124,20 @@ const EmblaCarousel: React.FC = () => {
     <div className="mx-auto w-full max-w-6xl">
       <div className="min-h-6 pb-2">
         <TypewriterText
-          text="// desliza para ver los proyectos"
+          key={t('projects.carousel.hint')}
+          text={t('projects.carousel.hint')}
           className="font-mono text-sm text-muted"
         />
       </div>
       <div className="embla relative">
         <div className="embla__viewport overflow-hidden pb-4 pt-1" ref={emblaRef}>
           <div className="embla__container flex">
-            {FEATURED.map((project) => (
+            {loading && [0, 1, 2].map((i) => (
+              <div key={i} className="embla__slide flex-none w-[88%] sm:w-[60%] md:w-1/2 lg:w-1/3 pr-6 pb-3">
+                <ProjectCardSkeleton />
+              </div>
+            ))}
+            {featured.map((project) => (
               <div key={project.slug} className="embla__slide flex-none w-[88%] sm:w-[60%] md:w-1/2 lg:w-1/3 pr-6 pb-3">
                 <ProjectCard project={project} onOpen={setDetailProject} />
               </div>
@@ -137,15 +145,17 @@ const EmblaCarousel: React.FC = () => {
           </div>
         </div>
 
+        {error && <ProjectsError />}
+
         <div className="mt-4 flex items-center justify-center gap-4">
-          <button aria-label="Anterior" className="btn !min-h-9 !px-3 font-mono text-lg" onClick={scrollPrev}>
+          <button aria-label={t('projects.carousel.prev')} className="btn !min-h-9 !px-3 font-mono text-lg" onClick={scrollPrev}>
             ‹
           </button>
           <div className="flex gap-1">
             {scrollSnaps.map((_, index) => (
               <button
                 key={index}
-                aria-label={`Ir al proyecto ${index + 1}`}
+                aria-label={t('projects.carousel.goTo', { n: index + 1 })}
                 aria-current={index === selectedIndex}
                 className="flex h-6 w-4 items-center justify-center"
                 onClick={() => scrollTo(index)}
@@ -154,7 +164,7 @@ const EmblaCarousel: React.FC = () => {
               </button>
             ))}
           </div>
-          <button aria-label="Siguiente" className="btn !min-h-9 !px-3 font-mono text-lg" onClick={scrollNext}>
+          <button aria-label={t('projects.carousel.next')} className="btn !min-h-9 !px-3 font-mono text-lg" onClick={scrollNext}>
             ›
           </button>
         </div>

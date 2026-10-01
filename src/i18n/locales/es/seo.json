@@ -1,0 +1,16 @@
+{
+  "seo": {
+    "home": {
+      "title": "Stiven Colorado | Software a medida, IA y seguridad",
+      "description": "Desarrollador full-stack en Colombia. Software a medida, inteligencia artificial y seguridad para pymes y grandes empresas."
+    },
+    "about": {
+      "title": "Acerca de | Stiven Colorado",
+      "description": "Analista y desarrollador full-stack en Colombia: arquitectura limpia, APIs, cloud y experiencias web."
+    },
+    "privacy": {
+      "title": "Aviso de privacidad | Stiven Colorado",
+      "description": "Qué datos de navegación se recogen en este sitio, para qué, por cuánto tiempo y cómo ejercer tus derechos (Ley 1581 de 2012)."
+    }
+  }
+}

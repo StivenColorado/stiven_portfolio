@@ -1,0 +1,28 @@
+{
+  "home": {
+    "hero": {
+      "greeting": "Hola.",
+      "name": "Soy Stiven.",
+      "tagline": "Software a medida, IA y seguridad para tu empresa.",
+      "cta": "Ver servicios"
+    },
+    "quickLinksTitle": "Quick links",
+    "quickLinksAria": "Accesos rápidos",
+    "quick": {
+      "services": "Servicios",
+      "projects": "Proyectos",
+      "about": "Acerca",
+      "contact": "Contacto"
+    },
+    "projects": {
+      "title": "Projects",
+      "intro": "Proyectos destacados, incluidos trabajos para clientes bajo acuerdos de confidencialidad.",
+      "all": "Ver todos los proyectos"
+    },
+    "contact": {
+      "title": "Hablemos",
+      "intro": "¿Tienes un proyecto en mente? Escríbeme y te respondo a tu correo.",
+      "windowTitle": "contacto.form"
+    }
+  }
+}

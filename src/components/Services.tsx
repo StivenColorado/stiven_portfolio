@@ -1,36 +1,33 @@
-import { Bot, Code2, Compass, ShieldCheck } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router";
-import { SERVICES } from "../data/services";
-
-const ICONS: Record<string, LucideIcon> = {
-    asesoria: Compass,
-    desarrollo: Code2,
-    ia: Bot,
-    seguridad: ShieldCheck,
-};
+import { useTranslation } from "react-i18next";
+import { useContent } from "../lib/content";
+import { getServiceIcon } from "../lib/serviceIcons";
+import { SkeletonBlocks, ContentError } from "./ContentState";
 
 export default function Services() {
+    const { t } = useTranslation();
+    const { data, loading, error } = useContent();
+    const services = data?.services ?? [];
     return (
         <div className="dither">
             <section id="servicios" data-scene="services" className="section scroll-mt-10">
-                <h2 className="text-4xl text-ink md:text-5xl">Servicios</h2>
-                <p className="mt-3 max-w-2xl text-muted">
-                    Trabajo con pymes y grandes empresas, desde la definición técnica hasta la
-                    puesta en producción.
-                </p>
+                <h2 className="text-4xl text-ink md:text-5xl">{t("services.title")}</h2>
+                <p className="mt-3 max-w-2xl text-muted">{t("services.intro")}</p>
                 <div data-slot="t" className="h-28 md:hidden" aria-hidden="true" />
 
+                {loading && <SkeletonBlocks count={2} className="mt-8 grid gap-6 md:grid-cols-2" />}
+                {error && <ContentError />}
+
                 <ol className="mt-8 grid gap-6 md:grid-cols-2">
-                    {SERVICES.map((service, index) => {
-                        const Icon = ICONS[service.id] ?? Code2;
+                    {services.map((service, index) => {
+                        const Icon = getServiceIcon(service.icon);
                         return (
-                            <li key={service.id} className="window">
+                            <li key={service.slug} className="window">
                                 <div className="window-bar">
                                     <span className="window-dot" aria-hidden="true" />
                                     <span className="window-dot" aria-hidden="true" />
                                     <span className="flex-1 truncate text-center">
-                                        {`${new Date().getFullYear()}-${service.id}.svc`}
+                                        {`${new Date().getFullYear()}-${service.slug}.svc`}
                                     </span>
                                 </div>
                                 <div className="window-body flex h-full flex-col gap-3">
@@ -54,7 +51,7 @@ export default function Services() {
                                         to="/projects?kind=case-study"
                                         className="mt-auto inline-flex items-center gap-1 pt-2 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper"
                                     >
-                                        Ver proyectos para clientes <span aria-hidden="true">↗</span>
+                                        {t("services.viewProjects")} <span aria-hidden="true">↗</span>
                                     </Link>
                                 </div>
                             </li>
@@ -64,7 +61,7 @@ export default function Services() {
 
                 <div className="mt-8">
                     <a href="#contacto" className="btn btn-primary">
-                        Hablemos
+                        {t("services.talk")}
                     </a>
                 </div>
             </section>

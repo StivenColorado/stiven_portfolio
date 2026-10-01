@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { EXPERIENCE, type ExperienceItemType } from '../data/experience';
+import { useTranslation } from 'react-i18next';
+import { useContent, type PublicExperience } from '../lib/content';
+import { SkeletonBlocks, ContentError } from './ContentState';
 import ExperienceItem from './ExperienceItem';
 import ExperienceDetailModal from './ExperienceDetailModal';
 import { Brain, Keyboard, QrCode, Box } from 'lucide-react';
 import WorkIcon from './icons/WorkIcon';
 
 const ExperienceTimeline: React.FC = () => {
-  const [selected, setSelected] = useState<ExperienceItemType | null>(null);
+  const { t } = useTranslation();
+  const { data, loading, error } = useContent();
+  const experience = data?.experience ?? [];
+  const [selected, setSelected] = useState<PublicExperience | null>(null);
 
   const container = {
     hidden: {},
@@ -28,15 +33,17 @@ const ExperienceTimeline: React.FC = () => {
         className="mb-10"
       >
         <h2 className="mb-3 text-4xl text-ink md:text-5xl">
-          Experiencia Profesional
+          {t('experience.title')}
         </h2>
         <p className="text-base text-ink">
-          Una mirada rápida a mi trayectoria · toca cualquier rol para ver el detalle
+          {t('experience.intro')}
         </p>
       </motion.div>
 
+      {loading && <SkeletonBlocks count={3} className="space-y-6 pl-10 md:pl-12" />}
+      {error && <ContentError />}
+
       <div className="relative">
-        {/* Línea vertical del timeline */}
         <motion.div
           initial={{ height: 0 }}
           whileInView={{ height: '100%' }}
@@ -46,7 +53,6 @@ const ExperienceTimeline: React.FC = () => {
           className="absolute bottom-0 left-0 top-0 ml-4 w-[var(--line)] bg-ink md:ml-6"
         />
 
-        {/* Lista de experiencias */}
         <motion.ol
           variants={container}
           initial="hidden"
@@ -54,15 +60,15 @@ const ExperienceTimeline: React.FC = () => {
           viewport={{ once: true, amount: 0.1 }}
           className="relative space-y-6"
         >
-          {EXPERIENCE.map((experience, index) => (
+          {experience.map((entry, index) => (
               <motion.li
-                key={index}
+                key={entry.id}
                 className="relative pl-10 md:pl-12"
                 variants={item}
               >
                 <ExperienceItem
-                  experience={experience}
-                  onSelect={() => setSelected(experience)}
+                  experience={entry}
+                  onSelect={() => setSelected(entry)}
                 >
                   <motion.div
                     whileHover={{ scale: 1.2, rotate: 10 }}

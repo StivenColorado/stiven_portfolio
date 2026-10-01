@@ -39,26 +39,26 @@ const NodejsIcon: React.FC<NodejsIconProps> = ({
             x2="159.245%"
             y1="55.169%"
             y2="-18.306%"
-            ><stop offset="13.76%" stop-color="#41873F"></stop><stop
+            ><stop offset="13.76%" stopColor="#41873F"></stop><stop
                 offset="40.32%"
-                stop-color="#54A044"></stop><stop
+                stopColor="#54A044"></stop><stop
                 offset="71.36%"
-                stop-color="#66B848"></stop><stop
+                stopColor="#66B848"></stop><stop
                 offset="90.81%"
-                stop-color="#6CC04A"></stop></linearGradient
+                stopColor="#6CC04A"></stop></linearGradient
         ><linearGradient
             id="f"
             x1="-4.389%"
             x2="101.499%"
             y1="49.997%"
             y2="49.997%"
-            ><stop offset="9.192%" stop-color="#6CC04A"></stop><stop
+            ><stop offset="9.192%" stopColor="#6CC04A"></stop><stop
                 offset="28.64%"
-                stop-color="#66B848"></stop><stop
+                stopColor="#66B848"></stop><stop
                 offset="59.68%"
-                stop-color="#54A044"></stop><stop
+                stopColor="#54A044"></stop><stop
                 offset="86.24%"
-                stop-color="#41873F"></stop></linearGradient
+                stopColor="#41873F"></stop></linearGradient
         ><path
             id="b"
             d="M134.923 1.832c-4.344-2.443-9.502-2.443-13.846 0L6.787 67.801C2.443 70.244 0 74.859 0 79.745v132.208c0 4.887 2.715 9.502 6.787 11.945l114.29 65.968c4.344 2.444 9.502 2.444 13.846 0l114.29-65.968c4.344-2.443 6.787-7.058 6.787-11.945V79.745c0-4.886-2.715-9.501-6.787-11.944L134.923 1.832Z"

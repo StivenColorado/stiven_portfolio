@@ -1,20 +1,36 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ExternalLink, Github, Code } from "lucide-react";
-import type { ProjectType } from "../types/types";
+import { useTranslation } from "react-i18next";
+import type { PublicProject } from "../types/content";
 import Tag from "./Tag";
 import GistModal from "./GistModal";
-import { PrivateBadge, ProjectVisual } from "./ProjectCard";
-import { fileNameOf } from "./fileName";
+import { ActiveBadge, PrivateBadge, ProjectVisual } from "./ProjectCard";
+import { fileNameOf, tagOf } from "./fileName";
 
 interface Props {
-    project: ProjectType;
+    project: PublicProject;
     onClose: () => void;
 }
 
-const posterOf = (src: string) => src.replace(/\.webm$/, ".webp");
+const MINUTE = 60_000;
+
+function relativeTime(iso: string, lang: string) {
+    const diff = new Date(iso).getTime() - Date.now();
+    if (Number.isNaN(diff)) return null;
+    const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
+    const minutes = Math.round(diff / MINUTE);
+    if (Math.abs(minutes) < 60) return rtf.format(minutes, "minute");
+    const hours = Math.round(minutes / 60);
+    if (Math.abs(hours) < 24) return rtf.format(hours, "hour");
+    const days = Math.round(hours / 24);
+    if (Math.abs(days) < 30) return rtf.format(days, "day");
+    return rtf.format(Math.round(days / 30), "month");
+}
 
 /** <dialog> nativo: Escape y retorno de foco los resuelve el navegador, como en GistModal. */
 const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
+    const { t, i18n } = useTranslation();
+    const lang = i18n.resolvedLanguage ?? "es";
     const dialogRef = useRef<HTMLDialogElement>(null);
     const [active, setActive] = useState(0);
     const [gistOpen, setGistOpen] = useState(false);
@@ -24,6 +40,9 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
         ...project.videos.map((src) => ({ type: 'video' as const, src })),
     ];
     const current = media[active];
+    const poster = project.images[0];
+    const activity = project.activity;
+    const lastActivity = activity ? relativeTime(activity.pushedAt, lang) : null;
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -52,14 +71,14 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                     type="button"
                     onClick={() => dialogRef.current?.close()}
                     className="flex h-5 w-5 shrink-0 items-center justify-center border-2 border-ink bg-paper text-sm leading-none hover:bg-ink hover:text-paper"
-                    aria-label="Cerrar modal"
+                    aria-label={t("projects.modal.close")}
                 >
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
 
             <div className="border-b-[length:var(--line)] border-ink p-4">
-                <span className="eyebrow">{project.client ?? (project.nda ? 'Proyecto para cliente · NDA' : project.kind === 'case-study' ? 'Proyecto personal · privado' : 'Proyecto')}</span>
+                <span className="eyebrow">{project.client ?? (project.nda ? t("projects.modal.clientNda") : project.kind === 'case-study' ? t("projects.modal.personalPrivate") : t("projects.modal.project"))}</span>
                 <h3 className="text-3xl">{project.title}</h3>
             </div>
 
@@ -69,8 +88,8 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                         <video
                             key={current.src}
                             src={current.src}
-                            poster={posterOf(current.src)}
-                            preload="none"
+                            poster={poster}
+                            preload={poster ? "none" : "metadata"}
                             controls
                             playsInline
                             className="h-full w-full object-cover"
@@ -79,7 +98,7 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                         <img
                             key={current.src}
                             src={current.src}
-                            alt={`${project.title}, captura ${active + 1}`}
+                            alt={t("projects.modal.shot", { title: project.title, n: active + 1 })}
                             width={1280}
                             height={800}
                             loading="lazy"
@@ -98,26 +117,35 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                                 <button
                                     type="button"
                                     onClick={() => setActive(i)}
-                                    aria-label={`Ver ${item.type === 'video' ? 'video' : 'captura'} ${i + 1}`}
+                                    aria-label={t(item.type === 'video' ? "projects.modal.viewVideo" : "projects.modal.viewShot", { n: i + 1 })}
                                     aria-current={i === active}
                                     className={`block h-14 w-20 overflow-hidden border-2 ${i === active ? 'border-ink shadow-[var(--shadow-hard-sm)]' : 'border-ink opacity-60 hover:opacity-100'}`}
                                 >
-                                    <img
-                                        src={item.type === 'video' ? posterOf(item.src) : item.src}
-                                        alt=""
-                                        width={80}
-                                        height={56}
-                                        loading="lazy"
-                                        decoding="async"
-                                        className="h-full w-full object-cover"
-                                    />
+                                    {item.type === 'video' && !poster ? (
+                                        <video src={item.src} muted playsInline preload="metadata" aria-hidden="true" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <img
+                                            src={item.type === 'video' ? poster : item.src}
+                                            alt=""
+                                            width={80}
+                                            height={56}
+                                            loading="lazy"
+                                            decoding="async"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    )}
                                 </button>
                             </li>
                         ))}
                     </ul>
                 )}
 
-                {project.private && media.length > 0 && <div><PrivateBadge nda={project.nda} /></div>}
+                {((project.private && media.length > 0) || project.workingOn) && (
+                    <div className="flex flex-wrap gap-2">
+                        {project.private && media.length > 0 && <PrivateBadge nda={project.nda} />}
+                        {project.workingOn && <ActiveBadge />}
+                    </div>
+                )}
                 <p className="text-sm leading-relaxed">{project.description}</p>
 
                 {project.highlights && project.highlights.length > 0 && (
@@ -126,8 +154,33 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                     </ul>
                 )}
 
+                {activity && (
+                    <div className="flex flex-col gap-3 border-[length:var(--line)] border-ink p-4 text-sm">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs">
+                            {lastActivity && <span>{t("projects.modal.lastActivity", { when: lastActivity })}</span>}
+                            <span>{t("projects.modal.commitsWeek", { count: activity.commitsWeek })}</span>
+                        </div>
+                        {activity.commits.length > 0 && (
+                            <div>
+                                <h4 className="eyebrow mb-2">{t("projects.modal.recentCommits")}</h4>
+                                <ul className="flex flex-col gap-1.5">
+                                    {activity.commits.map((c) => (
+                                        <li key={c.url} className="flex items-baseline gap-2">
+                                            <span className="min-w-0 flex-1 truncate">{c.message}</span>
+                                            <span className="shrink-0 font-mono text-xs text-muted">{relativeTime(c.date, lang)}</span>
+                                            <a href={c.url} target="_blank" rel="noopener noreferrer" aria-label={t("projects.modal.viewCommitAria", { message: c.message })} className="shrink-0 font-mono text-xs underline underline-offset-4 hover:bg-ink hover:text-paper">
+                                                {t("projects.modal.viewCommit")}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 <div className="flex flex-wrap gap-1.5">
-                    {project.tags.map((tag) => <Tag key={tag.name} tag={tag} />)}
+                    {project.tags.map((key) => <Tag key={key} tag={tagOf(key)} />)}
                 </div>
 
                 {(demo || repo || gist) && (
@@ -135,19 +188,19 @@ const ProjectDetailModal: React.FC<Props> = ({ project, onClose }) => {
                         {demo && (
                             <a href={demo} target="_blank" rel="noopener noreferrer" className="btn btn-primary text-sm">
                                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                                Ver demo
+                                {t("projects.modal.demo")}
                             </a>
                         )}
                         {repo && (
                             <a href={repo} target="_blank" rel="noopener noreferrer" className="btn text-sm">
                                 <Github className="h-4 w-4" aria-hidden="true" />
-                                Repositorio
+                                {t("projects.modal.repo")}
                             </a>
                         )}
                         {gist && (
                             <button type="button" onClick={() => setGistOpen(true)} className="btn text-sm">
                                 <Code className="h-4 w-4" aria-hidden="true" />
-                                Código
+                                {t("projects.modal.code")}
                             </button>
                         )}
                     </div>

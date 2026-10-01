@@ -1,14 +1,16 @@
 import React, { type ReactNode } from 'react';
-import type { ExperienceItemType } from '../data/experience';
+import { useTranslation } from 'react-i18next';
+import type { PublicExperience } from '../lib/content';
 
 interface ExperienceItemProps {
-  experience: ExperienceItemType;
+  experience: PublicExperience;
   onSelect: () => void;
   children?: ReactNode;
 }
 
 /** Tarjeta compacta para escaneo rápido; el detalle completo vive en ExperienceDetailModal. */
 const ExperienceItem: React.FC<ExperienceItemProps> = ({ experience, onSelect, children }) => {
+  const { t } = useTranslation();
   const { role, company, title, date, summary, description, stack } = experience;
 
   return (
@@ -20,7 +22,7 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({ experience, onSelect, c
       <button
         type="button"
         onClick={onSelect}
-        aria-label={`Ver detalle de ${role ?? title}`}
+        aria-label={t("experience.viewDetailAria", { name: role ?? title })}
         className="group window w-full cursor-pointer px-3 py-2.5 text-left shadow-[var(--shadow-hard-sm)] transition-transform hover:translate-x-px hover:translate-y-px"
       >
         <time className="eyebrow mb-1 block leading-none">{date}</time>
@@ -41,7 +43,7 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({ experience, onSelect, c
             </span>
           ))}
           <span className="ml-auto whitespace-nowrap font-mono text-xs text-ink opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-            Ver detalle →
+            {t("experience.viewDetail")} →
           </span>
         </div>
       </button>

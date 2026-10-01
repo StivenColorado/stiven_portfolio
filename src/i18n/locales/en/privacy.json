@@ -1,0 +1,27 @@
+{
+  "privacy": {
+    "eyebrow": "Legal",
+    "title": "Privacy notice",
+    "intro": "This notice is issued in compliance with Colombian Law 1581 of 2012 on personal data protection. We do not use tracking cookies or show a cookie banner.",
+    "dataTitle": "What data is collected",
+    "data": [
+      "IP address.",
+      "Approximate country and city, inferred from the IP.",
+      "Operating system and device type.",
+      "Browser (user agent).",
+      "Page visited and referrer.",
+      "Date and time of the visit."
+    ],
+    "purposeTitle": "Purpose",
+    "purpose": "This data is used only for site traffic statistics.",
+    "retentionTitle": "Retention and third parties",
+    "retention": "Records are kept for 30 days and then deleted. They are never shared with or sold to third parties. We honor the Global Privacy Control signal: if your browser sends it, your visit is not recorded.",
+    "geoTitle": "Geolocation",
+    "geoLink": "IP Geolocation by DB-IP",
+    "geoAfter": ". The lookup runs locally against a downloaded database; your IP is never sent to any external service.",
+    "rightsTitle": "Your rights",
+    "rightsBefore": "As a data subject you may access, update and correct your data, request its deletion, or revoke your authorization. To exercise these rights, write to me through the ",
+    "rightsLink": "contact form",
+    "rightsAfter": "."
+  }
+}

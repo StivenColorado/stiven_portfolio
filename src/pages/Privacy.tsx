@@ -1,51 +1,38 @@
 import React from "react"
 import { useDocumentMeta } from "../lib/seo"
 import { Link } from "react-router"
+import { useTranslation } from "react-i18next"
 
 const Privacy: React.FC = () => {
-  useDocumentMeta({
-    title: "Aviso de privacidad | Stiven Colorado",
-    description:
-      "Qué datos de navegación se recogen en este sitio, para qué, por cuánto tiempo y cómo ejercer tus derechos (Ley 1581 de 2012).",
-  })
+  const { t } = useTranslation()
+  useDocumentMeta({ title: t("seo.privacy.title"), description: t("seo.privacy.description") })
+  const data = t("privacy.data", { returnObjects: true }) as string[]
 
   const h2 = "mt-10 text-3xl text-ink"
   const li = "list-disc ml-5"
 
   return (
     <div className="section max-w-3xl text-ink">
-      <p className="eyebrow">Legal</p>
+      <p className="eyebrow">{t("privacy.eyebrow")}</p>
       <h1 className="mt-2 text-balance text-5xl md:text-6xl">
-        Aviso de privacidad
+        {t("privacy.title")}
       </h1>
-      <p className="mt-4 text-muted">
-        Este aviso se emite en cumplimiento de la Ley 1581 de 2012 de Colombia sobre protección de
-        datos personales. No usamos cookies de seguimiento ni mostramos banner de cookies.
-      </p>
+      <p className="mt-4 text-muted">{t("privacy.intro")}</p>
 
-      <h2 className={h2}>Qué datos se recogen</h2>
+      <h2 className={h2}>{t("privacy.dataTitle")}</h2>
       <ul className="mt-3 space-y-1 text-muted">
-        <li className={li}>Dirección IP.</li>
-        <li className={li}>País y ciudad aproximados, deducidos de la IP.</li>
-        <li className={li}>Sistema operativo y tipo de dispositivo.</li>
-        <li className={li}>Navegador (user agent).</li>
-        <li className={li}>Ruta visitada y referrer.</li>
-        <li className={li}>Fecha y hora de la visita.</li>
+        {data.map((item) => (
+          <li key={item} className={li}>{item}</li>
+        ))}
       </ul>
 
-      <h2 className={h2}>Finalidad</h2>
-      <p className="mt-3 text-muted">
-        Estos datos se usan únicamente para estadísticas de tráfico del sitio.
-      </p>
+      <h2 className={h2}>{t("privacy.purposeTitle")}</h2>
+      <p className="mt-3 text-muted">{t("privacy.purpose")}</p>
 
-      <h2 className={h2}>Retención y terceros</h2>
-      <p className="mt-3 text-muted">
-        Los registros se conservan 30 días y luego se eliminan. No se comparten ni se venden a
-        terceros. Respetamos la señal Global Privacy Control: si tu navegador la envía, no se
-        registra tu visita.
-      </p>
+      <h2 className={h2}>{t("privacy.retentionTitle")}</h2>
+      <p className="mt-3 text-muted">{t("privacy.retention")}</p>
 
-      <h2 className={h2}>Geolocalización</h2>
+      <h2 className={h2}>{t("privacy.geoTitle")}</h2>
       <p className="mt-3 text-muted">
         <a
           href="https://db-ip.com"
@@ -53,20 +40,18 @@ const Privacy: React.FC = () => {
           rel="noopener noreferrer"
           className="underline underline-offset-4 hover:bg-ink hover:text-paper"
         >
-          IP Geolocation by DB-IP
+          {t("privacy.geoLink")}
         </a>
-        . La consulta se hace localmente sobre una base de datos descargada; tu IP no se envía a
-        ningún servicio externo.
+        {t("privacy.geoAfter")}
       </p>
 
-      <h2 className={h2}>Tus derechos</h2>
+      <h2 className={h2}>{t("privacy.rightsTitle")}</h2>
       <p className="mt-3 text-muted">
-        Como titular puedes conocer, actualizar, rectificar y solicitar la supresión de tus datos, o
-        revocar la autorización. Para ejercer estos derechos escríbeme desde el{" "}
+        {t("privacy.rightsBefore")}
         <Link to="/#contacto" className="underline underline-offset-4 hover:bg-ink hover:text-paper">
-          formulario de contacto
+          {t("privacy.rightsLink")}
         </Link>
-        .
+        {t("privacy.rightsAfter")}
       </p>
     </div>
   )

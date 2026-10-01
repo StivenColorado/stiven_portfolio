@@ -1,0 +1,70 @@
+{
+  "projects": {
+    "seo": {
+      "title": "Proyectos · Stiven Colorado",
+      "description": "Proyectos de software que he construido: aplicaciones a medida, demos y código abierto."
+    },
+    "eyebrow": "Proyectos",
+    "heading": "Lo que he construido",
+    "filter": {
+      "label": "Intereses",
+      "search": "Buscar tipo o tecnología…",
+      "groupKind": "Tipo",
+      "groupTags": "Tecnologías",
+      "remove": "Quitar {{label}}",
+      "clear": "Limpiar todo",
+      "empty": "Ningún proyecto coincide con estos filtros."
+    },
+    "kind": {
+      "case-study": "Confidenciales",
+      "demo": "Demos",
+      "oss": "Open source"
+    },
+    "count_one": "{{count}} proyecto",
+    "count_other": "{{count}} proyectos",
+    "loadingLabel": "Cargando proyectos",
+    "error": "No se pudieron cargar los proyectos.",
+    "retry": "Reintentar",
+    "badge": {
+      "nda": "Cliente · confidencial (NDA)",
+      "private": "Código privado",
+      "active": "En desarrollo activo"
+    },
+    "card": {
+      "view": "Ver proyecto",
+      "viewAria": "Ver detalle de {{title}}",
+      "demo": "Demo",
+      "repo": "Repositorio",
+      "cover": "Captura de {{title}}"
+    },
+    "carousel": {
+      "hint": "// desliza para ver los proyectos",
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "goTo": "Ir al proyecto {{n}}"
+    },
+    "modal": {
+      "close": "Cerrar modal",
+      "clientNda": "Proyecto para cliente · NDA",
+      "personalPrivate": "Proyecto personal · privado",
+      "project": "Proyecto",
+      "shot": "{{title}}, captura {{n}}",
+      "viewShot": "Ver captura {{n}}",
+      "viewVideo": "Ver video {{n}}",
+      "demo": "Ver demo",
+      "repo": "Repositorio",
+      "code": "Código",
+      "lastActivity": "Última actividad: {{when}}",
+      "commitsWeek_one": "{{count}} commit esta semana",
+      "commitsWeek_other": "{{count}} commits esta semana",
+      "recentCommits": "Últimos commits",
+      "viewCommit": "ver",
+      "viewCommitAria": "Ver commit: {{message}}"
+    },
+    "gist": {
+      "title": "Código en GitHub Gist",
+      "frame": "GitHub Gist",
+      "open": "Ver en GitHub Gist"
+    }
+  }
+}

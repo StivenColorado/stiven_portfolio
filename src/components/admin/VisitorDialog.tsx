@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { adminApi } from "../../lib/api";
 import type { Visit, Visitor } from "../../lib/api";
-import { fmtDateTime, timesLabel } from "./format";
+import { deviceLabel, fmtDateTime, osLabel, timesLabel } from "./format";
 import { Multi, Place } from "./VisitsTable";
 
 interface Props {
@@ -21,6 +22,7 @@ const Stat = ({ label, children }: { label: string; children: React.ReactNode })
 );
 
 export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthorized }: Props) {
+    const { t } = useTranslation();
     const ref = useRef<HTMLDialogElement>(null);
     const [detail, setDetail] = useState<Detail | null>(null);
     const ip = visitor?.ip;
@@ -55,7 +57,7 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
             <div className="window-bar">
                 <span className="window-dot" aria-hidden="true" />
                 <span className="flex-1 truncate font-mono">{v?.ip}.log</span>
-                <button type="button" onClick={() => ref.current?.close()} className="px-2 font-bold" aria-label="Cerrar">✕</button>
+                <button type="button" onClick={() => ref.current?.close()} className="px-2 font-bold" aria-label={t("admin.common.close")}>✕</button>
             </div>
             {v && (
                 <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-4 sm:p-6">
@@ -64,15 +66,15 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
                         <span className="tag">{timesLabel(v.visits)}</span>
                     </div>
                     <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                        <Stat label="Ubicación"><Place v={v} /></Stat>
-                        <Stat label="Sistema"><Multi main={v.os} all={v.oses} /></Stat>
-                        <Stat label="Dispositivo"><Multi main={v.device} all={v.devices} /></Stat>
-                        <Stat label="Primera visita">{fmtDateTime.format(v.firstSeen)}</Stat>
-                        <Stat label="Última visita">{fmtDateTime.format(v.lastSeen)}</Stat>
-                        <Stat label="Total">{v.visits}</Stat>
+                        <Stat label={t("admin.dialog.location")}><Place v={v} /></Stat>
+                        <Stat label={t("admin.dialog.system")}><Multi main={v.os} all={v.oses} format={osLabel} /></Stat>
+                        <Stat label={t("admin.dialog.device")}><Multi main={v.device} all={v.devices} format={deviceLabel} /></Stat>
+                        <Stat label={t("admin.dialog.firstVisit")}>{fmtDateTime.format(v.firstSeen)}</Stat>
+                        <Stat label={t("admin.dialog.lastVisit")}>{fmtDateTime.format(v.lastSeen)}</Stat>
+                        <Stat label={t("admin.dialog.total")}>{v.visits}</Stat>
                     </dl>
                     <section className="space-y-2">
-                        <h3 className="eyebrow">Rutas visitadas</h3>
+                        <h3 className="eyebrow">{t("admin.dialog.paths")}</h3>
                         <ul className="flex flex-wrap gap-2">
                             {v.paths.map((p) => (
                                 <li key={p.key} className="tag break-all font-mono">{p.key} <span className="text-muted">×{p.n}</span></li>
@@ -80,9 +82,9 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
                         </ul>
                     </section>
                     <section className="space-y-2">
-                        <h3 className="eyebrow">Referrers</h3>
+                        <h3 className="eyebrow">{t("admin.dialog.referrers")}</h3>
                         {v.referrers.length === 0 ? (
-                            <p className="text-sm text-muted">Acceso directo, sin referrer.</p>
+                            <p className="text-sm text-muted">{t("admin.dialog.direct")}</p>
                         ) : (
                             <ul className="space-y-1 text-sm">
                                 {v.referrers.map((r) => <li key={r} className="break-all">{r}</li>)}
@@ -90,9 +92,9 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
                         )}
                     </section>
                     <section className="space-y-3">
-                        <h3 className="eyebrow">Línea de tiempo</h3>
-                        {detail === "error" && <p className="text-sm text-muted">No se pudo cargar el detalle.</p>}
-                        {!visits && detail !== "error" && <p className="text-sm text-muted">Cargando…</p>}
+                        <h3 className="eyebrow">{t("admin.dialog.timeline")}</h3>
+                        {detail === "error" && <p className="text-sm text-muted">{t("admin.dialog.loadFailed")}</p>}
+                        {!visits && detail !== "error" && <p className="text-sm text-muted">{t("admin.common.loading")}</p>}
                         {visits && (
                             <ol className="space-y-0 border-l-2 border-ink pl-4">
                                 {visits.map((x) => (
@@ -100,11 +102,11 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
                                         <span aria-hidden="true" className="absolute -left-[1.4rem] top-1.5 size-2.5 border-2 border-ink bg-paper" />
                                         <p className="font-mono text-xs font-bold">{fmtDateTime.format(x.ts)}</p>
                                         <p className="break-all font-mono text-ink">{x.path}</p>
-                                        <p className="break-all text-xs text-muted">{x.referrer ?? "Acceso directo"}</p>
+                                        <p className="break-all text-xs text-muted">{x.referrer ?? t("admin.dialog.directShort")}</p>
                                         <p className="break-all font-mono text-xs text-muted">{x.ua || "—"}</p>
                                     </li>
                                 ))}
-                                {visits.length >= 500 && <li className="text-xs text-muted">Se muestran las 500 más recientes.</li>}
+                                {visits.length >= 500 && <li className="text-xs text-muted">{t("admin.dialog.capped")}</li>}
                             </ol>
                         )}
                     </section>
@@ -112,8 +114,8 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
             )}
             {v && (
                 <div className="flex shrink-0 flex-wrap justify-end gap-3 border-t-2 border-ink bg-grey p-3 sm:px-6">
-                    <button type="button" className="btn" onClick={() => ref.current?.close()}>Cerrar</button>
-                    <button type="button" className="btn btn-primary" onClick={() => onDelete(v)}>Borrar todas las visitas de esta IP</button>
+                    <button type="button" className="btn" onClick={() => ref.current?.close()}>{t("admin.common.close")}</button>
+                    <button type="button" className="btn btn-primary" onClick={() => onDelete(v)}>{t("admin.dialog.deleteAll")}</button>
                 </div>
             )}
         </dialog>

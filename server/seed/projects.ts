@@ -1,9 +1,9 @@
-import { TAGS } from "./tags"
-import type { ProjectType } from "../types/types"
+import type { SeedProject } from '../validate.ts'
 
-export const PROJECTS: ProjectType[] = [
+const BASE: Omit<SeedProject, 'i18n'>[] = [
   {
     slug: "azur",
+    githubRepo: "StivenColorado/AZUR",
     nda: true,
     title: "AZUR — catálogo mayorista",
     summary: "Catálogo mayorista que importa Excel de 600 a 800 MB con fotos embebidas, con panel admin y catálogo público.",
@@ -13,11 +13,12 @@ export const PROJECTS: ProjectType[] = [
     highlights: ["Problema: el inventario llegaba en Excel de 600 a 800 MB con fotos embebidas, imposible de cargar a mano.", "Solución: importación de esos archivos hacia un panel admin y un catálogo público para los clientes.", "Resultado: catálogo en producción protegido con JWT en cookie httpOnly, rate limit y CSP, servido con nginx y systemd."],
     images: [],
     videos: [],
-    tags: [TAGS.NODEJS, TAGS.TYPESCRIPT, TAGS.REACT],
+    tags: ["NODEJS", "TYPESCRIPT", "REACT"],
     featured: true,
   },
   {
     slug: "chatbot-agencia",
+    githubRepo: "StivenColorado/chatBotAgencia",
     nda: true,
     title: "chatBotAgencia — cotizador de vuelos por WhatsApp",
     summary: "Chatbot de WhatsApp que cotiza vuelos, con proveedor de IA intercambiable (Gemini u OpenAI).",
@@ -27,11 +28,12 @@ export const PROJECTS: ProjectType[] = [
     highlights: ["Problema: cotizar vuelos por WhatsApp obliga a atender cada consulta de forma manual.", "Solución: un chatbot con NestJS, PostgreSQL, Prisma, Redis y Playwright que conversa y obtiene las cotizaciones.", "Resultado: la IA se cambia entre Gemini y OpenAI sin tocar el resto del sistema."],
     images: [],
     videos: [],
-    tags: [TAGS.NESTJS, TAGS.TYPESCRIPT, TAGS.PRISMA, TAGS.REDIS, TAGS.WHATSAPP, TAGS.IA],
+    tags: ["NESTJS", "TYPESCRIPT", "PRISMA", "REDIS", "WHATSAPP", "IA"],
     featured: true,
   },
   {
     slug: "asadero-inventario",
+    githubRepo: "StivenColorado/asadero-inventario",
     nda: true,
     title: "asadero-inventario — gestión offline para un asadero",
     summary: "App de escritorio offline-first en Python y SQLite, con respaldo en Supabase y PWA para meseros.",
@@ -41,10 +43,11 @@ export const PROJECTS: ProjectType[] = [
     highlights: ["Problema: el negocio no puede depender de la conexión a internet para operar.", "Solución: app de escritorio offline-first con SQLite, respaldo en Supabase y PWA para meseros.", "Resultado: pedidos firmados, aprobación de dispositivos y roles de acceso."],
     images: [],
     videos: [],
-    tags: [TAGS.PYTHON, TAGS.SQLITE, TAGS.SUPABASE],
+    tags: ["PYTHON", "SQLITE", "SUPABASE"],
   },
   {
     slug: "n8n-agent",
+    githubRepo: "StivenColorado/testN8n",
     title: "testN8n — agente LLM en Telegram",
     summary: "Bot de Telegram con agente LLM que lee y escribe en una API propia y envía correos y fotos.",
     description: "Bot de Telegram con un agente LLM orquestado en n8n. El agente lee y escribe datos en una API propia y puede enviar correos y fotos. Usa Node, SQLite y Redis, y se expone con Cloudflare Tunnel.",
@@ -53,10 +56,11 @@ export const PROJECTS: ProjectType[] = [
     highlights: ["Problema: operar una API propia desde el chat requería pasos manuales.", "Solución: un agente LLM en n8n conectado a Telegram que consulta y modifica la API, y envía correos y fotos.", "Resultado: todo accesible por chat, sobre Node, SQLite y Redis, publicado con Cloudflare Tunnel."],
     images: [],
     videos: [],
-    tags: [TAGS.N8N, TAGS.NODEJS, TAGS.SQLITE, TAGS.REDIS, TAGS.IA],
+    tags: ["N8N", "NODEJS", "SQLITE", "REDIS", "IA"],
   },
   {
     slug: "portafolio-3d",
+    githubRepo: "StivenColorado/portafolio3D",
     title: "portafolio3D — portafolio isométrico",
     summary: "Portafolio isométrico en 3D con three.js y TypeScript.",
     description: "Portafolio isométrico en 3D hecho con three.js y TypeScript. La demo es pública y el código del repositorio es privado.",
@@ -65,10 +69,11 @@ export const PROJECTS: ProjectType[] = [
     private: true,
     images: [],
     videos: [],
-    tags: [TAGS.THREEJS, TAGS.TYPESCRIPT],
+    tags: ["THREEJS", "TYPESCRIPT"],
   },
   {
     slug: "finanzas",
+    githubRepo: "StivenColorado/finanzas",
     title: "finanzas — gastos desde SMS bancarios",
     summary: "App Flutter que lee SMS bancarios colombianos y propone gastos por quincena.",
     description: "App en Flutter que lee los SMS de notificaciones de bancos colombianos y propone los gastos de cada quincena. Los datos se guardan únicamente en el teléfono.",
@@ -77,10 +82,11 @@ export const PROJECTS: ProjectType[] = [
     highlights: ["Problema: registrar los gastos a mano es tedioso y se abandona.", "Solución: lectura de SMS bancarios colombianos para proponer los gastos por quincena.", "Resultado: control de gastos con los datos guardados solo en el teléfono."],
     images: [],
     videos: [],
-    tags: [TAGS.FLUTTER],
+    tags: ["FLUTTER"],
   },
   {
     slug: "talkflow-ai",
+    githubRepo: "StivenColorado/TalkFlow_AI",
     title: "TalkFlow_AI — SaaS de automatización conversacional",
     summary: "Diseño de producto y arquitectura de un SaaS multitenant de automatización conversacional.",
     description: "Diseño de producto y arquitectura de un SaaS multitenant de automatización conversacional con WhatsApp Cloud API, IA y CRM. Es solo documentación: no hay código implementado.",
@@ -89,10 +95,11 @@ export const PROJECTS: ProjectType[] = [
     highlights: ["Problema: las empresas atienden sus conversaciones de WhatsApp sin automatización ni CRM integrado.", "Solución: diseño de un SaaS multitenant con WhatsApp Cloud API, IA y CRM.", "Resultado: documento de producto y arquitectura, sin implementación."],
     images: [],
     videos: [],
-    tags: [TAGS.WHATSAPP, TAGS.IA],
+    tags: ["WHATSAPP", "IA"],
   },
   {
     slug: "rick-morty-explorer",
+    githubRepo: "StivenColorado/rickAndMorty",
     title: "Rick & Morty Explorer",
     summary: "Explorador del universo de Rick & Morty con React, TypeScript y GraphQL.",
     description: "Explorador del universo de Rick & Morty construido con React 19, TypeScript y Vite, consumiendo la API vía GraphQL (graphql-request + TanStack Query). Incluye filtros con búsqueda en vivo, estado en la URL, modales de detalle con residentes, reparto y episodios en una sola query, favoritos y comparador persistentes con Zustand, y un dashboard de estadísticas con Recharts.",
@@ -101,10 +108,11 @@ export const PROJECTS: ProjectType[] = [
     private: true,
     images: ["/projects/rickandmorty/rickandmorty_p1.webp", "/projects/rickandmorty/rickandmorty_p2.webp", "/projects/rickandmorty/rickandmorty_p3.webp", "/projects/rickandmorty/rickandmorty_p4.webp"],
     videos: [],
-    tags: [TAGS.REACT, TAGS.TYPESCRIPT, TAGS.GRAPHQL, TAGS.TAILWIND],
+    tags: ["REACT", "TYPESCRIPT", "GRAPHQL", "TAILWIND"],
   },
   {
     slug: "paraty",
+    githubRepo: "StivenColorado/paraty",
     title: "Paraty — Sangrías & Tablas de queso",
     summary: "Tienda online de charcutería gourmet con React, Vite y Tailwind.",
     description: "Tienda online de charcutería gourmet (cups, cajas y tablas de queso) construida con React, Vite y Tailwind CSS. Incluye catálogo con búsqueda en tiempo real, filtrado por categorías, carrito de compras y valoraciones de productos, con diseño responsive.",
@@ -112,10 +120,11 @@ export const PROJECTS: ProjectType[] = [
     links: {"demo": "https://paraty-pink.vercel.app/"},
     images: ["/projects/paraty-pink/paraty1.webp", "/projects/paraty-pink/paraty2.webp"],
     videos: [],
-    tags: [TAGS.REACT, TAGS.TAILWIND, TAGS.JAVASCRIPT],
+    tags: ["REACT", "TAILWIND", "JAVASCRIPT"],
   },
   {
     slug: "cindy-fast-food",
+    githubRepo: "StivenColorado/CindyFastFood",
     title: "Cindy Fast Food — landing de comida rápida",
     summary: "Landing de un restaurante de comida rápida con menú filtrable por categorías.",
     description: "Landing page para un restaurante de comida rápida a la parrilla, hecha con React, Vite y Tailwind CSS. Tiene hero, menú interactivo filtrable por categorías (hamburguesas, salchipapas, perros, combos), tarjetas de producto con precios y sección de contacto y pedidos, con diseño responsive y tema oscuro.",
@@ -123,10 +132,11 @@ export const PROJECTS: ProjectType[] = [
     links: {"demo": "https://cindy-fast-food.vercel.app/"},
     images: ["/projects/cindy-fast-food/cindy1.webp", "/projects/cindy-fast-food/cindy2.webp"],
     videos: [],
-    tags: [TAGS.REACT, TAGS.TAILWIND, TAGS.JAVASCRIPT],
+    tags: ["REACT", "TAILWIND", "JAVASCRIPT"],
   },
   {
     slug: "saad-eye-tracking",
+    githubRepo: "StivenColorado/eyetracking",
     title: "SAAD - Eye Tracking",
     summary: "Migración de millones de registros de Eye Tracking con Python y Django, con panel de análisis.",
     description: "Automatización de la migración de millones de registros con Python y Django: procesamiento en batch de archivos Excel con Pandas, almacenamiento en MySQL y un panel interactivo en JavaScript para analizar y visualizar datos de Eye Tracking.",
@@ -134,10 +144,11 @@ export const PROJECTS: ProjectType[] = [
     links: {"repo": "https://github.com/StivenColorado/eyetracking", "gist": "https://gist.github.com/StivenColorado/ffa97ea66f19877153ee914d700ae9c3.js"},
     images: ["/projects/eyetracking/eyetracking_mockup.webp", "/projects/eyetracking/eyetracking_p2.webp", "/projects/eyetracking/eyetracking_p3.webp"],
     videos: ["/projects/eyetracking/eyetrackingVideo.webm"],
-    tags: [TAGS.PYTHON, TAGS.DJANGO, TAGS.JAVASCRIPT, TAGS.CSS],
+    tags: ["PYTHON", "DJANGO", "JAVASCRIPT", "CSS"],
   },
   {
     slug: "pokemon-api-consumer",
+    githubRepo: "StivenColorado/pokemon-api-consumer",
     title: "Pokémon API Consumer",
     summary: "Pokédex con Astro que consume la PokéAPI, con favoritos y comparador.",
     description: "Pokédex frontend construido con Astro, JavaScript y Tailwind CSS que consume la PokéAPI. Incluye búsqueda en vivo, filtrado por tipo, favoritos en localStorage, comparador de hasta 4 Pokémon con gráfico de estadísticas, scroll infinito con skeleton loaders y una vista de detalle con habilidades, cadena de evolución, sprites animados y el sonido de cada Pokémon.",
@@ -145,10 +156,11 @@ export const PROJECTS: ProjectType[] = [
     links: {"demo": "https://pokemon-api-consumer.vercel.app/", "repo": "https://github.com/StivenColorado/pokemon-api-consumer"},
     images: ["/projects/pokemon/pokemon_p1.webp", "/projects/pokemon/pokemon_p2.webp", "/projects/pokemon/pokemon_p3.webp", "/projects/pokemon/pokemon_p4.webp"],
     videos: [],
-    tags: [TAGS.ASTRO, TAGS.JAVASCRIPT, TAGS.TAILWIND],
+    tags: ["ASTRO", "JAVASCRIPT", "TAILWIND"],
   },
   {
     slug: "ss-recorder",
+    githubRepo: "StivenColorado/SS_RECORDER",
     title: "SS_RECORDER — grabador de pantalla multiplataforma",
     summary: "Grabador de pantalla de escritorio para Windows, macOS y Linux con audio del sistema.",
     description: "Grabador de pantalla de escritorio multiplataforma desarrollado en Python con interfaz en CustomTkinter. Captura la pantalla y el audio del sistema sin drivers extra: loopback WASAPI en Windows, monitor de PulseAudio/PipeWire en Linux y BlackHole en macOS. Soporta Wayland y X11, control de calidad y FPS, selección de monitor, capturas y exportación a mp4, avi, mov y webm con ffmpeg.",
@@ -156,6 +168,105 @@ export const PROJECTS: ProjectType[] = [
     private: true,
     images: ["/projects/ss-recorder/ss-recorder_1.webp", "/projects/ss-recorder/ss-recorder_2.webp"],
     videos: [],
-    tags: [TAGS.PYTHON],
+    tags: ["PYTHON"],
   },
 ]
+
+type ProjectEn = NonNullable<SeedProject['i18n']['en']>
+
+const PROJECTS_EN: Record<string, ProjectEn> = {
+  azur: {
+    title: 'AZUR — wholesale catalog',
+    summary: 'Wholesale catalog that imports 600 to 800 MB Excel files with embedded photos, with an admin panel and a public catalog.',
+    description: 'Wholesale catalog with an admin panel and a public catalog. Products are loaded by importing 600 to 800 MB Excel files with embedded photos. Authentication uses a JWT in an httpOnly cookie, with rate limiting and CSP, and it is deployed with nginx and systemd.',
+    highlights: [
+      'Problem: inventory arrived as 600 to 800 MB Excel files with embedded photos, impossible to load by hand.',
+      'Solution: importing those files into an admin panel and a public catalog for customers.',
+      'Result: a production catalog protected with a JWT in an httpOnly cookie, rate limiting and CSP, served with nginx and systemd.',
+    ],
+  },
+  'chatbot-agencia': {
+    title: 'chatBotAgencia — WhatsApp flight quoting',
+    summary: 'WhatsApp chatbot that quotes flights, with a swappable AI provider (Gemini or OpenAI).',
+    description: 'WhatsApp chatbot that quotes flights for a travel agency. The backend uses NestJS, PostgreSQL with Prisma and Redis, and Playwright to fetch the quotes. The AI provider can be swapped between Gemini and OpenAI.',
+    highlights: [
+      'Problem: quoting flights over WhatsApp forces every request to be handled manually.',
+      'Solution: a chatbot built with NestJS, PostgreSQL, Prisma, Redis and Playwright that holds the conversation and fetches the quotes.',
+      'Result: the AI can be switched between Gemini and OpenAI without touching the rest of the system.',
+    ],
+  },
+  'asadero-inventario': {
+    title: 'asadero-inventario — offline management for a grill restaurant',
+    summary: 'Offline-first desktop app in Python and SQLite, with a Supabase backup and a PWA for waiters.',
+    description: 'Desktop app for a grill restaurant designed to work without internet. It is built in Python with SQLite, backed up to Supabase, and includes a PWA so waiters can take orders, with signed orders, device approval and roles.',
+    highlights: [
+      'Problem: the business cannot depend on an internet connection to operate.',
+      'Solution: an offline-first desktop app with SQLite, a Supabase backup and a PWA for waiters.',
+      'Result: signed orders, device approval and access roles.',
+    ],
+  },
+  'n8n-agent': {
+    title: 'testN8n — LLM agent on Telegram',
+    summary: 'Telegram bot with an LLM agent that reads and writes to a custom API and sends emails and photos.',
+    description: 'Telegram bot with an LLM agent orchestrated in n8n. The agent reads and writes data in a custom API and can send emails and photos. It uses Node, SQLite and Redis, and is exposed through Cloudflare Tunnel.',
+    highlights: [
+      'Problem: operating a custom API from chat required manual steps.',
+      'Solution: an LLM agent in n8n connected to Telegram that queries and modifies the API, and sends emails and photos.',
+      'Result: everything available through chat, on top of Node, SQLite and Redis, published with Cloudflare Tunnel.',
+    ],
+  },
+  'portafolio-3d': {
+    title: 'portafolio3D — isometric portfolio',
+    summary: 'Isometric 3D portfolio built with three.js and TypeScript.',
+    description: 'Isometric 3D portfolio built with three.js and TypeScript. The demo is public and the repository code is private.',
+  },
+  finanzas: {
+    title: 'finanzas — expenses from bank SMS',
+    summary: 'Flutter app that reads Colombian bank SMS messages and suggests expenses for each pay period.',
+    description: 'Flutter app that reads notification SMS messages from Colombian banks and suggests the expenses for each biweekly pay period. Data is stored only on the phone.',
+    highlights: [
+      'Problem: logging expenses by hand is tedious and gets abandoned.',
+      'Solution: reading Colombian bank SMS messages to suggest expenses for each pay period.',
+      'Result: expense tracking with data stored only on the phone.',
+    ],
+  },
+  'talkflow-ai': {
+    title: 'TalkFlow_AI — conversational automation SaaS',
+    summary: 'Product design and architecture of a multi-tenant conversational automation SaaS.',
+    description: 'Product design and architecture of a multi-tenant conversational automation SaaS with the WhatsApp Cloud API, AI and a CRM. It is documentation only: no code has been implemented.',
+    highlights: [
+      'Problem: companies handle their WhatsApp conversations without automation or an integrated CRM.',
+      'Solution: design of a multi-tenant SaaS with the WhatsApp Cloud API, AI and a CRM.',
+      'Result: a product and architecture document, with no implementation.',
+    ],
+  },
+  'rick-morty-explorer': {
+    summary: 'Rick & Morty universe explorer with React, TypeScript and GraphQL.',
+    description: 'Explorer of the Rick & Morty universe built with React 19, TypeScript and Vite, consuming the API via GraphQL (graphql-request + TanStack Query). It includes filters with live search, URL state, detail modals with residents, cast and episodes in a single query, persistent favorites and a comparison tool with Zustand, and a statistics dashboard with Recharts.',
+  },
+  paraty: {
+    title: 'Paraty — Sangrías & Cheese Boards',
+    summary: 'Online gourmet charcuterie shop with React, Vite and Tailwind.',
+    description: 'Online gourmet charcuterie shop (cups, boxes and cheese boards) built with React, Vite and Tailwind CSS. It includes a catalog with real-time search, category filtering, a shopping cart and product ratings, with a responsive design.',
+  },
+  'cindy-fast-food': {
+    title: 'Cindy Fast Food — fast food landing page',
+    summary: 'Landing page for a fast food restaurant with a menu filterable by category.',
+    description: 'Landing page for a grill-style fast food restaurant, built with React, Vite and Tailwind CSS. It has a hero, an interactive menu filterable by category (burgers, salchipapas, hot dogs, combos), product cards with prices and a contact and orders section, with a responsive design and a dark theme.',
+  },
+  'saad-eye-tracking': {
+    summary: 'Migration of millions of Eye Tracking records with Python and Django, with an analysis dashboard.',
+    description: 'Automation of the migration of millions of records with Python and Django: batch processing of Excel files with Pandas, storage in MySQL and an interactive JavaScript dashboard to analyze and visualize Eye Tracking data.',
+  },
+  'pokemon-api-consumer': {
+    summary: 'Astro Pokédex that consumes the PokéAPI, with favorites and a comparison tool.',
+    description: 'Frontend Pokédex built with Astro, JavaScript and Tailwind CSS that consumes the PokéAPI. It includes live search, filtering by type, favorites in localStorage, a comparison tool for up to 4 Pokémon with a stats chart, infinite scroll with skeleton loaders and a detail view with abilities, evolution chain, animated sprites and each Pokémon\'s cry.',
+  },
+  'ss-recorder': {
+    title: 'SS_RECORDER — cross-platform screen recorder',
+    summary: 'Desktop screen recorder for Windows, macOS and Linux with system audio.',
+    description: 'Cross-platform desktop screen recorder developed in Python with a CustomTkinter interface. It captures the screen and system audio without extra drivers: WASAPI loopback on Windows, PulseAudio/PipeWire monitor on Linux and BlackHole on macOS. It supports Wayland and X11, quality and FPS control, monitor selection, screenshots and export to mp4, avi, mov and webm with ffmpeg.',
+  },
+}
+
+export const PROJECTS_SEED: SeedProject[] = BASE.map((p) => ({ ...p, i18n: { en: PROJECTS_EN[p.slug] ?? {} } }))
