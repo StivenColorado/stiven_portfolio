@@ -12,7 +12,7 @@ if (!config.adminEmail || !config.adminPasswordHash) {
   console.warn('[server] ADMIN_EMAIL/ADMIN_PASSWORD_HASH vacíos: solo entra el admin ya guardado en la DB')
 }
 
-const runPurge = () => purge(db, config.retentionDays, Date.now(), config.auditRetentionDays)
+const runPurge = () => purge(db, Date.now(), config.auditRetentionDays)
 runPurge()
 const purgeTimer = setInterval(runPurge, 3_600_000)
 purgeTimer.unref()

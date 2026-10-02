@@ -8,7 +8,7 @@ const DB = 'server/data/dbip-city-lite.mmdb'
 test('sin archivo devuelve nulos y no lanza', () => {
   assert.equal(initGeo('/no/existe.mmdb'), false)
   assert.equal(geoReady(), false)
-  assert.deepEqual(lookup('8.8.8.8'), { country: null, city: null })
+  assert.deepEqual(lookup('8.8.8.8'), { country: null, city: null, lat: null, lon: null })
 })
 
 test('resuelve país y ciudad', { skip: !existsSync(DB) && 'falta la base (scripts/get-geodb.sh)' }, () => {
@@ -20,5 +20,6 @@ test('resuelve país y ciudad', { skip: !existsSync(DB) && 'falta la base (scrip
   assert.equal(co.country, 'CO')
   assert.ok(co.city)
   assert.equal(lookup('186.29.1.1'), co)
-  assert.deepEqual(lookup('10.0.0.1'), { country: null, city: null })
+  assert.ok(typeof us.lat === 'number' && typeof us.lon === 'number')
+  assert.deepEqual(lookup('10.0.0.1'), { country: null, city: null, lat: null, lon: null })
 })

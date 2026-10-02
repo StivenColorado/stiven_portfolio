@@ -111,6 +111,6 @@ test('la retención purga el registro viejo', () => {
   const now = 400 * 86_400_000
   recordAudit(app.db, { email: null, ip: 'x', action: 'login', entity: 'auth', entityId: null, summary: 'viejo' }, 1000)
   recordAudit(app.db, { email: null, ip: 'x', action: 'login', entity: 'auth', entityId: null, summary: 'reciente' }, now - 86_400_000)
-  purge(app.db, 30, now, 365)
+  purge(app.db, now, 365)
   assert.deepEqual((app.db.prepare('SELECT summary FROM audit_log').all() as { summary: string }[]).map((r) => r.summary), ['reciente'])
 })

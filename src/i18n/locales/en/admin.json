@@ -166,6 +166,12 @@
       }
     },
     "dialog": {
+      "mapTitle": "Approximate location",
+      "mapFrame": "Map of the approximate IP location",
+      "mapNote": "{{place}} (city level, not an exact address)",
+      "mapOsm": "Open in OpenStreetMap",
+      "mapGmaps": "Open in Google Maps",
+      "mapNone": "No location for this IP",
       "location": "Location",
       "system": "System",
       "device": "Device",

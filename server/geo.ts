@@ -2,10 +2,10 @@ import { readFileSync } from 'node:fs'
 import { Reader } from 'mmdb-lib'
 import type { CityResponse } from 'mmdb-lib'
 
-export type GeoResult = { country: string | null; city: string | null }
+export type GeoResult = { country: string | null; city: string | null; lat: number | null; lon: number | null }
 
 const LRU_SIZE = 5000
-const NONE: GeoResult = { country: null, city: null }
+const NONE: GeoResult = { country: null, city: null, lat: null, lon: null }
 const lru = new Map<string, GeoResult>()
 let reader: Reader<CityResponse> | null = null
 
@@ -41,6 +41,8 @@ export function lookup(ip: string): GeoResult {
       result = {
         country: rec.country?.iso_code ?? null,
         city: rec.city?.names?.en ?? null,
+        lat: rec.location?.latitude ?? null,
+        lon: rec.location?.longitude ?? null,
       }
     }
   } catch {

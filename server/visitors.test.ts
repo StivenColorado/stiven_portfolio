@@ -8,6 +8,8 @@ import { loadConfig } from './config.ts'
 import { openDb } from './db.ts'
 import { clearCache } from './cache.ts'
 import { resetBuckets } from './ratelimit.ts'
+import { initGeo } from './geo.ts'
+import { existsSync } from 'node:fs'
 
 const EMAIL = 'admin@test.com'
 const db = openDb(':memory:')
@@ -83,6 +85,20 @@ test('detalle por IP: visitas en orden descendente', async () => {
   assert.deepEqual(visits.map((v) => v.ts), [3000, 2000, 1000])
   const v6 = (await (await get('visitors/%3A%3A1234/visits')).json()) as { visits: unknown[] }
   assert.equal(v6.visits.length, 1)
+})
+
+const GEO = 'server/data/dbip-city-lite.mmdb'
+
+test('detalle incluye location al vuelo; IP privada da null', { skip: !existsSync(GEO) && 'falta la base (scripts/get-geodb.sh)' }, async () => {
+  assert.equal(initGeo(GEO), true)
+  db.prepare('INSERT INTO visits (ts, ip, country, city, ua, os, device, path, referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(6000, '8.8.8.8', 'US', 'x', 'ua', 'linux', 'desktop', '/', null)
+  const pub = (await (await get('visitors/8.8.8.8/visits')).json()) as { location: { lat: number; lon: number; country: string } | null }
+  assert.equal(pub.location?.country, 'US')
+  assert.equal(typeof pub.location?.lat, 'number')
+  assert.equal(typeof pub.location?.lon, 'number')
+  const priv2 = (await (await get('visitors/192.168.1.5/visits')).json()) as { location: unknown }
+  assert.equal(priv2.location, null)
+  initGeo('/no/existe.mmdb')
 })
 
 test('detalle con IP inválida responde 400; sin sesión 401', async () => {

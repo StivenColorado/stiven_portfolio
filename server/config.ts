@@ -11,7 +11,6 @@ export type Config = {
   brevoApiKey: string
   isProd: boolean
   trustProxy: boolean
-  retentionDays: number
   auditRetentionDays: number
   mediaDir: string
   publicDir: string
@@ -39,7 +38,6 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     brevoApiKey: env.BREVO_API_KEY ?? '',
     isProd: env.NODE_ENV === 'production',
     trustProxy: env.TRUST_PROXY === '1',
-    retentionDays: int(env.RETENTION_DAYS, 30),
     auditRetentionDays: int(env.AUDIT_RETENTION_DAYS, 365),
     mediaDir: env.MEDIA_DIR || 'server/data/media',
     publicDir: env.PUBLIC_DIR ?? '',

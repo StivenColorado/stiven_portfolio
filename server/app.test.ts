@@ -30,14 +30,14 @@ after(() => {
   db.close()
 })
 
-test('track inserta con OS y dispositivo y purga lo viejo', () => {
+test('track inserta con OS y dispositivo y no borra visitas viejas', () => {
   recordVisit(db, { ip: '8.8.8.8', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) Mobile/15E148', path: '/', touch: true })
   recordVisit(db, { ip: '1.1.1.1', ua: 'curl/8', path: '/old', touch: false }, Date.now() - 40 * 86_400_000)
   const rows = db.prepare('SELECT os, device, path FROM visits ORDER BY id').all()
   assert.deepEqual({ ...rows[0] }, { os: 'ios', device: 'mobile', path: '/' })
   assert.equal(rows.length, 2)
-  purge(db, 30)
-  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM visits').get() as { n: number }).n, 1)
+  purge(db)
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM visits').get() as { n: number }).n, 2)
 })
 
 test('POST /api/track responde 204, guarda y respeta /admin, GPC y tamaño', async () => {

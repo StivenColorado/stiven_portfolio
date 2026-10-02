@@ -21,9 +21,8 @@ export function recordVisit(db: DatabaseSync, input: TrackInput, now = Date.now(
   ).run(now, input.ip, country, city, input.ua.slice(0, 300), os, device, input.path, input.ref || null)
 }
 
-export function purge(db: DatabaseSync, retentionDays: number, now = Date.now(), auditRetentionDays = 365): void {
+export function purge(db: DatabaseSync, now = Date.now(), auditRetentionDays = 365): void {
   db.prepare('DELETE FROM audit_log WHERE ts < ?').run(now - auditRetentionDays * 86_400_000)
-  db.prepare('DELETE FROM visits WHERE ts < ?').run(now - retentionDays * 86_400_000)
   db.prepare('DELETE FROM sessions WHERE expires <= ?').run(now)
   db.prepare('DELETE FROM reset_tokens WHERE expires <= ? OR used = 1').run(now)
 }

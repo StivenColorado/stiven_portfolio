@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { adminApi } from "../../lib/api";
-import type { Visit, Visitor } from "../../lib/api";
+import type { Visit, Visitor, VisitorLocation } from "../../lib/api";
 import { deviceLabel, fmtDateTime, osLabel, timesLabel } from "./format";
 import { Multi, Place } from "./VisitsTable";
 
@@ -12,7 +12,32 @@ interface Props {
     onUnauthorized: (err: unknown) => void;
 }
 
-type Detail = { ip: string; visits: Visit[] } | "error";
+type Detail = { ip: string; visits: Visit[]; location: VisitorLocation | null } | "error";
+
+const LocationMap = ({ loc }: { loc: VisitorLocation }) => {
+    const { t } = useTranslation();
+    const { lat, lon } = loc;
+    const bbox = [lon - 0.15, lat - 0.1, lon + 0.15, lat + 0.1].join(",");
+    const place = [loc.country, loc.city].filter(Boolean).join(" · ");
+    return (
+        <>
+            <div className="window overflow-hidden">
+                <iframe
+                    title={t("admin.dialog.mapFrame")}
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    className="block h-56 w-full border-0 sm:h-64"
+                />
+            </div>
+            <p className="text-sm text-muted">{t("admin.dialog.mapNote", { place })}</p>
+            <div className="flex flex-wrap gap-3">
+                <a className="btn" target="_blank" rel="noopener noreferrer" href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=11/${lat}/${lon}`}>{t("admin.dialog.mapOsm")}</a>
+                <a className="btn" target="_blank" rel="noopener noreferrer" href={`https://www.google.com/maps?q=${lat},${lon}`}>{t("admin.dialog.mapGmaps")}</a>
+            </div>
+        </>
+    );
+};
 
 const Stat = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="min-w-0">
@@ -38,12 +63,13 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
         if (!ip) return;
         let live = true;
         adminApi.visitorVisits(ip)
-            .then(({ visits }) => live && setDetail({ ip, visits }))
+            .then(({ visits, location }) => live && setDetail({ ip, visits, location }))
             .catch((err: unknown) => { onUnauthorized(err); if (live) setDetail("error"); });
         return () => { live = false; setDetail(null); };
     }, [ip, onUnauthorized]);
 
     const visits = detail && detail !== "error" && detail.ip === ip ? detail.visits : null;
+    const location = detail && detail !== "error" && detail.ip === ip ? detail.location : undefined;
     const v = visitor;
 
     return (
@@ -80,6 +106,12 @@ export default function VisitorDialog({ visitor, onClose, onDelete, onUnauthoriz
                                 <li key={p.key} className="tag break-all font-mono">{p.key} <span className="text-muted">×{p.n}</span></li>
                             ))}
                         </ul>
+                    </section>
+                    <section className="space-y-3">
+                        <h3 className="eyebrow">{t("admin.dialog.mapTitle")}</h3>
+                        {location === undefined && detail !== "error" && <p className="text-sm text-muted">{t("admin.common.loading")}</p>}
+                        {location === null && <p className="text-sm text-muted">{t("admin.dialog.mapNone")}</p>}
+                        {location && <LocationMap loc={location} />}
                     </section>
                     <section className="space-y-2">
                         <h3 className="eyebrow">{t("admin.dialog.referrers")}</h3>

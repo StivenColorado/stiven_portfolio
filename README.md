@@ -29,7 +29,6 @@ Otros scripts: `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test:server`. 
 | `GEO_DB` | `server/data/dbip-city-lite.mmdb` | Base de geolocalización |
 | `ADMIN_PASSWORD_HASH` | | Hash scrypt del admin |
 | `TRUST_PROXY` | `0` | `1` para confiar en `X-Real-IP` (solo detrás de nginx) |
-| `RETENTION_DAYS` | `30` | Retención de visitas |
 | `SESSION_HOURS` | `12` | Duración de la sesión admin |
 | `COOKIE_SECURE` | `1` | Usar `0` en desarrollo sobre http |
 
@@ -85,4 +84,4 @@ WantedBy=multi-user.target
 
 ## Privacidad
 
-Se registran IP, país y ciudad aproximados, agente de usuario, ruta, referrer y fecha, solo para estadísticas de tráfico y sin terceros. Se respeta `Sec-GPC`/DNT. Las visitas se purgan automáticamente a los 30 días (`RETENTION_DAYS`). Detalle en la ruta `/privacidad`. Geolocalización: IP Geolocation by DB-IP (CC BY 4.0).
+Se registran IP, país y ciudad aproximados, agente de usuario, ruta, referrer y fecha, solo para estadísticas de tráfico y sin terceros. Se respeta `Sec-GPC`/DNT. Las visitas no se purgan solas: el administrador las revisa y las borra a mano. Detalle en la ruta `/privacidad`. Geolocalización: IP Geolocation by DB-IP (CC BY 4.0).

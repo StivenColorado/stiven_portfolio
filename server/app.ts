@@ -18,7 +18,7 @@ import {
 import type { Entity } from './content.ts'
 import { parseLang } from './content.ts'
 import { seedAdmin } from './db.ts'
-import { geoReady } from './geo.ts'
+import { geoReady, lookup } from './geo.ts'
 import { createGithub } from './github.ts'
 import { clientIp } from './ip.ts'
 import { sendResetMail } from './mail.ts'
@@ -599,7 +599,9 @@ export function createApp(config: Config, db: DatabaseSync): Server {
           ip = ''
         }
         if (isIP(ip) === 0) return send(res, 400, { error: 'invalid_ip' })
-        return send(res, 200, { visits: visitsOfIp(db, ip) })
+        const geo = lookup(ip)
+        const location = geo.lat !== null && geo.lon !== null ? { lat: geo.lat, lon: geo.lon, country: geo.country, city: geo.city } : null
+        return send(res, 200, { visits: visitsOfIp(db, ip), location })
       }
       default: {
         const days = clampInt(url.searchParams.get('days'), 1, 90, 7)

@@ -1,6 +1,13 @@
 export type OS = "windows" | "macos" | "android" | "ios" | "linux" | "other";
 export type Device = "mobile" | "tablet" | "desktop" | "bot";
 
+export interface VisitorLocation {
+    lat: number;
+    lon: number;
+    country: string | null;
+    city: string | null;
+}
+
 export interface Visit {
     id: number;
     ts: number;
@@ -95,5 +102,5 @@ export const adminApi = {
         for (const [k, v] of Object.entries(filters)) if (v) q.set(k, v);
         return request<{ visitors: Visitor[] }>(`visitors?${q}`);
     },
-    visitorVisits: (ip: string) => request<{ visits: Visit[] }>(`visitors/${encodeURIComponent(ip)}/visits`),
+    visitorVisits: (ip: string) => request<{ visits: Visit[]; location: VisitorLocation | null }>(`visitors/${encodeURIComponent(ip)}/visits`),
 };
