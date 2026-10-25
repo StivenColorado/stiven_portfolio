@@ -65,7 +65,7 @@
     },
     "data": {
       "title": "Completa tus datos",
-      "intro": "Estos datos aparecen en el documento que vas a firmar. Revisa el texto: se actualiza mientras escribes.",
+      "intro": "Estos datos aparecerán en el documento que vas a firmar. Podrás revisarlos y corregirlos antes de firmar.",
       "legalName": "Nombre completo o razón social",
       "docType": "Tipo de documento",
       "docNumber": "Número de documento",
@@ -78,7 +78,19 @@
       "tooShort": "Es muy corto",
       "docInvalid": "Usa de 4 a 30 caracteres: letras, números, punto o guion",
       "chars": "Contiene caracteres no permitidos",
-      "fix": "Completa tus datos antes de firmar."
+      "fix": "Completa tus datos antes de firmar.",
+      "why1": "Para identificarte como parte del contrato y que la firma electrónica tenga validez (Ley 527 de 1999).",
+      "why2": "Quedan guardados junto con la evidencia de la firma: fecha, hora y huella del documento.",
+      "why3": "Se tratan conforme a la Ley 1581 de 2012; más abajo encuentras los detalles.",
+      "continue": "Continuar",
+      "edit": "Editar mis datos",
+      "reviewing": "Revisa el documento con tus datos"
+    },
+    "confirm": {
+      "title": "¿Son correctos tus datos?",
+      "body": "Estos son los datos que quedarán en el documento firmado. Verifícalos antes de firmar.",
+      "yes": "Sí, son correctos",
+      "fix": "Corregir"
     }
   }
 }

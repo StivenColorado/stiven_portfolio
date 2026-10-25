@@ -34,6 +34,17 @@ export function formatValue(value: string, type: VarType | string, lang: Contrac
   return v
 }
 
+const PENDING: Record<string, string> = {
+  cliente: 'nombre del cliente', cliente_tipo_doc: 'tipo de documento', cliente_documento: 'documento', cliente_representante: 'representante',
+  cliente_email: 'correo del cliente', cliente_telefono: 'teléfono del cliente', cliente_direccion: 'dirección del cliente',
+  cliente_ciudad: 'ciudad del cliente', prestador: 'nombre del prestador', prestador_tipo_doc: 'tipo de documento del prestador',
+  prestador_documento: 'documento del prestador', prestador_email: 'correo del prestador', prestador_telefono: 'teléfono del prestador',
+  prestador_ciudad: 'ciudad del prestador', ciudad_firma: 'ciudad de la firma', contrato_ref: 'contrato de referencia',
+}
+
+/** Texto legible para un hueco sin llenar: «(nombre del cliente pendiente)» en lugar de la clave interna. */
+export const pendingText = (key: string) => `(${PENDING[key] ?? key.replace(/_/g, ' ')} pendiente)`
+
 /** Las variables sin valor quedan como [[clave]] para que se vean en la vista previa y bloqueen el envío. */
 export function fill(
   body: string,

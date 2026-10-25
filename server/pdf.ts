@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit'
+import { pendingText } from './contract-text.ts'
 import type { Block } from './contract-text.ts'
 
 export type PdfStrokes = { w: number; h: number; strokes: number[][] }
@@ -116,7 +117,7 @@ export function buildPdf(d: PdfDoc): Promise<Buffer> {
       if (piece === '') continue
       const spaced = /\s$/.test(prev)
       prev = piece
-      if (PLACEHOLDER.test(piece)) toks.push({ t: piece, hl: true, sp: spaced })
+      if (PLACEHOLDER.test(piece)) toks.push({ t: pendingText(piece.slice(2, -2)), hl: true, sp: spaced })
       else for (const m of piece.matchAll(/\S+/g)) toks.push({ t: m[0], hl: false, sp: m.index > 0 ? /\s/.test(piece[m.index - 1] as string) : /^\s/.test(piece) })
     }
     const lines: Token[][] = [[]]

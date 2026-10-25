@@ -65,7 +65,7 @@
     },
     "data": {
       "title": "Complete your details",
-      "intro": "These details appear in the document you are about to sign. Review the text: it updates as you type.",
+      "intro": "These details will appear in the document you are about to sign. You can review and edit them before signing.",
       "legalName": "Full name or company name",
       "docType": "Document type",
       "docNumber": "Document number",
@@ -78,7 +78,19 @@
       "tooShort": "Too short",
       "docInvalid": "Use 4 to 30 characters: letters, numbers, dot or hyphen",
       "chars": "Contains characters that are not allowed",
-      "fix": "Complete your details before signing."
+      "fix": "Complete your details before signing.",
+      "why1": "To identify you as a party to the contract and give your electronic signature legal validity (Colombian Law 527 of 1999).",
+      "why2": "They are stored with the signature evidence: date, time and document fingerprint.",
+      "why3": "They are processed under Colombian Law 1581 of 2012; details below.",
+      "continue": "Continue",
+      "edit": "Edit my details",
+      "reviewing": "Review the document with your details"
+    },
+    "confirm": {
+      "title": "Are your details correct?",
+      "body": "These are the details that will appear in the signed document. Check them before signing.",
+      "yes": "Yes, they are correct",
+      "fix": "Edit"
     }
   }
 }

@@ -333,6 +333,17 @@ const autoVars = (client: AdminClient, owner: OwnerProfile, parent: DocRow | nul
   contrato_ref: parent ? `«${parent.title}» (documento n.º ${parent.id})` : '',
 })
 
+const INHERITS_PROPOSAL = new Set(['services', 'sla', 'retainer', 'acceptance', 'data_processing'])
+
+/** Lo acordado en la propuesta (SOW) más reciente del expediente pasa al nuevo documento; el administrador puede ajustarlo después. */
+function inheritedFromProposal(db: DatabaseSync, clientId: number, tpl: { kind: string; variables: TemplateVar[] }): Record<string, string> {
+  if (!INHERITS_PROPOSAL.has(tpl.kind)) return {}
+  const sow = db.prepare("SELECT variables FROM contracts WHERE client_id = ? AND kind = 'sow' AND status <> 'cancelled' ORDER BY id DESC LIMIT 1").get(clientId) as { variables: string } | undefined
+  if (!sow) return {}
+  const vars = parse<Record<string, string>>(sow.variables)
+  return Object.fromEntries(tpl.variables.filter((v) => !(v.key in AUTO_LABELS) && (vars[v.key] ?? '').trim() !== '').map((v) => [v.key, vars[v.key] as string]))
+}
+
 export function createDoc(
   db: DatabaseSync, clientId: number, input: { templateId: number; parentId: number | null; title: string | null }, now = now0(),
 ): DocRow | 'client_not_found' | 'template_not_found' | 'parent_invalid' {
@@ -344,7 +355,7 @@ export function createDoc(
   if (input.parentId !== null && (!parent || parent.client_id !== clientId)) return 'parent_invalid'
   const fromTemplate = Object.fromEntries(tpl.variables.filter((v) => v.default !== undefined).map((v) => [v.key, v.default as string]))
   const auto = Object.fromEntries(Object.entries(autoVars(client, ownerProfile(db), parent, now)).filter(([, v]) => v !== ''))
-  const variables = { ...fromTemplate, ...client.defaults, ...auto }
+  const variables = { ...fromTemplate, ...client.defaults, ...inheritedFromProposal(db, clientId, tpl), ...auto }
   const data: DocData = { signatures: {}, varDefs: tpl.variables }
   const row = db
     .prepare(

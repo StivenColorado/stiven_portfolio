@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { BadgeCheck, Download, PenLine } from "lucide-react";
+import { BadgeCheck, Download, PenLine, Pencil } from "lucide-react";
 import { ApiError } from "../lib/api";
 import { CLIENT_FIELD_VARS } from "../lib/contractText";
 import { useDocumentMeta } from "../lib/seo";
@@ -62,7 +62,13 @@ export default function Firmar() {
     const [error, setError] = useState("");
     const [data, setData] = useState<ClientData>({});
     const [shown, setShown] = useState(false);
+    const [stage, setStage] = useState<"data" | "doc">("doc");
+    const [confirming, setConfirming] = useState(false);
     const dialog = useRef<HTMLDialogElement>(null);
+    const confirmDialog = useRef<HTMLDialogElement>(null);
+    const stageHead = useRef<HTMLHeadingElement>(null);
+    const firstStage = useRef(true);
+    const confirmId = useId();
     const titleId = useId();
     const lang = i18n.resolvedLanguage ?? "es";
 
@@ -72,6 +78,7 @@ export default function Firmar() {
             .then((view) => {
                 if (!alive) return;
                 setName(view.contactName);
+                if (view.clientForm) setStage("data");
                 if (view.clientForm) setData({ legalName: view.clientForm.prefill.legalName, docType: view.clientForm.prefill.docType });
                 setState(view.clientSigned || view.status === "active" ? { kind: "done", view, result: null } : { kind: "ready", view });
             })
@@ -88,16 +95,37 @@ export default function Firmar() {
     const errors = Object.fromEntries(fields.map((f) => [f, fieldError(f, data[f] ?? "")])) as Record<ClientField, string | null>;
     const blocks = useMemo(() => (state.kind === "ready" && form ? fillBlocks(state.view.blocks, data) : state.kind === "loading" || state.kind === "error" ? [] : state.view.blocks), [state, form, data]);
 
+    const bad = fields.find((f) => errors[f]);
+    const summary = state.kind === "ready"
+        ? form
+            ? fields.map((f) => [f, clean(data[f] ?? "")] as const)
+            : state.view.clientName ? [["legalName", state.view.clientName] as const] : []
+        : [];
+
+    function validate() {
+        if (!bad) return true;
+        setShown(true);
+        document.getElementById(`sign-data-${bad}`)?.focus();
+        return false;
+    }
+
+    function goStage(next: "data" | "doc") {
+        if (next === "doc" && !validate()) return;
+        setStage(next);
+        window.scrollTo({ top: 0 });
+    }
+
     function openSign() {
         setError("");
-        const bad = fields.find((f) => errors[f]);
-        if (bad) {
-            setShown(true);
-            document.getElementById(`sign-data-${bad}`)?.focus();
-            return;
-        }
-        setOpen(true);
+        if (!validate()) return;
+        if (summary.length) setConfirming(true);
+        else setOpen(true);
     }
+
+    useEffect(() => {
+        if (firstStage.current) { firstStage.current = false; return; }
+        stageHead.current?.focus();
+    }, [stage]);
 
     useEffect(() => {
         const d = dialog.current;
@@ -105,6 +133,13 @@ export default function Firmar() {
         if (open && !d.open) d.showModal();
         if (!open && d.open) d.close();
     }, [open]);
+
+    useEffect(() => {
+        const d = confirmDialog.current;
+        if (!d) return;
+        if (confirming && !d.open) d.showModal();
+        if (!confirming && d.open) d.close();
+    }, [confirming]);
 
     async function submit(e: FormEvent) {
         e.preventDefault();
@@ -154,6 +189,7 @@ export default function Firmar() {
     const done = state.kind === "done";
     const signedAt = state.kind === "done" ? (state.result?.signedAt ?? view.clientSigned?.ts) : undefined;
     const hash = state.kind === "done" ? (state.result?.hash ?? view.hash) : view.hash;
+    const gate = !done && !!form && stage === "data";
     const canDownload = done && (state.result !== null || view.status === "active");
 
     return shell(
@@ -171,13 +207,18 @@ export default function Firmar() {
                 </section>
             )}
 
-            {form && !done && (
+            {gate && form && (
                 <section aria-labelledby="sign-data-title" className="window">
                     <div className="window-bar"><span className="window-dot" aria-hidden="true" /><span className="flex-1 truncate">datos.frm</span></div>
                     <div className="window-body space-y-4">
                         <div>
-                            <h2 id="sign-data-title" className="text-xl leading-tight">{t("sign.data.title")}</h2>
+                            <h2 id="sign-data-title" ref={stageHead} tabIndex={-1} className="text-xl leading-tight outline-none">{t("sign.data.title")}</h2>
                             <p className="mt-1 text-sm text-muted">{t("sign.data.intro")}</p>
+                            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted">
+                                <li>{t("sign.data.why1")}</li>
+                                <li>{t("sign.data.why2")}</li>
+                                <li>{t("sign.data.why3")}</li>
+                            </ul>
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2">
                             {fields.map((f) => {
@@ -205,19 +246,29 @@ export default function Firmar() {
                             })}
                         </div>
                         <p className="border-t-2 border-dashed border-ink pt-3 text-xs text-muted">{t("sign.data.privacy")}</p>
+                        <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => goStage("doc")}>{t("sign.data.continue")}</button>
                     </div>
                 </section>
             )}
 
-            <DocView
-                blocks={blocks}
-                title={view.title}
-                cover={{ clientName: view.clientName, ownerName: view.ownerName, ...view.cover }}
-                owner={{ name: view.ownerName, strokes: view.ownerSignature }}
-                client={{ name: view.clientSigned?.name ?? "", date: view.clientSigned ? fmt(view.clientSigned.ts, lang) : undefined }}
-            />
+            {!gate && !done && form && (
+                <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-ink bg-paper p-3">
+                    <h2 ref={stageHead} tabIndex={-1} className="text-sm font-extrabold outline-none">{t("sign.data.reviewing")}</h2>
+                    <button type="button" className="btn" onClick={() => goStage("data")}><Pencil size={16} strokeWidth={2.5} aria-hidden /> {t("sign.data.edit")}</button>
+                </div>
+            )}
 
-            {!done && (
+            {!gate && (
+                <DocView
+                    blocks={blocks}
+                    title={view.title}
+                    cover={{ clientName: view.clientName, ownerName: view.ownerName, ...view.cover }}
+                    owner={{ name: view.ownerName, strokes: view.ownerSignature }}
+                    client={{ name: view.clientSigned?.name ?? "", date: view.clientSigned ? fmt(view.clientSigned.ts, lang) : undefined }}
+                />
+            )}
+
+            {!done && !gate && (
                 <div className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink bg-paper p-3">
                     <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
                         {view.expiresAt && <p className="hidden text-xs text-muted sm:block">{t("sign.expires", { date: fmt(view.expiresAt, lang) })}</p>}
@@ -227,6 +278,34 @@ export default function Firmar() {
                     </div>
                 </div>
             )}
+
+            <dialog
+                ref={confirmDialog}
+                onClose={() => setConfirming(false)}
+                onClick={(e) => e.target === confirmDialog.current && confirmDialog.current?.close()}
+                aria-labelledby={confirmId}
+                className="window m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto p-0 backdrop:bg-paper/60 backdrop:dither-dense [&:not([open])]:hidden"
+            >
+                <div className="window-bar"><span className="window-dot" aria-hidden="true" /><span className="flex-1 truncate">datos.dlg</span></div>
+                {confirming && (
+                    <div className="space-y-4 p-4 sm:p-6">
+                        <h2 id={confirmId} className="text-xl leading-tight">{t("sign.confirm.title")}</h2>
+                        <p className="text-sm text-muted">{t("sign.confirm.body")}</p>
+                        <dl className="space-y-2 border-2 border-ink p-3 text-sm">
+                            {summary.map(([f, v]) => (
+                                <div key={f} className="min-w-0">
+                                    <dt className="eyebrow">{t(`sign.data.${f}`)}</dt>
+                                    <dd className="break-words font-extrabold">{v}</dd>
+                                </div>
+                            ))}
+                        </dl>
+                        <div className="flex flex-wrap justify-end gap-3">
+                            <button type="button" className="btn" onClick={() => { setConfirming(false); if (form) goStage("data"); }}>{t("sign.confirm.fix")}</button>
+                            <button type="button" autoFocus className="btn btn-primary" onClick={() => { setConfirming(false); setOpen(true); }}>{t("sign.confirm.yes")}</button>
+                        </div>
+                    </div>
+                )}
+            </dialog>
 
             <dialog
                 ref={dialog}
