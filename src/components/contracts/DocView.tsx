@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { CoverInfo, DocBlock, Strokes } from "../../types/contracts";
 import SignatureView from "./SignatureView";
@@ -18,6 +20,7 @@ type Item = { kind: "h2"; text: string; n: number } | { kind: "p"; text: string;
 const SERIF = "font-['Cormorant_Garamond',Georgia,'Times_New_Roman',serif]";
 const SMALL_CAPS = "[font-variant:small-caps]";
 const SHEET_BUDGET = 2600;
+const PAGE_W = 794;
 
 const weight = (i: Item) => (i.kind === "table" ? 140 + i.rows.length * 90 : i.kind === "h2" ? 160 : i.kind === "h1" ? 160 : 60 + i.text.length);
 
@@ -82,6 +85,33 @@ function Table({ rows }: { rows: string[][] }) {
     );
 }
 
+/** La hoja se maqueta siempre a ancho de papel y se reduce en pantallas angostas, como un visor de PDF (el zoom del navegador la amplía). */
+function Scaled({ children }: { children: ReactNode }) {
+    const outer = useRef<HTMLDivElement>(null);
+    const inner = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState(1);
+    const [height, setHeight] = useState<number>();
+
+    useLayoutEffect(() => {
+        const measure = () => {
+            const s = Math.min(1, (outer.current?.clientWidth ?? PAGE_W) / PAGE_W);
+            setScale(s);
+            setHeight((inner.current?.offsetHeight ?? 0) * s || undefined);
+        };
+        measure();
+        const ro = new ResizeObserver(measure);
+        if (outer.current) ro.observe(outer.current);
+        if (inner.current) ro.observe(inner.current);
+        return () => ro.disconnect();
+    }, []);
+
+    return (
+        <div ref={outer} className="mx-auto w-full max-w-[794px] overflow-hidden" style={{ height }}>
+            <div ref={inner} style={{ width: PAGE_W, transform: `scale(${scale})`, transformOrigin: "top left" }}>{children}</div>
+        </div>
+    );
+}
+
 function Party({ label, sig }: { label: string; sig?: PartySig }) {
     const { t } = useTranslation();
     return (
@@ -102,23 +132,23 @@ export default function DocView({ blocks, title, cover, owner, client, className
     const heading = firstH1?.text || title;
     const sheets = paginate(toItems(blocks, !!firstH1));
     const ref = cover?.ref ?? "";
-    const sheet = "relative mx-auto flex w-full max-w-[794px] flex-col bg-[#FDFCF8] text-[#2B2A24] shadow-[0_2px_14px_rgba(43,42,36,0.18)] md:aspect-[8.5/11]";
+    const sheet = "relative flex w-[794px] aspect-[8.5/11] flex-col bg-[#FDFCF8] font-normal text-[#2B2A24] shadow-[0_2px_14px_rgba(43,42,36,0.18)]";
     const contact = [cover?.ownerName, cover?.ownerEmail, cover?.ownerPhone, cover?.ownerCity].filter(Boolean);
 
     const render = (it: Item, i: number) => {
         if (it.kind === "h1") return <h2 key={i} className={`${SERIF} pt-2 text-2xl font-bold`}>{it.text}</h2>;
         if (it.kind === "h2") return <h3 key={i} className={`break-words mt-2 border-b border-[#4A4636]/25 pb-1 pt-3 text-base font-extrabold tracking-wide text-[#4A4636] ${SMALL_CAPS}`}>{it.n}. {it.text}</h3>;
-        if (it.kind === "li") return <p key={i} className="flex gap-2 pl-4 sm:pl-8"><span aria-hidden="true">•</span><span className="min-w-0 break-words">{it.text}</span></p>;
+        if (it.kind === "li") return <p key={i} className="flex gap-2 pl-8"><span aria-hidden="true">•</span><span className="min-w-0 break-words">{it.text}</span></p>;
         if (it.kind === "table") return <Table key={i} rows={it.rows} />;
         return <p key={i} className="break-words text-left"><span className="mr-2 font-extrabold tabular-nums text-[#4A4636]">{it.num}</span>{it.text}</p>;
     };
 
     return (
-        <article aria-label={heading} className={`dither space-y-6 border-2 border-ink p-3 sm:p-6 ${className}`}>
-            <section className={`${sheet} min-h-[28rem] justify-between bg-[#EDEBDD] px-6 py-8 sm:px-14 sm:py-12`}>
+        <article aria-label={heading} className={`dither space-y-6 border-2 border-ink p-2 sm:p-6 ${className}`}>
+            <Scaled><section className={`${sheet} justify-between bg-[#EDEBDD] px-14 py-12`}>
                 <p className="text-right text-sm text-[#4A4636]">{cover?.date}</p>
                 <div className="space-y-5 py-10 text-center">
-                    <h1 className={`${SERIF} break-words text-4xl font-semibold leading-tight sm:text-5xl`}>{heading}</h1>
+                    <h1 className={`${SERIF} break-words text-5xl font-semibold leading-tight`}>{heading}</h1>
                     {cover?.subtitle && <p className="text-xs uppercase tracking-[0.3em] text-[#4A4636]">{cover.subtitle}</p>}
                     <hr className="mx-auto w-24 border-t border-[#4A4636]" />
                     {cover?.clientName && <p className="text-base">{t("sign.doc.client")}: <strong>{cover.clientName}</strong></p>}
@@ -126,10 +156,10 @@ export default function DocView({ blocks, title, cover, owner, client, className
                 <div className="space-y-0.5 text-sm text-[#4A4636]">
                     {contact.map((c, i) => <p key={i} className={`break-words ${i === 0 ? "font-extrabold text-[#2B2A24]" : ""}`}>{c}</p>)}
                 </div>
-            </section>
+            </section></Scaled>
 
             {sheets.map((items, si) => (
-                <section key={si} className={`${sheet} px-6 py-8 sm:px-14 sm:py-12`}>
+                <Scaled key={si}><section className={`${sheet} px-14 py-12`}>
                     <header className="mb-6 flex items-baseline justify-between gap-4 border-b border-[#4A4636]/40 pb-2">
                         <span className={`${SERIF} text-xl font-semibold`}>{t("sign.doc.contract")}</span>
                         <span className={`truncate text-sm text-[#4A4636] ${SMALL_CAPS}`}>{cover?.subtitle || heading}</span>
@@ -139,7 +169,7 @@ export default function DocView({ blocks, title, cover, owner, client, className
                         {si === sheets.length - 1 && (
                             <div className="space-y-4 pt-8">
                                 <h3 className={`text-base font-extrabold uppercase tracking-widest text-[#4A4636]`}>{t("sign.doc.signatures")}</h3>
-                                <div className="grid gap-8 sm:grid-cols-2">
+                                <div className="grid grid-cols-2 gap-8">
                                     <Party label={t("sign.provider")} sig={owner} />
                                     <Party label={t("sign.client")} sig={client} />
                                 </div>
@@ -150,7 +180,7 @@ export default function DocView({ blocks, title, cover, owner, client, className
                         <span className="truncate">{ref}</span>
                         <span>{t("sign.doc.sheet", { n: si + 1 })}</span>
                     </footer>
-                </section>
+                </section></Scaled>
             ))}
         </article>
     );
