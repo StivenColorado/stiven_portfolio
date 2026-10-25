@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Star } from "lucide-react";
+import { Share2, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useDocumentMeta } from "../../../lib/seo";
 import { projectsApi, isUnauthorized } from "../../../lib/adminApi";
@@ -7,6 +7,7 @@ import EntityList from "../../../components/admin/ui/EntityList";
 import { useToast } from "../../../components/admin/ui/toastContext";
 import type { Status } from "../../../types/content";
 import type { FullProject } from "./projectForm";
+import ProjectShareDialog from "./ProjectShareDialog";
 
 export default function ProjectsList() {
     const { t } = useTranslation();
@@ -16,6 +17,7 @@ export default function ProjectsList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [busyId, setBusyId] = useState<number | null>(null);
+    const [sharing, setSharing] = useState<FullProject | null>(null);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -100,6 +102,11 @@ export default function ProjectsList() {
                     </>
                 )}
                 extraActions={(p) => (
+                    <>
+                    <button type="button" className="btn !min-h-9 !gap-1.5 !px-3 !py-1 !text-sm" onClick={() => setSharing(p)}>
+                        <Share2 size={14} strokeWidth={2.5} aria-hidden />
+                        {t("adminProjects.share.open")}
+                    </button>
                     <button
                         type="button"
                         className="btn !min-h-9 !gap-1.5 !px-3 !py-1 !text-sm disabled:opacity-40"
@@ -111,13 +118,16 @@ export default function ProjectsList() {
                         <Star size={14} strokeWidth={2.5} fill={p.featured ? "currentColor" : "none"} aria-hidden />
                         {t(p.featured ? "adminProjects.list.unfeature" : "adminProjects.list.feature")}
                     </button>
+                    </>
                 )}
+                onOpen={setSharing}
                 onSetStatus={onSetStatus}
                 onDelete={onDelete}
                 onReorder={onReorder}
                 busyId={busyId}
                 onRetry={() => void load()}
             />
+            <ProjectShareDialog project={sharing} onClose={() => setSharing(null)} />
         </div>
     );
 }

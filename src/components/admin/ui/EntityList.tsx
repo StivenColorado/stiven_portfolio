@@ -23,6 +23,7 @@ interface Props<T extends EntityItem> {
     getSubtitle?: (item: T) => string | undefined;
     renderExtra?: (item: T) => ReactNode;
     extraActions?: (item: T) => ReactNode;
+    onOpen?: (item: T) => void;
     onSetStatus: (item: T, status: Status) => void | Promise<void>;
     onDelete: (item: T) => void | Promise<void>;
     onReorder?: (ids: number[]) => void | Promise<void>;
@@ -36,7 +37,7 @@ const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCa
 const act = "btn !min-h-9 !gap-1.5 !px-3 !py-1 !text-sm disabled:opacity-40";
 
 export default function EntityList<T extends EntityItem>({
-    items, loading, error, noun, nounPlural, newTo, editTo, getTitle, getSubtitle, renderExtra, extraActions,
+    items, loading, error, noun, nounPlural, newTo, editTo, getTitle, getSubtitle, renderExtra, extraActions, onOpen,
     onSetStatus, onDelete, onReorder, busyId = null, onRetry,
 }: Props<T>) {
     const { t } = useTranslation();
@@ -94,11 +95,17 @@ export default function EntityList<T extends EntityItem>({
                             const busy = busyId === it.id;
                             const sub = getSubtitle?.(it);
                             return (
-                                <li key={it.id} className={`window window-body !shadow-none ${it.status === "published" ? "" : "dither"}`}>
+                                <li
+                                    key={it.id}
+                                    className={`window window-body !shadow-none ${it.status === "published" ? "" : "dither"} ${onOpen ? "cursor-pointer transition-colors hover:bg-grey/40" : ""}`}
+                                    onClick={onOpen ? (e) => { if (!(e.target as Element).closest("a,button,input,select,dialog")) onOpen(it); } : undefined}
+                                >
                                     <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
                                         <div className="min-w-0 flex-1 basis-56 space-y-1">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <h3 className="break-words text-lg leading-tight">{getTitle(it)}</h3>
+                                                <h3 className="break-words text-lg leading-tight">
+                                                    {onOpen ? <button type="button" className="text-left hover:underline" onClick={() => onOpen(it)}>{getTitle(it)}</button> : getTitle(it)}
+                                                </h3>
                                                 <StatusBadge status={it.status} />
                                                 {renderExtra?.(it)}
                                             </div>
