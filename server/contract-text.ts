@@ -21,7 +21,8 @@ export function formatValue(value: string, type: VarType | string, lang: Contrac
     const locale = lang === 'en' ? 'en-US' : 'es-CO'
     if (type === 'number') return new Intl.NumberFormat(locale).format(n)
     const cur = /^[A-Z]{3}$/.test(currency) ? currency : 'COP'
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: cur }).format(n)
+    const digits = cur === 'COP' ? 0 : 2
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: cur, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n)
   }
   if (type === 'date') {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v)

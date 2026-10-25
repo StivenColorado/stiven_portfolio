@@ -8,6 +8,7 @@ import EmptyState from "../../../components/admin/ui/EmptyState";
 import Field from "../../../components/admin/ui/Field";
 import { useToast } from "../../../components/admin/ui/toastContext";
 import Select from "../../../components/ui/Select";
+import MoneyField from "../../../components/admin/ui/MoneyField";
 import DocStatusBadge from "../../../components/contracts/DocStatusBadge";
 import DocView from "../../../components/contracts/DocView";
 import type { PartySig } from "../../../components/contracts/DocView";
@@ -188,7 +189,9 @@ export default function DocEditor() {
     const status = item.status;
     const btn = "btn !min-h-9 !px-3 !py-1 !text-sm";
     const typeOf = (k: string) => varType(k, defs);
-    const currencyOptions = ["COP", "USD"].map((v) => ({ value: v, label: v }));
+    const currencyOptions = [{ value: "COP", label: t("adminContracts.currency.COP") }, { value: "USD", label: t("adminContracts.currency.USD") }];
+    const currency = form.variables.moneda || "COP";
+    const showCurrency = !keys.includes("moneda") && keys.some((k) => typeOf(k) === "money");
 
     const actions = (
         <div className="flex flex-wrap items-center gap-2">
@@ -268,6 +271,7 @@ export default function DocEditor() {
                                 {missing.length > 0 && <p role="status" className="dither border-2 border-dashed border-ink p-2 text-xs font-extrabold">{t("adminContracts.docs.missing", { vars: missing.join(", ") })}</p>}
                                 {keys.length === 0 && <p className="text-sm text-muted">{t("adminContracts.docs.noVars")}</p>}
                                 <div className="grid gap-4 sm:grid-cols-2">
+                                    {showCurrency && <Select label={t("adminContracts.vars.moneda")} options={currencyOptions} value={currency} onChange={(v: string) => setVar("moneda", v || currency)} searchable={false} />}
                                     {keys.map((k) => {
                                         const type = typeOf(k);
                                         const label = varLabel(k, defs);
@@ -275,7 +279,9 @@ export default function DocEditor() {
                                         const error = err(`variables.${k}`);
                                         if (k === "moneda") return <Select key={k} label={label} options={currencyOptions} value={value || "COP"} onChange={(v: string) => setVar(k, v || value)} searchable={false} />;
                                         if (type === "textarea") return <div key={k} className="sm:col-span-2"><Field label={label} as="textarea" rows={4} maxLength={5000} value={value} onChange={(v) => setVar(k, v)} error={error} /></div>;
-                                        return <Field key={k} label={label} type={type === "date" ? "date" : type === "number" || type === "money" ? "number" : "text"} maxLength={5000} value={value} onChange={(v) => setVar(k, v)} error={error} />;
+                                        if (type === "money") return <MoneyField key={k} label={label} currency={currency} value={value} onChange={(v) => setVar(k, v)} error={error} />;
+                                        const hint = ["plazo", "garantia_dias"].includes(k) ? t(`adminContracts.vars.${k === "plazo" ? "plazoHint" : "garantiaHint"}`) : undefined;
+                                        return <Field key={k} label={label} hint={hint} placeholder={k === "plazo" ? t("adminContracts.vars.plazoPlaceholder") : undefined} type={type === "date" ? "date" : type === "number" ? "number" : "text"} maxLength={5000} value={value} onChange={(v) => setVar(k, v)} error={error} />;
                                     })}
                                 </div>
                                 {err("variables") && <p role="alert" className="text-sm font-extrabold">{err("variables")}</p>}

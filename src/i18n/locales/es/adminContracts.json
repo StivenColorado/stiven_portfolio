@@ -23,7 +23,8 @@
       "remove": "Quitar",
       "save": "Guardar",
       "saved": "Guardado",
-      "backToList": "Volver a contratos"
+      "backToList": "Volver a contratos",
+      "dialCode": "Indicativo"
     },
     "status": {
       "draft": "Borrador",
@@ -63,11 +64,14 @@
     "vars": {
       "monto": "Monto",
       "moneda": "Moneda",
-      "plazo": "Plazo",
+      "plazo": "Plazo de ejecución",
       "fecha_inicio": "Fecha de inicio",
       "garantia_dias": "Garantía (días)",
       "hitos": "Hitos de pago",
-      "alcance": "Alcance"
+      "alcance": "Alcance",
+      "plazoHint": "Tiempo total que tomará entregar el proyecto, contado desde la fecha de inicio. Es la fecha límite de entrega del contrato.",
+      "plazoPlaceholder": "Ej.: 45 días calendario",
+      "garantiaHint": "Días después de la entrega en los que corriges errores sin costo."
     },
     "clients": {
       "new": "Nuevo expediente",
@@ -257,6 +261,10 @@
       "current": "Firma actual",
       "saveSignature": "Guardar firma",
       "signatureSaved": "Firma guardada"
+    },
+    "currency": {
+      "COP": "COP · Pesos colombianos",
+      "USD": "USD · Dólares"
     }
   }
 }

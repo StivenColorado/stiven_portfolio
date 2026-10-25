@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { PhoneInput } from "../../../components/admin/ui/CountryPhone";
 import Field from "../../../components/admin/ui/Field";
 import { useToast } from "../../../components/admin/ui/toastContext";
 import Select from "../../../components/ui/Select";
@@ -69,7 +70,7 @@ export default function SettingsTab() {
                     <Select label={t("adminContracts.clients.docType")} options={docTypeOptions} value={profile.docType} onChange={(v: string) => setProfile((p) => ({ ...p, docType: (v || p.docType) as DocType }))} searchable={false} />
                     <Field label={t("adminContracts.clients.docNumber")} value={profile.docNumber} onChange={set("docNumber")} maxLength={30} error={errors.docNumber} />
                     <Field label={t("adminContracts.clients.email")} type="email" value={profile.email} onChange={set("email")} maxLength={254} error={errors.email} />
-                    <Field label={t("adminContracts.clients.phone")} value={profile.phone} onChange={set("phone")} maxLength={30} error={errors.phone} />
+                    <PhoneInput label={t("adminContracts.clients.phone")} value={profile.phone} onChange={set("phone")} error={errors.phone} />
                     <Field label={t("adminContracts.clients.address")} value={profile.address} onChange={set("address")} maxLength={200} error={errors.address} />
                     <Field label={t("adminContracts.clients.city")} value={profile.city} onChange={set("city")} maxLength={80} error={errors.city} />
                 </div>

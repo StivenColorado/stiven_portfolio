@@ -23,7 +23,8 @@
       "remove": "Remove",
       "save": "Save",
       "saved": "Saved",
-      "backToList": "Back to contracts"
+      "backToList": "Back to contracts",
+      "dialCode": "Dial code"
     },
     "status": {
       "draft": "Draft",
@@ -63,11 +64,14 @@
     "vars": {
       "monto": "Amount",
       "moneda": "Currency",
-      "plazo": "Term",
+      "plazo": "Delivery timeline",
       "fecha_inicio": "Start date",
       "garantia_dias": "Warranty (days)",
       "hitos": "Payment milestones",
-      "alcance": "Scope"
+      "alcance": "Scope",
+      "plazoHint": "Total time needed to deliver the project, counted from the start date. It is the delivery deadline in the contract.",
+      "plazoPlaceholder": "e.g. 45 calendar days",
+      "garantiaHint": "Days after delivery during which you fix bugs at no cost."
     },
     "clients": {
       "new": "New client file",
@@ -257,6 +261,10 @@
       "current": "Current signature",
       "saveSignature": "Save signature",
       "signatureSaved": "Signature saved"
+    },
+    "currency": {
+      "COP": "COP · Colombian pesos",
+      "USD": "USD · US dollars"
     }
   }
 }

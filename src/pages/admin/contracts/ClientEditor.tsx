@@ -5,6 +5,8 @@ import Field from "../../../components/admin/ui/Field";
 import ListEditor from "../../../components/admin/ui/ListEditor";
 import EmptyState from "../../../components/admin/ui/EmptyState";
 import Select from "../../../components/ui/Select";
+import MoneyField from "../../../components/admin/ui/MoneyField";
+import { CountrySelect, PhoneInput } from "../../../components/admin/ui/CountryPhone";
 import { clientsApi } from "../../../lib/contractsApi";
 import { DOC_TYPES } from "../../../types/contracts";
 import type { AdminClient, ClientInput, ContractLang, DocType } from "../../../types/contracts";
@@ -76,7 +78,7 @@ export default function ClientEditor() {
 
     const docTypeOptions = DOC_TYPES.map((v) => ({ value: v, label: t(`adminContracts.docType.${v}`) }));
     const langOptions = (["es", "en"] as const).map((v) => ({ value: v, label: t(`adminContracts.lang.${v}`) }));
-    const currencyOptions = ["COP", "USD"].map((v) => ({ value: v, label: v }));
+    const currencyOptions = [{ value: "COP", label: t("adminContracts.currency.COP") }, { value: "USD", label: t("adminContracts.currency.USD") }];
     const setExtra = (i: number, changes: Partial<Extra>) => patch({ extras: form.extras.map((x, j) => (j === i ? { ...x, ...changes } : x)) });
     const f = (key: keyof Form, label: string, extra: { maxLength?: number; required?: boolean; type?: "email" | "text" } = {}) => (
         <Field label={label} value={form[key] as string} onChange={(v) => patch({ [key]: v } as Partial<Form>)} error={err(key)} {...extra} />
@@ -103,10 +105,10 @@ export default function ClientEditor() {
                         {f("docNumber", t("adminContracts.clients.docNumber"), { maxLength: 30 })}
                         {f("contactName", t("adminContracts.clients.contactName"), { maxLength: 120 })}
                         {f("email", t("adminContracts.clients.email"), { maxLength: 254, type: "email" })}
-                        {f("phone", t("adminContracts.clients.phone"), { maxLength: 30 })}
+                        <PhoneInput label={t("adminContracts.clients.phone")} value={form.phone} onChange={(v) => patch({ phone: v })} countryName={form.country} error={err("phone")} />
                         {f("address", t("adminContracts.clients.address"), { maxLength: 200 })}
                         {f("city", t("adminContracts.clients.city"), { maxLength: 80 })}
-                        {f("country", t("adminContracts.clients.country"), { maxLength: 60 })}
+                        <CountrySelect label={t("adminContracts.clients.country")} value={form.country} onChange={(v) => patch({ country: v })} />
                         <Select label={t("adminContracts.clients.lang")} options={langOptions} value={form.lang} onChange={(v: string) => patch({ lang: (v || form.lang) as ContractLang })} searchable={false} />
                     </div>
                     <Field label={t("adminContracts.clients.notes")} as="textarea" rows={3} maxLength={2000} value={form.notes} onChange={(v) => patch({ notes: v })} error={err("notes")} />
@@ -118,11 +120,11 @@ export default function ClientEditor() {
                         <p className="text-xs text-muted">{t("adminContracts.clients.defaultsHint")}</p>
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <Field label={t("adminContracts.vars.monto")} type="number" min={0} value={form.monto} onChange={(v) => patch({ monto: v })} error={err("defaults.monto", "defaults")} />
                         <Select label={t("adminContracts.vars.moneda")} options={currencyOptions} value={form.moneda} onChange={(v: string) => patch({ moneda: v || form.moneda })} searchable={false} />
-                        <Field label={t("adminContracts.vars.plazo")} value={form.plazo} onChange={(v) => patch({ plazo: v })} maxLength={200} error={err("defaults.plazo")} />
+                        <MoneyField label={t("adminContracts.vars.monto")} currency={form.moneda || "COP"} value={form.monto} onChange={(v) => patch({ monto: v })} error={err("defaults.monto", "defaults")} />
+                        <Field label={t("adminContracts.vars.plazo")} value={form.plazo} onChange={(v) => patch({ plazo: v })} maxLength={200} placeholder={t("adminContracts.vars.plazoPlaceholder")} hint={t("adminContracts.vars.plazoHint")} error={err("defaults.plazo")} />
                         <Field label={t("adminContracts.vars.fecha_inicio")} type="date" value={form.fecha_inicio} onChange={(v) => patch({ fecha_inicio: v })} error={err("defaults.fecha_inicio")} />
-                        <Field label={t("adminContracts.vars.garantia_dias")} type="number" min={0} value={form.garantia_dias} onChange={(v) => patch({ garantia_dias: v })} error={err("defaults.garantia_dias")} />
+                        <Field label={t("adminContracts.vars.garantia_dias")} hint={t("adminContracts.vars.garantiaHint")} type="number" min={0} value={form.garantia_dias} onChange={(v) => patch({ garantia_dias: v })} error={err("defaults.garantia_dias")} />
                     </div>
                     <ListEditor label={t("adminContracts.vars.hitos")} items={form.hitos} onChange={(hitos) => patch({ hitos })} max={12} maxLength={200} itemLabel={t("adminContracts.clients.milestone")} hint={t("adminContracts.clients.hitosHint")} error={err("defaults.hitos")} />
                     <Field label={t("adminContracts.vars.alcance")} as="textarea" rows={4} maxLength={5000} value={form.alcance} onChange={(v) => patch({ alcance: v })} error={err("defaults.alcance")} />
