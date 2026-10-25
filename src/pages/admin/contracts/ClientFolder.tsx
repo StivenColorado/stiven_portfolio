@@ -237,7 +237,7 @@ export default function ClientFolder() {
                 open={resendTarget !== null}
                 resend
                 title={resendTarget?.title ?? ""}
-                defaultEmail={resendTarget?.sentTo ?? client.email}
+                defaultEmail={client.email || resendTarget?.sentTo || ""}
                 defaultRemind={0}
                 hasSaved={false}
                 onSubmit={async (input) => (await docsApi.resend(resendTarget!.id, { email: input.email, expiresInDays: input.expiresInDays })).link}

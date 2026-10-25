@@ -235,13 +235,13 @@ export function getDocRow(db: DatabaseSync, id: number): DocRow | null {
   return r && r.status === 'draft' ? withFreshAuto(db, r) : r
 }
 
-/** Un borrador toma los datos del prestador y del cliente que se completaron después de crearlo. */
+/** Un borrador siempre refleja los datos actuales del prestador y del cliente (los campos automáticos no se editan a mano). */
 function withFreshAuto(db: DatabaseSync, r: DocRow): DocRow {
   const client = getClient(db, r.client_id)
   if (!client) return r
   const parent = r.parent_id === null ? null : (db.prepare(`SELECT ${COLS} FROM contracts WHERE id = ?`).get(r.parent_id) as DocRow | undefined) ?? null
   const vars = varsOf(r)
-  const fresh = Object.entries(autoVars(client, ownerProfile(db), parent, r.created_at)).filter(([k, v]) => v !== '' && !(vars[k] ?? '').trim())
+  const fresh = Object.entries(autoVars(client, ownerProfile(db), parent, r.created_at)).filter(([k, v]) => v !== '' && k !== 'fecha' && vars[k] !== v)
   return fresh.length ? { ...r, variables: JSON.stringify({ ...vars, ...Object.fromEntries(fresh) }) } : r
 }
 

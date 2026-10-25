@@ -333,7 +333,7 @@ export default function DocEditor() {
             <SendDialog
                 open={sendOpen}
                 title={item.title}
-                defaultEmail={item.sentTo ?? client?.email ?? ""}
+                defaultEmail={client?.email || item.sentTo || ""}
                 defaultRemind={Number(form.remindDays) || 0}
                 hasSaved={hasSaved}
                 onSubmit={async (input) => absolute((await docsApi.send(item.id, input)).link)}
@@ -343,7 +343,7 @@ export default function DocEditor() {
                 open={resendOpen}
                 resend
                 title={item.title}
-                defaultEmail={item.sentTo ?? client?.email ?? ""}
+                defaultEmail={client?.email || item.sentTo || ""}
                 defaultRemind={0}
                 hasSaved={false}
                 onSubmit={async (input) => absolute((await docsApi.resend(item.id, { email: input.email, expiresInDays: input.expiresInDays })).link)}
