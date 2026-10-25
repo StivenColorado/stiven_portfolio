@@ -19,7 +19,7 @@ const PageFallback: React.FC = () => (
 const Layout: React.FC = () => {
     useTrack();
     const { pathname } = useLocation();
-    const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+    const bare = pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/firmar/");
     const showScene = SCENE_ROUTES.has(pathname.replace(/\/+$/, "") || "/");
 
     return (
@@ -30,14 +30,14 @@ const Layout: React.FC = () => {
                 </Suspense>
             )}
             <ScrollToTop />
-            {!isAdmin && <Navbar />}
+            {!bare && <Navbar />}
             <main className="relative">
                 <Suspense fallback={<PageFallback />}>
                     <Outlet />
                 </Suspense>
             </main>
-            {!isAdmin && <Footer />}
-            {!isAdmin && <WhatsAppButton />}
+            {!bare && <Footer />}
+            {!bare && <WhatsAppButton />}
         </div>
     );
 };

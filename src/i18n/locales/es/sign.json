@@ -1,0 +1,67 @@
+{
+  "sign": {
+    "meta": "Firmar documento",
+    "loading": "Cargando documento…",
+    "retry": "Reintentar",
+    "home": "Ir al inicio",
+    "eyebrow": "Documento de {{owner}}",
+    "for": "Para: {{client}}",
+    "signatures": "firmas",
+    "provider": "Prestador",
+    "client": "Cliente",
+    "ownerPending": "Aún sin firma del prestador.",
+    "signatureOf": "Firma de {{name}}",
+    "cta": "Firmar documento",
+    "expires": "Este enlace vence el {{date}}",
+    "pad": {
+      "aria": "Área para dibujar tu firma",
+      "hint": "Dibuja tu firma con el dedo o el ratón.",
+      "clear": "Borrar"
+    },
+    "dialog": {
+      "title": "Firmar documento",
+      "name": "Nombre completo",
+      "signature": "Tu firma",
+      "consent": "He leído el documento y acepto firmarlo electrónicamente; esta firma tiene los efectos de la Ley 527 de 1999.",
+      "cancel": "Cancelar",
+      "submit": "Firmar",
+      "signing": "Firmando…"
+    },
+    "done": {
+      "title": "Documento firmado",
+      "already": "Este documento ya fue firmado",
+      "at": "Firmado el {{date}}",
+      "copy": "Te enviamos una copia al correo.",
+      "download": "Descargar PDF"
+    },
+    "errors": {
+      "failed": "No se pudo firmar. Inténtalo de nuevo.",
+      "invalid": "Revisa tu nombre y tu firma e inténtalo de nuevo.",
+      "tooMany": "Demasiados intentos. Espera unos minutos."
+    },
+    "error": {
+      "invalid": {
+        "title": "Enlace no válido",
+        "body": "Este enlace no existe o ya no está disponible. Pide uno nuevo a quien te lo envió."
+      },
+      "expired": {
+        "title": "Enlace vencido",
+        "body": "Este enlace ya venció. Pide uno nuevo a quien te lo envió."
+      },
+      "cancelled": {
+        "title": "Documento cancelado",
+        "body": "Este documento fue cancelado y ya no se puede firmar."
+      },
+      "failed": {
+        "title": "No se pudo cargar",
+        "body": "Ocurrió un error al cargar el documento. Inténtalo de nuevo."
+      }
+    },
+    "doc": {
+      "contract": "Contrato",
+      "signatures": "Firmas de las partes",
+      "client": "Cliente",
+      "sheet": "Hoja {{n}}"
+    }
+  }
+}

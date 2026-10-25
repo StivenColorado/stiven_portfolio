@@ -1,4 +1,5 @@
 User-agent: *
 Disallow: /admin
+Disallow: /firmar
 
 Sitemap: https://negocioempresarial.online/sitemap.xml

@@ -13,7 +13,8 @@
       "admin": "Admin",
       "audit": "Auditoría · Admin",
       "account": "Cuenta · Admin",
-      "reset": "Restablecer contraseña"
+      "reset": "Restablecer contraseña",
+      "contracts": "Contratos · Admin"
     },
     "shell": {
       "logout": "Salir",
@@ -27,7 +28,8 @@
         "projects": "Proyectos",
         "services": "Servicios",
         "experience": "Experiencia",
-        "account": "Cuenta"
+        "account": "Cuenta",
+        "contracts": "Contratos"
       }
     },
     "auth": {
@@ -119,7 +121,16 @@
         "featured": "Destacado",
         "create": "Creación",
         "update": "Edición",
-        "media_upload": "Subida de archivo"
+        "media_upload": "Subida de archivo",
+        "send": "Envío",
+        "resend": "Reenvío",
+        "sign": "Firma",
+        "revoke": "Vuelta a borrador",
+        "cancel": "Cancelación",
+        "expire": "Vencimiento",
+        "remind": "Recordatorio",
+        "restore": "Restauración",
+        "settings": "Ajustes"
       },
       "entities": {
         "projects": "Proyectos",
@@ -127,7 +138,10 @@
         "experience": "Experiencia",
         "media": "Archivos",
         "visits": "Visitas",
-        "auth": "Acceso"
+        "auth": "Acceso",
+        "clients": "Expedientes",
+        "contract_templates": "Plantillas de contrato",
+        "contracts": "Contratos"
       }
     },
     "visitors": {

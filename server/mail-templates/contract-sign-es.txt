@@ -1,0 +1,24 @@
+  firmar.mail
+
+
+{{HEADING}}
+
+Hola {{clientName}},
+
+{{intro}}
+
+{{ownerName}}
+
+{{message}}
+
+Revisar y firmar {{url}}
+
+Si el botón no funciona, copia este enlace
+
+{{url}}
+
+Este enlace es personal: no lo compartas. Vence en {{days}} días.
+
+Stiven Colorado · negocioempresarial.online
+
+Si no esperabas este correo, puedes ignorarlo.

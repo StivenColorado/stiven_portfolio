@@ -13,7 +13,8 @@
       "admin": "Admin",
       "audit": "Audit · Admin",
       "account": "Account · Admin",
-      "reset": "Reset password"
+      "reset": "Reset password",
+      "contracts": "Contracts · Admin"
     },
     "shell": {
       "logout": "Sign out",
@@ -27,7 +28,8 @@
         "projects": "Projects",
         "services": "Services",
         "experience": "Experience",
-        "account": "Account"
+        "account": "Account",
+        "contracts": "Contracts"
       }
     },
     "auth": {
@@ -119,7 +121,16 @@
         "featured": "Featured",
         "create": "Creation",
         "update": "Edit",
-        "media_upload": "File upload"
+        "media_upload": "File upload",
+        "send": "Sent",
+        "resend": "Resent",
+        "sign": "Signature",
+        "revoke": "Back to draft",
+        "cancel": "Cancellation",
+        "expire": "Expiry",
+        "remind": "Reminder",
+        "restore": "Restored",
+        "settings": "Settings"
       },
       "entities": {
         "projects": "Projects",
@@ -127,7 +138,10 @@
         "experience": "Experience",
         "media": "Files",
         "visits": "Visits",
-        "auth": "Access"
+        "auth": "Access",
+        "clients": "Client files",
+        "contract_templates": "Contract templates",
+        "contracts": "Contracts"
       }
     },
     "visitors": {

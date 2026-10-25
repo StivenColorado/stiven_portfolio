@@ -6,7 +6,7 @@ interface Props {
     value: string;
     onChange: (v: string) => void;
     as?: "input" | "textarea";
-    type?: "text" | "url" | "number" | "email";
+    type?: "text" | "url" | "number" | "email" | "date";
     hint?: ReactNode;
     error?: string;
     maxLength?: number;

@@ -1,6 +1,7 @@
 import { createApp } from './app.ts'
 import { loadConfig } from './config.ts'
 import { openDb } from './db.ts'
+import { tick } from './contracts.ts'
 import { initGeo } from './geo.ts'
 import { purge } from './visits.ts'
 
@@ -12,7 +13,10 @@ if (!config.adminEmail || !config.adminPasswordHash) {
   console.warn('[server] ADMIN_EMAIL/ADMIN_PASSWORD_HASH vacíos: solo entra el admin ya guardado en la DB')
 }
 
-const runPurge = () => purge(db, Date.now(), config.auditRetentionDays)
+const runPurge = () => {
+  purge(db, Date.now(), config.auditRetentionDays)
+  tick(db, config, Date.now()).catch((err: unknown) => console.error('[contracts]', (err as Error).message))
+}
 runPurge()
 const purgeTimer = setInterval(runPurge, 3_600_000)
 purgeTimer.unref()

@@ -12,10 +12,10 @@ interface EntityApi<Admin, Input> {
     get: (id: number) => Promise<Admin>;
     create: (input: Input) => Promise<Admin>;
     update: (id: number, input: Input) => Promise<Admin>;
-    setStatus: (id: number, status: Status) => Promise<Admin>;
+    setStatus?: (id: number, status: Status) => Promise<Admin>;
 }
 
-interface Options<Admin extends { id: number; status: Status }, Form, Input> {
+interface Options<Admin extends { id: number; status?: string }, Form, Input> {
     api: EntityApi<Admin, Input>;
     id: number | null;
     basePath: string;
@@ -24,7 +24,7 @@ interface Options<Admin extends { id: number; status: Status }, Form, Input> {
     toInput: (form: Form, item: Admin | null) => Input;
 }
 
-export function useEditor<Admin extends { id: number; status: Status }, Form, Input>({ api, id, basePath, empty, toForm, toInput }: Options<Admin, Form, Input>) {
+export function useEditor<Admin extends { id: number; status?: string }, Form, Input>({ api, id, basePath, empty, toForm, toInput }: Options<Admin, Form, Input>) {
     const { t } = useTranslation();
     const { toast } = useToast();
     const navigate = useNavigate();
@@ -86,7 +86,7 @@ export function useEditor<Admin extends { id: number; status: Status }, Form, In
             let saved = id === null ? await api.create(input) : await api.update(id, input);
             const snapshot = JSON.stringify(form);
             let publishFailed = false;
-            if (publish && saved.status !== "published") {
+            if (publish && api.setStatus && saved.status !== "published") {
                 try { saved = await api.setStatus(saved.id, "published"); } catch { publishFailed = true; }
             }
             setItem(saved);

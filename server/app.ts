@@ -21,11 +21,14 @@ import { seedAdmin } from './db.ts'
 import { geoReady, lookup } from './geo.ts'
 import { createGithub } from './github.ts'
 import { clientIp } from './ip.ts'
+import { createContractRoutes } from './contracts-routes.ts'
+import { seedTemplates } from './contracts.ts'
 import { sendResetMail } from './mail.ts'
 import {
   MAX_IMAGE, MAX_VIDEO, MEDIA_NAME, detectMedia, extensionMatches, mediaSize, mimeOf, parseRange, saveMedia,
 } from './media.ts'
 import { migrateMediaOnce } from './media-migrate.ts'
+import { MINUTE, clampInt, header, isSameOrigin, readBuffer, readJson, send } from './http.ts'
 import { hit } from './ratelimit.ts'
 import {
   STATUSES, validateExperience, validateFeatured, validateProject, validateReorder, validateService, validateStatus,
@@ -35,7 +38,6 @@ import {
   countMatching, deleteVisits, filterFromQuery, listVisitors, listVisits, parseDeleteSpec, recordVisit, stats, visitsOfIp,
 } from './visits.ts'
 
-const MAX_BODY = 1024
 const MAX_DELETE_BODY = 16 * 1024
 const MAX_CONTENT_BODY = 64 * 1024
 const MAX_UPLOAD = MAX_VIDEO + 64 * 1024
@@ -45,107 +47,26 @@ const VALIDATORS: Record<Entity, (b: Record<string, unknown>) => Result<object>>
   services: validateService,
   experience: validateExperience,
 }
-const MINUTE = 60_000
 const MIN_PASSWORD = 12
 const RESET_TTL_MS = 30 * MINUTE
 
-function send(res: ServerResponse, status: number, body?: unknown, extra: Record<string, string> = {}): void {
-  const payload = body === undefined ? undefined : JSON.stringify(body)
-  res.writeHead(status, {
-    'Cache-Control': 'no-store',
-    'X-Content-Type-Options': 'nosniff',
-    'Referrer-Policy': 'no-referrer',
-    ...(payload ? { 'Content-Type': 'application/json; charset=utf-8' } : {}),
-    ...extra,
-  })
-  res.end(payload)
-}
-
-type Body = { tooBig: boolean; json: Record<string, unknown> | null }
-
-function readJson(req: IncomingMessage, max = MAX_BODY): Promise<Body> {
-  return new Promise((resolve) => {
-    const declared = Number(req.headers['content-length'] ?? 0)
-    if (declared > max) {
-      req.resume()
-      resolve({ tooBig: true, json: null })
-      return
-    }
-    const chunks: Buffer[] = []
-    let size = 0
-    let tooBig = false
-    req.on('data', (chunk: Buffer) => {
-      size += chunk.length
-      if (size > max) tooBig = true
-      else chunks.push(chunk)
-    })
-    req.on('error', () => resolve({ tooBig, json: null }))
-    req.on('end', () => {
-      if (tooBig) return resolve({ tooBig, json: null })
-      try {
-        const parsed: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'))
-        const isObject = typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
-        resolve({ tooBig, json: isObject ? (parsed as Record<string, unknown>) : null })
-      } catch {
-        resolve({ tooBig, json: null })
-      }
-    })
-  })
-}
-
-function readBuffer(req: IncomingMessage, max: number): Promise<Buffer | null> {
-  return new Promise((resolve) => {
-    const chunks: Buffer[] = []
-    let size = 0
-    let tooBig = false
-    req.on('data', (chunk: Buffer) => {
-      size += chunk.length
-      if (size > max) {
-        tooBig = true
-        chunks.length = 0
-      } else if (!tooBig) chunks.push(chunk)
-    })
-    req.on('error', () => resolve(null))
-    req.on('end', () => resolve(tooBig ? null : Buffer.concat(chunks)))
-  })
-}
-
-function header(req: IncomingMessage, name: string): string {
-  const v = req.headers[name]
-  return (Array.isArray(v) ? v[0] : v) ?? ''
-}
-
-function isSameOrigin(req: IncomingMessage): boolean {
-  const site = header(req, 'sec-fetch-site')
-  if (site) return site === 'same-origin'
-  const origin = header(req, 'origin')
-  if (!origin) return false
-  try {
-    return new URL(origin).host === header(req, 'host')
-  } catch {
-    return false
-  }
-}
-
 const normalizeEmail = (v: unknown): string | null =>
   typeof v === 'string' && v.length <= 254 ? v.trim().toLowerCase() : null
-
-function clampInt(raw: string | null, min: number, max: number, fallback: number): number {
-  const n = Number.parseInt(raw ?? '', 10)
-  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback
-}
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export function createApp(config: Config, db: DatabaseSync): Server {
   seedAdmin(db, config.adminEmail, config.adminPasswordHash)
   seedContent(db, config.mediaDir)
+  seedTemplates(db)
   migrateMediaOnce(db, config.mediaDir, config.publicDir || null)
   if (migrateGithubRepos(db) > 0) clearCache()
   const github = createGithub(config.githubToken)
 
   const audit = (email: string | null, ip: string, action: string, entity: string | null, entityId: number | null, summary: string) =>
     recordAudit(db, { email, ip, action, entity, entityId, summary })
+
+  const contracts = createContractRoutes(db, config, audit)
 
   async function track(req: IncomingMessage, res: ServerResponse, ip: string): Promise<void> {
     const body = await readJson(req)
@@ -154,7 +75,7 @@ export function createApp(config: Config, db: DatabaseSync): Server {
     if (body.tooBig || !body.json || header(req, 'sec-gpc') === '1') return
     const { path, ref, touch } = body.json
     if (typeof path !== 'string' || !path.startsWith('/') || path.length > 200) return
-    if (path === '/admin' || path.startsWith('/admin/')) return
+    if (path === '/admin' || path.startsWith('/admin/') || path === '/firmar' || path.startsWith('/firmar/')) return
     recordVisit(db, {
       ip,
       ua: header(req, 'user-agent'),
@@ -535,6 +456,15 @@ export function createApp(config: Config, db: DatabaseSync): Server {
       if (!hit(`health:${ip}`, 60, MINUTE)) return send(res, 429, { error: 'too_many_requests' })
       const row = db.prepare('SELECT COUNT(*) AS n FROM visits').get() as { n: number }
       return send(res, 200, { ok: true, geo: geoReady(), visits: row.n })
+    }
+
+    if (/^\/api\/sign\//.test(url.pathname)) return contracts.public(req, res, ip, url)
+
+    if (url.pathname.startsWith('/api/admin/contracts/')) {
+      if (!hit(`admin:contracts:${ip}`, 120, MINUTE)) return send(res, 429, { error: 'too_many_requests' })
+      const email = sessionEmail(db, readSid(req.headers.cookie))
+      if (email === null) return send(res, 401, { error: 'unauthorized' })
+      return contracts.admin(req, res, email, ip, url)
     }
 
     const admin = new Set(['POST /api/admin/logout', 'POST /api/admin/password', 'GET /api/admin/me', 'GET /api/admin/visits', 'GET /api/admin/visitors', 'GET /api/admin/visitors/:ip/visits', 'POST /api/admin/visits/delete', 'GET /api/admin/stats', 'POST /api/admin/media', 'GET /api/admin/audit', 'GET /api/admin/github/repos', 'GET /api/admin/:entity', 'POST /api/admin/:entity', 'GET /api/admin/:entity/:id', 'PUT /api/admin/:entity/:id', 'DELETE /api/admin/:entity/:id', 'POST /api/admin/:entity/reorder', 'POST /api/admin/:entity/:id/status', 'POST /api/admin/:entity/:id/featured'])

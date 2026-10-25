@@ -1,0 +1,67 @@
+{
+  "sign": {
+    "meta": "Sign document",
+    "loading": "Loading document…",
+    "retry": "Retry",
+    "home": "Go to home",
+    "eyebrow": "Document from {{owner}}",
+    "for": "For: {{client}}",
+    "signatures": "signatures",
+    "provider": "Provider",
+    "client": "Client",
+    "ownerPending": "The provider has not signed yet.",
+    "signatureOf": "Signature of {{name}}",
+    "cta": "Sign document",
+    "expires": "This link expires on {{date}}",
+    "pad": {
+      "aria": "Area to draw your signature",
+      "hint": "Draw your signature with your finger or mouse.",
+      "clear": "Clear"
+    },
+    "dialog": {
+      "title": "Sign document",
+      "name": "Full name",
+      "signature": "Your signature",
+      "consent": "I have read the document and agree to sign it electronically; this signature has the effects of Colombian Law 527 of 1999.",
+      "cancel": "Cancel",
+      "submit": "Sign",
+      "signing": "Signing…"
+    },
+    "done": {
+      "title": "Document signed",
+      "already": "This document has already been signed",
+      "at": "Signed on {{date}}",
+      "copy": "We emailed you a copy.",
+      "download": "Download PDF"
+    },
+    "errors": {
+      "failed": "Could not sign. Please try again.",
+      "invalid": "Check your name and signature and try again.",
+      "tooMany": "Too many attempts. Wait a few minutes."
+    },
+    "error": {
+      "invalid": {
+        "title": "Invalid link",
+        "body": "This link does not exist or is no longer available. Ask the sender for a new one."
+      },
+      "expired": {
+        "title": "Link expired",
+        "body": "This link has expired. Ask the sender for a new one."
+      },
+      "cancelled": {
+        "title": "Document cancelled",
+        "body": "This document was cancelled and can no longer be signed."
+      },
+      "failed": {
+        "title": "Could not load",
+        "body": "An error occurred while loading the document. Please try again."
+      }
+    },
+    "doc": {
+      "contract": "Contract",
+      "signatures": "Signatures of the parties",
+      "client": "Client",
+      "sheet": "Sheet {{n}}"
+    }
+  }
+}

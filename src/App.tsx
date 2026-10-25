@@ -18,6 +18,12 @@ const ServicesList = lazy(() => import('./pages/admin/services/ServicesList'));
 const ServiceEditor = lazy(() => import('./pages/admin/services/ServiceEditor'));
 const ExperienceList = lazy(() => import('./pages/admin/experience/ExperienceList'));
 const ExperienceEditor = lazy(() => import('./pages/admin/experience/ExperienceEditor'));
+const Contratos = lazy(() => import('./pages/admin/contracts/Contratos'));
+const ClientEditor = lazy(() => import('./pages/admin/contracts/ClientEditor'));
+const ClientFolder = lazy(() => import('./pages/admin/contracts/ClientFolder'));
+const DocEditor = lazy(() => import('./pages/admin/contracts/DocEditor'));
+const TemplateEditor = lazy(() => import('./pages/admin/contracts/TemplateEditor'));
+const Firmar = lazy(() => import('./pages/Firmar'));
 const AdminReset = lazy(() => import('./pages/AdminReset'));
 
 const App: React.FC = () => (
@@ -42,10 +48,18 @@ const App: React.FC = () => (
         <Route path="experiencia" element={<ExperienceList />} />
         <Route path="experiencia/nuevo" element={<ExperienceEditor />} />
         <Route path="experiencia/:id" element={<ExperienceEditor />} />
+        <Route path="contratos" element={<Contratos />} />
+        <Route path="contratos/nuevo" element={<ClientEditor />} />
+        <Route path="contratos/plantillas/nueva" element={<TemplateEditor />} />
+        <Route path="contratos/plantillas/:id" element={<TemplateEditor />} />
+        <Route path="contratos/:clientId" element={<ClientFolder />} />
+        <Route path="contratos/:clientId/editar" element={<ClientEditor />} />
+        <Route path="contratos/:clientId/documentos/:docId" element={<DocEditor />} />
         <Route path="cuenta" element={<Cuenta />} />
         <Route path="*" element={<Navigate to="/admin/auditoria" replace />} />
       </Route>
       <Route path="/admin/restablecer" element={<Suspense fallback={null}><AdminReset /></Suspense>} />
+      <Route path="/firmar/:token" element={<Suspense fallback={null}><Firmar /></Suspense>} />
       <Route path="*" element={<Home />} />
     </Route>
   </Routes>

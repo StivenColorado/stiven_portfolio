@@ -1,0 +1,24 @@
+  firmado.mail
+
+
+{{HEADING}}
+
+{{intro}}
+
+Document
+
+{{docTitle}}
+
+Signed on
+
+{{signedAt}}
+
+SHA-256 fingerprint
+
+{{hash}}
+
+The fingerprint identifies the exact content that was signed; it also appears in the attached PDF.
+
+Stiven Colorado · negocioempresarial.online
+
+Keep this email as a record.

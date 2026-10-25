@@ -32,6 +32,18 @@ Otros scripts: `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test:server`. 
 | `SESSION_HOURS` | `12` | Duración de la sesión admin |
 | `COOKIE_SECURE` | `1` | Usar `0` en desarrollo sobre http |
 
+## Contratos
+
+Módulo del panel (`/admin/contratos`) para expedientes de clientes, plantillas y documentos con firma electrónica. No requiere variables de entorno nuevas: usa `PUBLIC_URL` para los enlaces, `BREVO_API_KEY` para los correos y `MAIL_REPLY_TO` (o `ADMIN_EMAIL`) para la copia firmada del prestador. Sin `BREVO_API_KEY`, en desarrollo el enlace de firma se imprime en la consola del servidor.
+
+Flujo: se crea un expediente, se genera un documento desde una plantilla (8 tipos en español de Colombia, editables; «Restaurar por defecto» recupera la original), se edita el borrador y se envía. El cliente abre `/firmar/<token>` (enlace personal de 32 bytes, solo se guarda su hash; vence a los 30 días por defecto), dibuja su firma y acepta. Si el prestador firmó al enviar, el contrato queda `active` y se genera el PDF definitivo (portada, cláusulas numeradas, firmas, registro de firma con hash SHA-256, fecha, IP y user-agent), que se envía por correo a ambas partes. Si el prestador eligió «firmar después», queda `client_signed` hasta que firme desde el panel. Un trabajo horario (junto con la purga) vence contratos y reenvía hasta 3 recordatorios; cada recordatorio genera un enlace nuevo.
+
+El texto de las plantillas es texto plano con marcado mínimo: `# título`, `## sección` (se numeran solas), `- viñeta`, `| celda | celda |` para tablas (con `|---|` tras el encabezado) y `{{variable}}`. El PDF se escribe con un módulo propio (`server/pdf.ts`), sin dependencias.
+
+Los correos son React Email: tras cambiar `emails/*.tsx` ejecuta `pnpm email:build` para regenerar `server/mail-templates/`.
+
+**Aviso legal:** las plantillas son modelos generales y no constituyen asesoría legal; revísalas con un abogado antes de usarlas. La firma es electrónica simple (Ley 527 de 1999 y Decreto 2364 de 2012).
+
 ## Hash de la contraseña del admin
 
 ```bash

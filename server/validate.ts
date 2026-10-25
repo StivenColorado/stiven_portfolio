@@ -33,7 +33,7 @@ const TAG = /^[A-Z0-9_]{1,24}$/
 const ICON = /^[A-Za-z][A-Za-z0-9]{1,31}$/
 const GITHUB_REPO = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/
 
-function reader(body: Record<string, unknown>, allowed: string[], prefix = '', fields: Fields = {}) {
+export function reader(body: Record<string, unknown>, allowed: string[], prefix = '', fields: Fields = {}) {
   for (const key of Object.keys(body)) if (!allowed.includes(key)) fields[prefix + key] = 'Campo desconocido'
   const fail = (key: string, message: string) => {
     fields[prefix + key] ??= message

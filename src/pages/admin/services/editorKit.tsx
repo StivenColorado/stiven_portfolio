@@ -48,10 +48,11 @@ interface EditorFrameProps {
     saving: boolean;
     dirty: boolean;
     onSave: (publish: boolean) => void;
+    publishLabel?: string | false;
     children: React.ReactNode;
 }
 
-export function EditorFrame({ eyebrow, heading, backTo, backLabel, status, saving, dirty, onSave, children }: EditorFrameProps) {
+export function EditorFrame({ eyebrow, heading, backTo, backLabel, status, saving, dirty, onSave, publishLabel, children }: EditorFrameProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [confirmLeave, setConfirmLeave] = useState(false);
@@ -75,7 +76,9 @@ export function EditorFrame({ eyebrow, heading, backTo, backLabel, status, savin
                 <span className="mr-auto hidden text-xs text-muted sm:inline">{t("adminContent.common.shortcut")}</span>
                 <button type="button" className="btn" onClick={cancel} disabled={saving}>{t("adminContent.common.cancel")}</button>
                 <button type="submit" className="btn" disabled={saving}>{saving ? t("adminContent.common.saving") : t("adminContent.common.save")}</button>
-                <button type="button" className="btn btn-primary" disabled={saving} onClick={() => onSave(true)}>{t("adminContent.common.saveAndPublish")}</button>
+                {publishLabel !== false && (
+                    <button type="button" className="btn btn-primary" disabled={saving} onClick={() => onSave(true)}>{publishLabel ?? t("adminContent.common.saveAndPublish")}</button>
+                )}
             </div>
             <ConfirmDialog
                 open={confirmLeave}

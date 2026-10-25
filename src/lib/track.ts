@@ -8,7 +8,7 @@ export function useTrack() {
     const { pathname } = useLocation();
 
     useEffect(() => {
-        if (pathname.startsWith("/admin")) return;
+        if (pathname.startsWith("/admin") || pathname.startsWith("/firmar")) return;
         if ((navigator as GpcNavigator).globalPrivacyControl) return;
         try {
             const body = JSON.stringify({

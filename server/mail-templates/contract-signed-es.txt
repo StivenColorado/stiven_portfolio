@@ -1,0 +1,24 @@
+  firmado.mail
+
+
+{{HEADING}}
+
+{{intro}}
+
+Documento
+
+{{docTitle}}
+
+Firmado el
+
+{{signedAt}}
+
+Huella SHA-256
+
+{{hash}}
+
+La huella identifica el contenido exacto que se firmó; también aparece en el PDF adjunto.
+
+Stiven Colorado · negocioempresarial.online
+
+Guarda este correo como constancia.

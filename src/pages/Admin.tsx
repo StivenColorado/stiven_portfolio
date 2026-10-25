@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Briefcase, History, LogOut, Menu, Sparkles, UserCog, Wrench, X } from "lucide-react";
+import { Briefcase, FileSignature, History, LogOut, Menu, Sparkles, UserCog, Wrench, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { adminApi } from "../lib/api";
 import { onUnauthorized } from "../lib/adminApi";
@@ -19,6 +19,7 @@ const ITEMS: { to: string; labelKey: string; icon: ComponentType<{ size?: number
     { to: "/admin/proyectos", labelKey: "admin.shell.nav.projects", icon: Sparkles },
     { to: "/admin/servicios", labelKey: "admin.shell.nav.services", icon: Wrench },
     { to: "/admin/experiencia", labelKey: "admin.shell.nav.experience", icon: Briefcase },
+    { to: "/admin/contratos", labelKey: "admin.shell.nav.contracts", icon: FileSignature },
     { to: "/admin/cuenta", labelKey: "admin.shell.nav.account", icon: UserCog },
 ];
 

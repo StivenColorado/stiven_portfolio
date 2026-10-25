@@ -23,7 +23,7 @@ function toError(status: number, retryHeader: string | null, body: ErrorBody | n
     return new ApiError(status, Number.isFinite(retry) ? retry : undefined, body?.error, body?.fields);
 }
 
-async function request<T>(path: string, method = "GET", body?: unknown): Promise<T> {
+export async function request<T>(path: string, method = "GET", body?: unknown): Promise<T> {
     const result = await send<T>(path, method, body);
     if (method !== "GET" && CONTENT_PATH.test(path)) invalidateContent();
     return result;

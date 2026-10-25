@@ -1,0 +1,24 @@
+  firmar.mail
+
+
+{{HEADING}}
+
+Hi {{clientName}},
+
+{{intro}}
+
+{{ownerName}}
+
+{{message}}
+
+Review and sign {{url}}
+
+If the button doesn't work, copy this link
+
+{{url}}
+
+This link is personal: please do not share it. It expires in {{days}} days.
+
+Stiven Colorado · negocioempresarial.online
+
+If you weren't expecting this email, you can ignore it.

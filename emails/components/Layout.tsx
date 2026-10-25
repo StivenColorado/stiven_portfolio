@@ -29,11 +29,12 @@ interface LayoutProps {
   windowTitle: string
   children: ReactNode
   footer: ReactNode
+  lang?: string
 }
 
-export function Layout({ preview, windowTitle, children, footer }: LayoutProps) {
+export function Layout({ preview, windowTitle, children, footer, lang = 'es' }: LayoutProps) {
   return (
-    <Html lang="es">
+    <Html lang={lang}>
       <Head>
         <meta name="color-scheme" content="light dark" />
         <meta name="supported-color-schemes" content="light dark" />

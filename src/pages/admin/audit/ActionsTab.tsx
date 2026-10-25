@@ -7,7 +7,7 @@ import EmptyState from "../../../components/admin/ui/EmptyState";
 import { fmtShort } from "../../../components/admin/format";
 
 const PAGE = 50;
-const ENTITIES = ["projects", "services", "experience", "media", "visits", "auth"];
+const ENTITIES = ["projects", "services", "experience", "media", "visits", "auth", "clients", "contract_templates", "contracts"];
 
 const uniq = (xs: string[]) => [...new Set(xs)].sort();
 
