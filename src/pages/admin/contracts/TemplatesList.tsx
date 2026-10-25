@@ -93,10 +93,10 @@ export default function TemplatesList() {
                                     {x.seedKey && <span className="tag dither">{t("adminContracts.templates.default")}</span>}
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    <Link to={`/admin/contratos/plantillas/${x.id}`} className="btn !min-h-8 !px-3 !py-1 !text-xs"><Pencil size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.edit")}</Link>
-                                    <button type="button" className="btn !min-h-8 !px-3 !py-1 !text-xs" onClick={() => void duplicate(x)}><Copy size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.templates.duplicate")}</button>
-                                    {x.seedKey && <button type="button" className="btn !min-h-8 !px-3 !py-1 !text-xs" onClick={() => setAction({ kind: "restore", tpl: x })}><RotateCcw size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.templates.restore")}</button>}
-                                    <button type="button" className="btn !min-h-8 !px-3 !py-1 !text-xs" onClick={() => setAction({ kind: "delete", tpl: x })}><Trash2 size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.delete")}</button>
+                                    <Link to={`/admin/contratos/plantillas/${x.id}`} className="btn !min-h-10 !px-3 !py-1 !text-xs"><Pencil size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.edit")}</Link>
+                                    <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-xs" onClick={() => void duplicate(x)}><Copy size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.templates.duplicate")}</button>
+                                    {x.seedKey && <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-xs" onClick={() => setAction({ kind: "restore", tpl: x })}><RotateCcw size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.templates.restore")}</button>}
+                                    <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-xs" onClick={() => setAction({ kind: "delete", tpl: x })}><Trash2 size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.delete")}</button>
                                 </div>
                             </li>
                         ))}

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Copy } from "lucide-react";
+import RemindField from "../admin/ui/RemindField";
 import Field from "../admin/ui/Field";
 import type { SendInput, Strokes } from "../../types/contracts";
 import SignaturePad from "./SignaturePad";
@@ -114,9 +115,9 @@ export default function SendDialog({ open, resend = false, title, defaultEmail, 
                 ) : (
                     <form noValidate onSubmit={(e) => { e.preventDefault(); void submit(); }} className="space-y-4">
                         <Field label={t("adminContracts.send.email")} type="email" value={email} onChange={setEmail} required maxLength={254} autoComplete="off" />
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-4 sm:grid-cols-2 labels-aligned">
                             <Field label={t("adminContracts.send.days")} type="number" min={1} max={90} value={days} onChange={setDays} hint={t("adminContracts.send.daysHint")} />
-                            {!resend && <Field label={t("adminContracts.send.remind")} type="number" min={0} max={30} value={remind} onChange={setRemind} hint={t("adminContracts.send.remindHint")} />}
+                            {!resend && <RemindField value={remind} onChange={setRemind} />}
                         </div>
                         {!resend && (
                             <>

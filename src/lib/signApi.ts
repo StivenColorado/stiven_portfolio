@@ -1,5 +1,5 @@
 import { ApiError } from "./api";
-import type { SignResult, SignView, Strokes } from "../types/contracts";
+import type { ClientData, SignResult, SignView, Strokes } from "../types/contracts";
 
 const url = (token: string) => `/api/sign/${encodeURIComponent(token)}`;
 
@@ -18,5 +18,5 @@ async function call<T>(token: string, method: "GET" | "POST", body?: unknown): P
 }
 
 export const getSign = (token: string) => call<SignView>(token, "GET");
-export const postSign = (token: string, body: { name: string; strokes: Strokes; accepted: true }) => call<SignResult>(token, "POST", body);
+export const postSign = (token: string, body: { name: string; strokes: Strokes; accepted: true; clientData?: ClientData }) => call<SignResult>(token, "POST", body);
 export const signPdfUrl = (token: string) => `${url(token)}/pdf`;

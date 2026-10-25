@@ -119,13 +119,13 @@ export default function ClientsList() {
                                     ))}
                                 </ul>
                                 <div className="mt-auto flex flex-wrap gap-2">
-                                    <Link to={`/admin/contratos/${c.id}`} className="btn !min-h-9 !px-3 !py-1 !text-sm btn-primary"><FolderOpen size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.clients.open")}</Link>
-                                    <Link to={`/admin/contratos/${c.id}/editar`} className="btn !min-h-9 !px-3 !py-1 !text-sm"><Pencil size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.edit")}</Link>
-                                    <button type="button" className="btn !min-h-9 !px-3 !py-1 !text-sm" onClick={() => void toggleArchive(c)}>
+                                    <Link to={`/admin/contratos/${c.id}`} className="btn !min-h-10 !px-3 !py-1 !text-sm btn-primary"><FolderOpen size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.clients.open")}</Link>
+                                    <Link to={`/admin/contratos/${c.id}/editar`} className="btn !min-h-10 !px-3 !py-1 !text-sm"><Pencil size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.edit")}</Link>
+                                    <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-sm" onClick={() => void toggleArchive(c)}>
                                         {c.status === "active" ? <Archive size={14} strokeWidth={2.5} aria-hidden /> : <ArchiveRestore size={14} strokeWidth={2.5} aria-hidden />}
                                         {c.status === "active" ? t("adminContracts.clients.archive") : t("adminContracts.clients.restore")}
                                     </button>
-                                    <button type="button" className="btn !min-h-9 !px-3 !py-1 !text-sm" onClick={() => setTarget(c)}>
+                                    <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-sm" onClick={() => setTarget(c)}>
                                         <Trash2 size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.delete")}
                                     </button>
                                 </div>

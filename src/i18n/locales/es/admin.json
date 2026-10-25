@@ -125,6 +125,7 @@
         "send": "Envío",
         "resend": "Reenvío",
         "sign": "Firma",
+        "client_data": "Datos del cliente",
         "revoke": "Vuelta a borrador",
         "cancel": "Cancelación",
         "expire": "Vencimiento",

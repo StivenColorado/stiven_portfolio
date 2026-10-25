@@ -65,7 +65,7 @@ Si EL PRESTADOR incumple los tiempos de severidad crítica por causas que le sea
 
 ## Vigencia
 
-Este acuerdo rige desde el {{fecha_inicio}} por {{vigencia_meses}} meses y se renovará por periodos iguales, salvo que alguna de las partes comunique por escrito su decisión de no renovarlo con al menos treinta (30) días de anticipación.
+Este acuerdo rige desde el {{fecha_inicio}} por {{vigencia_meses}} y se renovará por periodos iguales, salvo que alguna de las partes comunique por escrito su decisión de no renovarlo con al menos treinta (30) días de anticipación.
 
 ## Firma electrónica
 

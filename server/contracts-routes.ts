@@ -6,12 +6,13 @@ import {
   cancelDoc, clientSign, createClient, createDoc, createTemplate, dataOf, docDetail, docPdf, findByToken, fmtDateTime, getClient,
   getDocRow, getTemplate, listClients, listDocs, listTemplates, ownerProfile, ownerSign, ownerSignature, removeClient, removeDoc,
   removeTemplate, renderDoc, resendDoc, restoreTemplate, revokeDoc, sendDoc, setClientStatus, setOwnerProfile, setOwnerSignature,
-  signView, updateClient, updateDoc, updateTemplate,
+  previewPdf, signView, updateClient, updateDoc, updateTemplate,
 } from './contracts.ts'
 import type { Meta } from './contracts.ts'
+import { missingVars } from './contract-text.ts'
 import {
   validateClient, validateClientSign, validateClientStatus, validateDoc, validateNewDoc, validateNote, validateOwnerProfile,
-  validateOwnerSign, validateResend, validateSend, validateSignatureSetting, validateTemplate,
+  validateOwnerSign, validatePreview, validateResend, validateSend, validateSignatureSetting, validateTemplate,
 } from './contracts-validate.ts'
 import { MINUTE, header, isSameOrigin, readJson, send } from './http.ts'
 import { sendContractSignMail, sendContractSignedMail } from './mail.ts'
@@ -27,10 +28,10 @@ const ID = /^\d{1,10}$/
 const short = (s: string, n = 80) => (s.length > n ? `${s.slice(0, n - 1)}…` : s)
 const slug = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 60) || 'documento'
 
-function sendPdf(res: ServerResponse, pdf: Buffer, name: string): void {
+function sendPdf(res: ServerResponse, pdf: Buffer, name: string, inline = false): void {
   res.writeHead(200, {
     'Content-Type': 'application/pdf',
-    'Content-Disposition': `attachment; filename="${name}.pdf"`,
+    'Content-Disposition': `${inline ? 'inline' : 'attachment'}; filename="${name}.pdf"`,
     'Content-Length': String(pdf.length),
     'Cache-Control': 'no-store',
     'X-Content-Type-Options': 'nosniff',
@@ -71,7 +72,7 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
 
   async function mailSigned(docId: number): Promise<void> {
     const r = getDocRow(db, docId)
-    const pdf = docPdf(db, docId)
+    const pdf = await docPdf(db, docId)
     if (!r || !pdf) return
     const recipients = [r.sent_to, ownerCopy()].filter((to): to is string => Boolean(to))
     const hash = r.content_hash ?? ''
@@ -212,7 +213,7 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
     return notFound(res)
   }
 
-  async function adminDocs(req: IncomingMessage, res: ServerResponse, email: string, ip: string, seg: string[]): Promise<void> {
+  async function adminDocs(req: IncomingMessage, res: ServerResponse, email: string, ip: string, seg: string[], url: URL): Promise<void> {
     const [, idRaw, sub] = seg
     const m = req.method
     if (!idRaw || !ID.test(idRaw)) return notFound(res)
@@ -243,8 +244,8 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
       return notFound(res)
     }
     if (sub === 'pdf' && m === 'GET') {
-      const pdf = docPdf(db, id)
-      return pdf ? sendPdf(res, pdf, slug(row.title)) : notFound(res)
+      const pdf = await docPdf(db, id)
+      return pdf ? sendPdf(res, pdf, slug(row.title), url.searchParams.get('inline') === '1') : notFound(res)
     }
     if (m !== 'POST') return notFound(res)
 
@@ -304,7 +305,7 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
   }
 
   const renderMissing = (row: NonNullable<ReturnType<typeof getDocRow>>) =>
-    [...renderDoc(row).matchAll(/\[\[([a-z][a-z0-9_]*)\]\]/g)].map((x) => x[1]).filter((v, i, a) => a.indexOf(v) === i).join(', ')
+    missingVars(renderDoc(row), true).join(', ')
 
   async function adminSettings(req: IncomingMessage, res: ServerResponse, email: string, ip: string, seg: string[]): Promise<void> {
     const [, what] = seg
@@ -332,6 +333,14 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
     return notFound(res)
   }
 
+  async function previewRoute(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    if (req.method !== 'POST') return notFound(res)
+    const input = await parsed(req, res, validatePreview, MAX_BIG)
+    if (!input) return
+    const pdf = await previewPdf(db, input)
+    return pdf ? sendPdf(res, pdf, 'vista-previa', true) : notFound(res)
+  }
+
   async function admin(req: IncomingMessage, res: ServerResponse, email: string, ip: string, url: URL): Promise<void> {
     const seg = url.pathname.replace(/^\/api\/admin\/contracts\/?/, '').split('/').filter(Boolean)
     if (req.method !== 'GET' && !isSameOrigin(req)) {
@@ -341,7 +350,8 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
     switch (seg[0]) {
       case 'clients': return adminClients(req, res, email, ip, seg, url)
       case 'templates': return adminTemplates(req, res, email, ip, seg, url)
-      case 'docs': return adminDocs(req, res, email, ip, seg)
+      case 'docs': return adminDocs(req, res, email, ip, seg, url)
+      case 'preview-pdf': return previewRoute(req, res)
       case 'settings': return adminSettings(req, res, email, ip, seg)
       default: return notFound(res)
     }
@@ -363,12 +373,15 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
       }
       const input = await parsed(req, res, validateClientSign, MAX_SIGN)
       if (!input) return
-      const out = clientSign(db, token, { name: input.name, strokes: input.strokes, ...meta(req, ip) })
+      const out = clientSign(db, token, { name: input.name, strokes: input.strokes, clientData: input.clientData, ...meta(req, ip) })
       if (out === 'not_found') return notFound(res)
       if (out === 'expired') return send(res, 410, { error: 'expired' })
       if (out === 'already_signed' || out === 'cancelled') return send(res, 409, { error: out })
+      if (out === 'client_data_missing') return invalid(res, { clientData: 'Completa tus datos para firmar' })
       const signedAt = dataOf(out).signatures.client?.ts ?? Date.now()
       const hash = out.content_hash ?? ''
+      const provided = dataOf(out).clientData
+      if (provided) audit(null, ip, 'client_data', 'contracts', out.id, `El cliente aportó sus datos (${provided.fields.join(', ')}) al firmar «${short(out.title)}»`)
       audit(null, ip, 'sign', 'contracts', out.id, `El cliente «${short(input.name)}» firmó «${short(out.title)}» (hash ${hash.slice(0, 8)})`)
       if (out.status === 'active') await mailSigned(out.id)
       return send(res, 200, { ok: true, signedAt, hash })
@@ -382,7 +395,7 @@ export function createContractRoutes(db: DatabaseSync, config: Config, audit: Au
     if (row.status === 'expired' || (row.token_expires ?? 0) <= Date.now()) return send(res, 410, { error: 'expired' })
     if (sub === 'pdf') {
       if (row.status !== 'active') return send(res, 409, { error: 'not_ready' })
-      const pdf = docPdf(db, row.id)
+      const pdf = await docPdf(db, row.id)
       return pdf ? sendPdf(res, pdf, slug(row.title)) : send(res, 409, { error: 'not_ready' })
     }
     return send(res, 200, signView(db, row))

@@ -1,4 +1,4 @@
-import type { ContractLang, VarType } from './contract-text.ts'
+import type { ClientField, ContractLang, VarType } from './contract-text.ts'
 import { reader } from './validate.ts'
 import type { Fields, Result } from './validate.ts'
 
@@ -23,7 +23,8 @@ export type SendInput = {
 }
 export type ResendInput = { email: string | null; expiresInDays: number }
 export type OwnerSignInput = { signature: Strokes | null; useSaved: boolean }
-export type ClientSignInput = { name: string; accepted: true; strokes: Strokes }
+export type ClientData = Partial<Record<Exclude<ClientField, 'docType'>, string>> & { docType?: DocType }
+export type ClientSignInput = { name: string; accepted: true; strokes: Strokes; clientData: ClientData }
 export type OwnerProfile = {
   name: string; docType: DocType; docNumber: string; email: string; phone: string; address: string; city: string
 }
@@ -31,6 +32,7 @@ export type OwnerProfile = {
 const KEY = /^[a-z][a-z0-9_]*$/
 const DOC_NUMBER = /^[0-9A-Za-z.-]+$/
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const DOC_NUMBER_SIGN = /^[0-9A-Za-z][0-9A-Za-z.-]{3,29}$/
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
 type R = ReturnType<typeof reader>
@@ -51,6 +53,13 @@ function email(r: R, body: Record<string, unknown>, key: string, required: boole
   if (v === undefined || v === null || v === '') return required ? (r.fail(key, 'Obligatorio'), '') : ''
   if (typeof v !== 'string' || v.trim().length > 254 || !EMAIL.test(v.trim())) return r.fail(key, 'Correo inválido'), ''
   return v.trim().toLowerCase()
+}
+
+/** El celular es el único dato de contacto obligatorio: el resto del cliente lo completa él mismo al firmar. */
+function phone(r: R): string {
+  const v = r.text('phone', 30)
+  if (v !== '' && v.replace(/\D/g, '').length < 7) r.fail('phone', 'Celular inválido')
+  return v
 }
 
 function docNumber(r: R, body: Record<string, unknown>, required: boolean): string {
@@ -124,7 +133,7 @@ export function validateClient(body: Record<string, unknown>): Result<ClientInpu
     docNumber: docNumber(r, body, false),
     contactName: r.text('contactName', 120, false),
     email: email(r, body, 'email', false),
-    phone: r.text('phone', 30, false),
+    phone: phone(r),
     address: r.text('address', 200, false),
     city: r.text('city', 80, false),
     country: body.country === undefined ? 'Colombia' : r.text('country', 60, false),
@@ -196,6 +205,23 @@ export function validateDoc(body: Record<string, unknown>): Result<DocInput> {
   return done(r.fields, value)
 }
 
+export type PreviewInput = {
+  docId?: number; title?: string; body?: string; variables?: Record<string, string>; kind?: DocKind; lang?: ContractLang; clientId?: number
+}
+
+export function validatePreview(body: Record<string, unknown>): Result<PreviewInput> {
+  const r = reader(body, ['docId', 'title', 'body', 'variables', 'kind', 'lang', 'clientId'])
+  const value: PreviewInput = {}
+  if (body.docId !== undefined) value.docId = int(r, body, 'docId', 1, 2_000_000_000, null)
+  if (body.clientId !== undefined) value.clientId = int(r, body, 'clientId', 1, 2_000_000_000, null)
+  if (body.title !== undefined) value.title = r.text('title', 160, false)
+  if (body.body !== undefined) value.body = r.text('body', 100_000, false)
+  if (body.variables !== undefined) value.variables = varsMap(r, body, 'variables', 60)
+  if (body.kind !== undefined) value.kind = r.oneOf('kind', DOC_KINDS)
+  if (body.lang !== undefined) value.lang = r.oneOf('lang', LANGS)
+  return done(r.fields, value)
+}
+
 export function validateNewDoc(body: Record<string, unknown>): Result<NewDocInput> {
   const r = reader(body, ['templateId', 'parentId', 'title'])
   const value: NewDocInput = {
@@ -237,10 +263,48 @@ export function validateNote(key: 'note' | 'reason') {
   }
 }
 
+/** Texto que se inserta tal cual en el documento: sin marcas del formato ([[ ]], {{ }}, tablas) ni saltos de línea. */
+function safeText(r: R, o: Record<string, unknown>, key: string, min: number, max: number): string | undefined {
+  const v = o[key]
+  if (v === undefined || v === null || v === '') return undefined
+  const t = typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : ''
+  if (t === '') return undefined
+  if (t.length < min || t.length > max) return r.fail(`clientData.${key}`, `Entre ${min} y ${max} caracteres`), undefined
+  if (/[[\]{}|<>\\]/.test(t) || /^(#|- )/.test(t) || /\p{Cc}/u.test(t)) return r.fail(`clientData.${key}`, 'Contiene caracteres no permitidos'), undefined
+  return t
+}
+
+function clientData(r: R, body: Record<string, unknown>): ClientData {
+  const v = body.clientData
+  if (v === undefined) return {}
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return r.fail('clientData', 'Debe ser un objeto'), {}
+  const o = v as Record<string, unknown>
+  reader(o, ['legalName', 'docType', 'docNumber', 'contactName', 'city', 'address'], 'clientData.', r.fields)
+  const out: ClientData = {}
+  const set = (k: Exclude<ClientField, 'docType'>, min: number, max: number) => {
+    const t = safeText(r, o, k, min, max)
+    if (t !== undefined) out[k] = t
+  }
+  set('legalName', 2, 160)
+  set('contactName', 2, 120)
+  set('city', 2, 80)
+  set('address', 5, 200)
+  if (o.docType !== undefined && o.docType !== '') {
+    if (typeof o.docType === 'string' && (DOC_TYPES as readonly string[]).includes(o.docType)) out.docType = o.docType as DocType
+    else r.fail('clientData.docType', 'Tipo de documento inválido')
+  }
+  if (o.docNumber !== undefined && o.docNumber !== '') {
+    const n = typeof o.docNumber === 'string' ? o.docNumber.trim() : ''
+    if (DOC_NUMBER_SIGN.test(n)) out.docNumber = n
+    else r.fail('clientData.docNumber', 'Entre 4 y 30 caracteres: letras, números, punto y guion')
+  }
+  return out
+}
+
 export function validateClientSign(body: Record<string, unknown>): Result<ClientSignInput> {
-  const r = reader(body, ['name', 'accepted', 'strokes'])
+  const r = reader(body, ['name', 'accepted', 'strokes', 'clientData'])
   if (body.accepted !== true) r.fail('accepted', 'Debes aceptar para firmar')
-  const value = { name: r.text('name', 120), accepted: true as const, strokes: strokes(r, body, 'strokes', false) as Strokes }
+  const value = { name: r.text('name', 120), accepted: true as const, strokes: strokes(r, body, 'strokes', false) as Strokes, clientData: clientData(r, body) }
   return done(r.fields, value)
 }
 

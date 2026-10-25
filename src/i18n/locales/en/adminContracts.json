@@ -3,6 +3,17 @@
     "title": "Contracts",
     "legal": "This is not legal advice: templates are a starting point. Have a lawyer review them before using them with clients.",
     "markup": "Markup: \"# \" title, \"## \" section (numbered), \"- \" bullet, blank line = paragraph, {{variable}} for values. Tables: \"| cell | cell |\" and a \"|---|---|\" line after the header.",
+    "pdfPreview": {
+      "title": "PDF preview",
+      "loading": "Generating preview…",
+      "error": "The preview could not be generated.",
+      "enlarge": "Enlarge",
+      "enlargeLabel": "Enlarge PDF preview",
+      "newTab": "Open in new tab",
+      "download": "Download",
+      "footer": "Preview of the real PDF · updates as you type",
+      "fillProfile": "Complete in My details"
+    },
     "tabs": {
       "label": "Contract sections",
       "clients": "Client files",
@@ -66,12 +77,9 @@
       "moneda": "Currency",
       "plazo": "Delivery timeline",
       "fecha_inicio": "Start date",
-      "garantia_dias": "Warranty (days)",
+      "garantia_dias": "Warranty",
       "hitos": "Payment milestones",
-      "alcance": "Scope",
-      "plazoHint": "Total time needed to deliver the project, counted from the start date. It is the delivery deadline in the contract.",
-      "plazoPlaceholder": "e.g. 45 calendar days",
-      "garantiaHint": "Days after delivery during which you fix bugs at no cost."
+      "alcance": "Scope"
     },
     "clients": {
       "new": "New client file",
@@ -121,7 +129,14 @@
       "extras": "Other values",
       "extraKey": "variable_key",
       "extraValue": "Value",
-      "addExtra": "Add value"
+      "addExtra": "Add value",
+      "groupPrice": "Price",
+      "groupTiming": "Start and timeline",
+      "groupWarranty": "Warranty",
+      "groupContent": "Content",
+      "optionalHint": "Only the name and mobile number are required. The client will complete the other identification details when signing; if you already have them, you can enter them here.",
+      "pending": "Pending: the client completes it when signing",
+      "providedBy": "Details provided by the client when signing on {{date}}."
     },
     "docs": {
       "title": "Documents",
@@ -173,7 +188,29 @@
       "noVars": "This text has no variables.",
       "preview": "Preview",
       "readonly": "Document sent: read-only. To edit it, go back to draft.",
-      "readonlyCancelled": "Document cancelled: read-only."
+      "readonlyCancelled": "Document cancelled: read-only.",
+      "group": {
+        "content": "Content",
+        "tables": "Tables",
+        "money": "Price",
+        "timing": "Dates and timelines",
+        "other": "Other data",
+        "auto": "Automatic data",
+        "own": "Your details (provider)",
+        "client": "Client details"
+      },
+      "autoHint": "Filled automatically from the client file and \"My data\". If something is missing, complete it there.",
+      "autoMissing": "{{count}} missing",
+      "autoEmpty": "Missing",
+      "editMyData": "Complete in My data",
+      "advancedBody": "Edit the full document text (advanced)",
+      "advancedBodyHint": "Only if you need to change the wording of this contract for this client. Changes here do not affect the template.",
+      "ownHint": "They come from \"My data\". If one is missing, complete it there before sending.",
+      "clientHint": "You do not ask for these: the client fills them in on the signing page, right before signing. Here you see the ones that already exist.",
+      "clientPending": "{{count}} to be completed by the client",
+      "clientEmpty": "Pending: filled in by the client",
+      "editClientData": "View or edit client details",
+      "clientProvided": "The client provided their details when signing: {{fields}} ({{date}}, IP {{ip}})."
     },
     "send": {
       "file": "send.dlg",
@@ -250,7 +287,14 @@
       "insertHint": "Click a variable to insert it at the cursor.",
       "undeclared": "Undeclared:",
       "declare": "Declare variable",
-      "previewSample": "Preview with sample values"
+      "previewSample": "Preview with sample values",
+      "autoVars": "Insert an automatic field (client, provider, date…)",
+      "varsHint": "They are detected from the text: every variable you write between double curly braces shows up here. Open one to change its label, type or default value.",
+      "noVars": "No variables yet. Write one between double curly braces in the text or add one below.",
+      "unused": "Not used in the text",
+      "varDefaultHint": "Filled in when a new document is created; you can change it per client.",
+      "newVar": "New variable",
+      "newVarHint": "Letters, numbers and underscore only. It is inserted in the text at the cursor."
     },
     "settings": {
       "profile": "My details",
@@ -265,6 +309,286 @@
     "currency": {
       "COP": "COP · Colombian pesos",
       "USD": "USD · US dollars"
+    },
+    "plazo": {
+      "hint": "How long will delivery take? The delivery date is calculated from the start date.",
+      "qty": "Amount",
+      "unit": "Unit",
+      "kind": "Day type",
+      "units": {
+        "day": "Days",
+        "week": "Weeks",
+        "month": "Months"
+      },
+      "kinds": {
+        "business": "Business",
+        "calendar": "Calendar"
+      },
+      "businessNote": "Business: Monday to Friday, excluding Colombian public holidays.",
+      "legacy": "The current timeline is free text (\"{{value}}\"). Pick amount, unit and type to replace it.",
+      "result": "Timeline: {{plazo}} · Estimated delivery: {{date}}",
+      "needStart": "Timeline: {{plazo}} · Set the start date to calculate delivery."
+    },
+    "garantia": {
+      "hint": "Time after delivery during which you fix bugs at no cost.",
+      "result": "Equals {{days}} calendar days (as it appears in the contract)."
+    },
+    "timeline": {
+      "title": "Client process",
+      "hint": "The recommended order for working with a client, from the first conversation to maintenance. Create each document from here and the system picks the template and the parent contract.",
+      "next": "Next step: {{name}}",
+      "create": "Create",
+      "another": "Create another",
+      "continue": "Continue",
+      "open": "Open",
+      "optional": "Optional",
+      "required": "Required",
+      "allDone": "All required steps are complete.",
+      "locked": "Create the services agreement first.",
+      "phases": {
+        "start": "1 · Before starting",
+        "formalize": "2 · Formalization",
+        "build": "3 · During development",
+        "close": "4 · Delivery and closing",
+        "keep": "5 · After delivery"
+      },
+      "why": {
+        "nda": "Use it before discussing the project if the client will share sensitive information.",
+        "sow": "What you offer: scope, deliverables, timeline and price. The base the client accepts.",
+        "services": "The formal contract with payments, intellectual property and warranty. Signed before work starts.",
+        "data_processing": "If the system handles personal data of the client's users (Law 1581).",
+        "change_order": "Whenever the client asks for something out of scope: records the change, cost and extra time.",
+        "acceptance": "The client confirms everything was received as agreed. Enables the final payment and starts the warranty.",
+        "sla": "Defines support: what it covers, response times and what is billed separately.",
+        "retainer": "Monthly maintenance with included hours, once the warranty ends."
+      }
+    },
+    "remind": {
+      "label": "Remind the client by email if they have not signed",
+      "every": "Send every (days)",
+      "onHint": "An email with the signing link is sent every N days until the client signs (up to 3 reminders). Each email replaces the previous link.",
+      "offHint": "No reminders will be sent: the client only gets the initial email."
+    },
+    "table": {
+      "header": "Column {{n}} header",
+      "cell": "Row {{row}}, column {{col}}",
+      "addRow": "Add row",
+      "addCol": "Add column",
+      "removeRow": "Remove row",
+      "removeCol": "Remove column",
+      "newCol": "New column",
+      "fill": "Fill in table",
+      "save": "Save table",
+      "fillHint": "Type the data in each cell. Enter moves to the next row and, on the last one, adds a new row."
+    },
+    "varHelp": {
+      "summary": "Why is this asked?",
+      "example": "Example:",
+      "useExample": "Use this example",
+      "objeto": {
+        "why": "Describe in one sentence what you will deliver to the client. It is the base of the contract: anything outside the purpose can be treated as a change with extra cost.",
+        "example": "Design, development and launch of the client's corporate website."
+      },
+      "alcance": {
+        "why": "List what the work includes: modules, screens, integrations. It is what the client accepts when signing and your defense if they later ask for things that were not agreed.",
+        "example": "5-page responsive website, contact form, text editing panel and deployment on the client's server."
+      },
+      "entregables": {
+        "why": "The concrete products the client will receive (code, designs, access, manuals). Lets both sides know when the work is finished.",
+        "example": "Source code, published site and a PDF user manual."
+      },
+      "monto": {
+        "why": "Total value of the work. The contract quotes it with the currency and the payment plan; it is the basis for billing and for penalties.",
+        "example": "5,000,000"
+      },
+      "moneda": {
+        "why": "Sets the payment currency and avoids confusion between pesos and dollars when billing.",
+        "example": "COP"
+      },
+      "hitos": {
+        "why": "How and when you get paid: down payment, intermediate payments and final payment, each with its condition. A down payment protects you if the client disappears, and tying payments to deliveries avoids disputes.",
+        "example": "50 % on signing and 50 % on final delivery."
+      },
+      "plazo": {
+        "why": "How long you have to deliver, counted from the start date. It sets the deadline for both sides; if the client delays content or answers, the timeline moves.",
+        "example": "45 business days"
+      },
+      "fecha_inicio": {
+        "why": "When the timeline starts counting. Usually the signing date or the date of the first payment (down payment).",
+        "example": "January 15, 2027"
+      },
+      "garantia_dias": {
+        "why": "Time after delivery during which you fix bugs at no cost (new changes are not included). It reassures the client and limits your liability over time.",
+        "example": "60 days"
+      },
+      "penalidad": {
+        "why": "What the party that breaches the contract pays, usually a percentage of the contract value. It discourages breaches and avoids having to prove the exact damage.",
+        "example": "10 % of the total contract value."
+      },
+      "jurisdiccion": {
+        "why": "City whose courts would settle a dispute if there is no agreement. Choose one where you can attend the process without traveling.",
+        "example": "Medellín"
+      },
+      "rondas_revision": {
+        "why": "How many times the client can request adjustments on a deliverable before extra is charged. Avoids endless revisions.",
+        "example": "2"
+      },
+      "vigencia_dias": {
+        "why": "How many days your proposal and its price remain valid. After that you can re-quote.",
+        "example": "15"
+      },
+      "vigencia_meses": {
+        "why": "How many months the agreement lasts from its start.",
+        "example": "12"
+      },
+      "preaviso_dias": {
+        "why": "Days of notice required from whoever wants to end the contract. Avoids terminations overnight.",
+        "example": "30"
+      },
+      "contexto": {
+        "why": "The client's situation and need: where the project starts from. Records why the work is being hired.",
+        "example": "The client sells in a physical store and wants to start receiving online orders."
+      },
+      "objetivos": {
+        "why": "What the client wants to achieve. It helps measure whether the work met its purpose.",
+        "example": "Receive online orders and reduce manual phone handling."
+      },
+      "fuera_alcance": {
+        "why": "What the project does NOT include. It is your best protection against \"obvious\" requests that were not quoted.",
+        "example": "Content writing, advertising campaigns, hosting and domain."
+      },
+      "supuestos": {
+        "why": "What the client must do for the timeline to hold: deliver content and access, and reply on time.",
+        "example": "The client will provide texts and images in week one and reply within 3 business days."
+      },
+      "pruebas": {
+        "why": "What you verified with the client before delivery. Records that the work was tested.",
+        "example": "Navigation, forms, test payments and display on mobile and desktop."
+      },
+      "observaciones": {
+        "why": "Minor pending items or reservations from the client on receipt. If none, write \"None\".",
+        "example": "None."
+      },
+      "tipo_aceptacion": {
+        "why": "Full acceptance (everything as agreed) or with reservations (accepts but leaves pending items). It determines whether you can bill the final balance.",
+        "example": "Full acceptance"
+      },
+      "saldo_pendiente": {
+        "why": "What is still unpaid after this delivery, usually the last payment. It is put in writing so you can collect it.",
+        "example": "$ 2,500,000 upon signing this report."
+      },
+      "cambio_descripcion": {
+        "why": "Exactly what the client requested. It must be clear so there is no dispute over what the change includes.",
+        "example": "Add a PDF reports module that was not in the original scope."
+      },
+      "cambio_costo": {
+        "why": "How much is added to (or subtracted from) the contract value for this change.",
+        "example": "$ 800,000"
+      },
+      "cambio_plazo": {
+        "why": "How many extra days the change needs. It moves the delivery date.",
+        "example": "5 additional business days."
+      },
+      "finalidades": {
+        "why": "What the personal data will be used for; the law requires telling the data subject, and you may only process it for that.",
+        "example": "Register orders, send confirmations and manage support."
+      },
+      "categorias_datos": {
+        "why": "Which personal data the system handles and about whom. It defines the level of care you must take.",
+        "example": "Name, email, phone and address of the client's end customers."
+      },
+      "subencargados": {
+        "why": "Third parties that touch the data on your behalf (hosting, email, database). The client must know them.",
+        "example": "DigitalOcean (hosting) and Brevo (email delivery)."
+      },
+      "duracion": {
+        "why": "How long you keep the data; when it ends it is returned or deleted.",
+        "example": "During the contract and up to 30 days after it ends."
+      },
+      "plazo_incidentes": {
+        "why": "In how many hours you notify the client of a leak or unauthorized access. Usually between 24 and 72 hours.",
+        "example": "48"
+      },
+      "servicios_incluidos": {
+        "why": "Which tasks the monthly fee covers. Anything not listed is billed separately, so requests do not become unlimited.",
+        "example": "Security updates, weekly backups and bug fixes."
+      },
+      "horas_mensuales": {
+        "why": "Work hours included each month. Unused hours usually do not roll over.",
+        "example": "5"
+      },
+      "tarifa_hora": {
+        "why": "Price of each extra hour when the client exceeds the included hours.",
+        "example": "$ 80,000"
+      },
+      "sistema": {
+        "why": "The product or site the support applies to.",
+        "example": "Website and admin panel of example.com"
+      },
+      "canal_soporte": {
+        "why": "Where the client reports problems. Only reports made through this channel are handled.",
+        "example": "Email support@example.com or WhatsApp."
+      },
+      "sla_horario": {
+        "why": "Days and hours you provide support. Outside them, response time does not count.",
+        "example": "Monday to Friday, 8:00 a.m. to 6:00 p.m."
+      },
+      "sla_respuesta_horas": {
+        "why": "Maximum time to respond to a critical failure (system down). Responding is not the same as resolving.",
+        "example": "4"
+      },
+      "sla_resolucion_horas": {
+        "why": "Maximum time to resolve a critical failure. Promise only what you can deliver.",
+        "example": "24"
+      },
+      "disponibilidad": {
+        "why": "Share of time the system must be running; 99 % means about 7 hours of downtime per month.",
+        "example": "99 %"
+      },
+      "credito": {
+        "why": "Discount for the client if you miss the promised time. It is the agreed consequence, not unlimited compensation.",
+        "example": "5 % of the monthly fee per breach."
+      },
+      "nda": {
+        "objeto": {
+          "why": "Why the confidential information and documents will be shared. It limits permitted use: it may only be used for that purpose, and any other use breaches the agreement.",
+          "example": "Evaluate and quote the development of an order management web platform for the client."
+        },
+        "vigencia_meses": {
+          "why": "Months during which the parties must keep confidentiality, counted from signing. Usually between 12 and 36.",
+          "example": "24"
+        }
+      },
+      "sla": {
+        "vigencia_meses": {
+          "why": "How many months the support agreement lasts from its start.",
+          "example": "12"
+        }
+      },
+      "sow": {
+        "entregables": {
+          "why": "One row for each thing you deliver, with a short description and its status. Avoids disputes about what was delivered.",
+          "example": "Website | Five responsive pages | Pending"
+        }
+      },
+      "acceptance": {
+        "entregables": {
+          "why": "What the client receives and accepts with this report. It must match what the contract promised.",
+          "example": "Published website | Five responsive pages | Delivered"
+        }
+      },
+      "retainer": {
+        "monto": {
+          "why": "What the client pays each month for maintenance.",
+          "example": "$ 600,000"
+        }
+      },
+      "change_order": {
+        "monto": {
+          "why": "The new total contract value including this change: the previous value plus the cost of the change.",
+          "example": "$ 5,800,000"
+        }
+      }
     }
   }
 }

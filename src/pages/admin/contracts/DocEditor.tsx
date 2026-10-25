@@ -7,18 +7,19 @@ import ConfirmDialog from "../../../components/admin/ui/ConfirmDialog";
 import EmptyState from "../../../components/admin/ui/EmptyState";
 import Field from "../../../components/admin/ui/Field";
 import { useToast } from "../../../components/admin/ui/toastContext";
-import Select from "../../../components/ui/Select";
-import MoneyField from "../../../components/admin/ui/MoneyField";
+import VariablesForm from "./VariablesForm";
+import RemindField from "../../../components/admin/ui/RemindField";
+import { entregaOf } from "../../../lib/plazo";
 import DocStatusBadge from "../../../components/contracts/DocStatusBadge";
 import DocView from "../../../components/contracts/DocView";
-import type { PartySig } from "../../../components/contracts/DocView";
+import PdfPreview from "../../../components/contracts/PdfPreview";
 import SendDialog from "../../../components/contracts/SendDialog";
 import SignaturePad from "../../../components/contracts/SignaturePad";
 import SignatureView from "../../../components/contracts/SignatureView";
 import { fmtDateTime } from "../../../components/admin/format";
 import { isConflict, isUnauthorized } from "../../../lib/adminApi";
 import { extractVars, fill, missingVars, toBlocks } from "../../../lib/contractText";
-import { previewBlocks, shortHash, varLabel, varType } from "../../../lib/contractVars";
+import { shortHash } from "../../../lib/contractVars";
 import { clientsApi, contractsSettingsApi, docsApi, templatesApi } from "../../../lib/contractsApi";
 import type { AdminClient, ContractDoc, DocInput, DocVersion, Signature, Strokes } from "../../../types/contracts";
 import { EditorFrame } from "../services/editorKit";
@@ -40,13 +41,13 @@ const toInput = (f: Form): DocInput => ({
     expiresAt: f.expiresAt || null,
 });
 
+const PROVIDER_VARS = ["prestador", "prestador_documento", "prestador_email", "prestador_telefono", "prestador_ciudad", "prestador_tipo_doc"];
+
 const api = {
     get: docsApi.get,
     create: () => Promise.reject(new Error("unsupported")),
     update: docsApi.update,
 };
-
-const party = (s?: Signature): PartySig | undefined => (s ? { name: s.name, strokes: s.strokes, date: fmtDateTime.format(s.ts) } : undefined);
 
 const absolute = (link: string) => (link.startsWith("/") ? `${window.location.origin}${link}` : link);
 
@@ -142,14 +143,18 @@ export default function DocEditor() {
     const defs = useMemo(() => item?.varDefs ?? [], [item]);
     const lang = item?.lang ?? "es";
     const keys = useMemo(() => [...new Set([...extractVars(form.body), ...defs.map((d) => d.key)])], [form.body, defs]);
-    const blocks = useMemo(() => {
-        if (!item) return [];
-        return draft ? previewBlocks(form.body, form.variables, defs, lang) : toBlocks(item.rendered ?? "");
-    }, [item, draft, form.body, form.variables, defs, lang]);
-    const missing = useMemo(() => (draft ? missingVars(fill(form.body, form.variables)) : []), [draft, form.body, form.variables]);
+    const missing = useMemo(() => (draft ? missingVars(fill(form.body, form.variables), true) : []), [draft, form.body, form.variables]);
 
     const back = `/admin/contratos/${clientId ?? ""}`;
-    const setVar = (key: string, value: string) => patch({ variables: { ...form.variables, [key]: value } });
+    const setVars = (changes: Record<string, string>) => {
+        const next = { ...form.variables, ...changes };
+        if ("plazo" in changes || "fecha_inicio" in changes) {
+            const entrega = entregaOf(next.plazo ?? "", next.fecha_inicio ?? "");
+            if (entrega) next.fecha_entrega = entrega; else delete next.fecha_entrega;
+        }
+        patch({ variables: next });
+    };
+    const setVar = (key: string, value: string) => setVars({ [key]: value });
 
     const run = async (action: () => Promise<unknown>, okKey: string, after?: () => void) => {
         setBusy(true);
@@ -187,11 +192,7 @@ export default function DocEditor() {
     if (loading || !item) return <p className="text-sm text-muted" role="status">{t("adminContracts.common.loading")}</p>;
 
     const status = item.status;
-    const btn = "btn !min-h-9 !px-3 !py-1 !text-sm";
-    const typeOf = (k: string) => varType(k, defs);
-    const currencyOptions = [{ value: "COP", label: t("adminContracts.currency.COP") }, { value: "USD", label: t("adminContracts.currency.USD") }];
-    const currency = form.variables.moneda || "COP";
-    const showCurrency = !keys.includes("moneda") && keys.some((k) => typeOf(k) === "money");
+    const btn = "btn !min-h-10 !px-3 !py-1 !text-sm";
 
     const actions = (
         <div className="flex flex-wrap items-center gap-2">
@@ -209,7 +210,7 @@ export default function DocEditor() {
         <>
             {!draft && (
                 <Panel title={t("adminContracts.sig.title")}>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
                         <SigBox who={t("adminContracts.sig.owner")} sig={item.signatures?.owner} />
                         <SigBox who={t("adminContracts.sig.client")} sig={item.signatures?.client} />
                     </div>
@@ -226,7 +227,7 @@ export default function DocEditor() {
                                 <span className="font-mono text-xs text-muted">{shortHash(v.contentHash)}</span>
                                 <span className="text-xs text-muted">{fmtDateTime.format(v.createdAt)}</span>
                                 {v.note && <span className="min-w-0 break-words text-xs">{v.note}</span>}
-                                <button type="button" className="btn ml-auto !min-h-8 !px-3 !py-1 !text-xs" onClick={() => setViewing(v)}>{t("adminContracts.versions.view")}</button>
+                                <button type="button" className="btn ml-auto !min-h-10 !px-3 !py-1 !text-xs" onClick={() => setViewing(v)}>{t("adminContracts.versions.view")}</button>
                             </li>
                         ))}
                     </ul>
@@ -256,59 +257,50 @@ export default function DocEditor() {
     const body = (
         <div className="space-y-6">
             {actions}
-            <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
                 <div className="min-w-0 space-y-6">
                     {draft ? (
                         <>
                             <Panel title={t("adminContracts.docs.sectionDoc")}>
                                 <Field label={t("adminContracts.docs.titleField")} value={form.title} onChange={(v) => patch({ title: v })} maxLength={160} required error={err("title")} />
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <Field label={t("adminContracts.docs.remindDays")} type="number" min={0} max={30} value={form.remindDays} onChange={(v) => patch({ remindDays: v })} hint={t("adminContracts.send.remindHint")} error={err("remindDays")} />
+                                <div className="grid gap-4 sm:grid-cols-2 labels-aligned">
+                                    <RemindField value={form.remindDays} onChange={(v) => patch({ remindDays: v })} error={err("remindDays")} />
                                     <Field label={t("adminContracts.docs.expiresAt")} type="date" value={form.expiresAt} onChange={(v) => patch({ expiresAt: v })} hint={t("adminContracts.docs.expiresHint")} error={err("expiresAt")} />
                                 </div>
                             </Panel>
                             <Panel title={t("adminContracts.docs.sectionVars")}>
-                                {missing.length > 0 && <p role="status" className="dither border-2 border-dashed border-ink p-2 text-xs font-extrabold">{t("adminContracts.docs.missing", { vars: missing.join(", ") })}</p>}
+                                {missing.length > 0 && <p role="status" className="dither border-2 border-dashed border-ink p-2 text-xs font-extrabold">{t("adminContracts.docs.missing", { vars: missing.join(", ") })}{missing.some((k) => PROVIDER_VARS.includes(k)) && <> <Link to="/admin/contratos?tab=ajustes" className="underline underline-offset-4">{t("adminContracts.pdfPreview.fillProfile")}</Link></>}</p>}
                                 {keys.length === 0 && <p className="text-sm text-muted">{t("adminContracts.docs.noVars")}</p>}
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    {showCurrency && <Select label={t("adminContracts.vars.moneda")} options={currencyOptions} value={currency} onChange={(v: string) => setVar("moneda", v || currency)} searchable={false} />}
-                                    {keys.map((k) => {
-                                        const type = typeOf(k);
-                                        const label = varLabel(k, defs);
-                                        const value = form.variables[k] ?? "";
-                                        const error = err(`variables.${k}`);
-                                        if (k === "moneda") return <Select key={k} label={label} options={currencyOptions} value={value || "COP"} onChange={(v: string) => setVar(k, v || value)} searchable={false} />;
-                                        if (type === "textarea") return <div key={k} className="sm:col-span-2"><Field label={label} as="textarea" rows={4} maxLength={5000} value={value} onChange={(v) => setVar(k, v)} error={error} /></div>;
-                                        if (type === "money") return <MoneyField key={k} label={label} currency={currency} value={value} onChange={(v) => setVar(k, v)} error={error} />;
-                                        const hint = ["plazo", "garantia_dias"].includes(k) ? t(`adminContracts.vars.${k === "plazo" ? "plazoHint" : "garantiaHint"}`) : undefined;
-                                        return <Field key={k} label={label} hint={hint} placeholder={k === "plazo" ? t("adminContracts.vars.plazoPlaceholder") : undefined} type={type === "date" ? "date" : type === "number" ? "number" : "text"} maxLength={5000} value={value} onChange={(v) => setVar(k, v)} error={error} />;
-                                    })}
-                                </div>
+                                <VariablesForm kind={item.kind} clientId={clientId} keys={keys} defs={defs} values={form.variables} lang={lang} err={err} onVar={setVar} onVars={setVars} />
                                 {err("variables") && <p role="alert" className="text-sm font-extrabold">{err("variables")}</p>}
                             </Panel>
                             <Panel title={t("adminContracts.docs.sectionBody")}>
+                                <details>
+                                    <summary className="cursor-pointer py-2.5 text-sm font-extrabold text-ink">{t("adminContracts.docs.advancedBody")}</summary>
+                                    <p className="mt-2 text-xs text-muted">{t("adminContracts.docs.advancedBodyHint")}</p>
+                                    <div className="mt-3">
                                 <div className="space-y-1">
                                     <label htmlFor="doc-body" className="eyebrow">{t("adminContracts.docs.body")}</label>
                                     <textarea id="doc-body" value={form.body} onChange={(e) => patch({ body: e.target.value })} rows={18} maxLength={100000} spellCheck className="field font-mono !text-sm" aria-invalid={err("body") ? true : undefined} />
                                     <p className="text-xs text-muted">{t("adminContracts.markup")}</p>
                                     {err("body") && <p role="alert" className="text-sm font-extrabold">{err("body")}</p>}
                                 </div>
+                                    </div>
+                                </details>
                             </Panel>
                         </>
                     ) : (
                         <p role="status" className="dither border-2 border-dashed border-ink p-3 text-sm font-extrabold">{t(status === "cancelled" ? "adminContracts.docs.readonlyCancelled" : "adminContracts.docs.readonly")}</p>
                     )}
+                    {item.clientData && <p role="status" className="border-2 border-dashed border-ink p-3 text-xs">{t("adminContracts.docs.clientProvided", { fields: item.clientData.fields.map((f) => t(`adminContracts.clients.${f === "docType" ? "docType" : f}`)).join(", "), date: fmtDateTime.format(item.clientData.ts), ip: item.clientData.ip })}</p>}
                     {panels}
                 </div>
-                <aside aria-label={t("adminContracts.docs.preview")} className="min-w-0 space-y-2 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
+                <aside aria-label={t("adminContracts.docs.preview")} className="mx-auto w-full max-w-[340px] min-w-0 space-y-2 xl:sticky xl:top-4 xl:self-start">
                     <p className="eyebrow">{t("adminContracts.docs.preview")}</p>
-                    <DocView
-                        blocks={blocks}
-                        title={item.title}
-                        cover={{ clientName: client?.name, ownerName: item.signatures?.owner?.name, ...item.cover }}
-                        owner={party(item.signatures?.owner)}
-                        client={party(item.signatures?.client)}
-                    />
+                    {draft
+                        ? <PdfPreview payload={{ docId: item.id, title: form.title, body: form.body, variables: form.variables, kind: item.kind, lang, clientId: clientId ?? undefined }} />
+                        : <PdfPreview src={`${docsApi.pdfUrl(item.id)}?inline=1`} />}
+                    <p className="text-center text-xs text-muted">{t("adminContracts.pdfPreview.footer")}</p>
                 </aside>
             </div>
         </div>
@@ -326,7 +318,7 @@ export default function DocEditor() {
             ) : (
                 <div className="min-w-0 space-y-6">
                     <header className="space-y-2">
-                        <Link to={back} className="inline-flex items-center gap-1 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper"><ArrowLeft size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.docs.backToFolder")}</Link>
+                        <Link to={back} className="inline-flex min-h-10 items-center gap-1 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper"><ArrowLeft size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.docs.backToFolder")}</Link>
                         <p className="eyebrow">{eyebrow}</p>
                         <div className="flex flex-wrap items-center gap-3">
                             <h1 className="break-words font-display text-3xl tracking-tight text-ink">{heading}</h1>

@@ -12,13 +12,14 @@ interface Props {
     destructive?: boolean;
     busy?: boolean;
     confirmDisabled?: boolean;
+    wide?: boolean | "xl";
     onConfirm: () => void;
     onCancel: () => void;
 }
 
 export default function ConfirmDialog({
     open, title, children, confirmLabel, busyLabel, cancelLabel,
-    destructive = false, busy = false, confirmDisabled = false, onConfirm, onCancel,
+    destructive = false, busy = false, confirmDisabled = false, wide = false, onConfirm, onCancel,
 }: Props) {
     const { t } = useTranslation();
     const ref = useRef<HTMLDialogElement>(null);
@@ -37,7 +38,7 @@ export default function ConfirmDialog({
             onClose={onCancel}
             onClick={(e) => e.target === ref.current && !busy && ref.current?.close()}
             aria-labelledby={titleId}
-            className="window m-auto w-[calc(100%-2rem)] max-w-md p-0 backdrop:bg-paper/60 backdrop:dither-dense [&:not([open])]:hidden"
+            className={`window m-auto w-[calc(100%-2rem)] p-0 ${wide === "xl" ? "max-w-5xl overflow-visible" : wide ? "max-w-2xl overflow-visible" : "max-w-md"} backdrop:bg-paper/60 backdrop:dither-dense [&:not([open])]:hidden`}
         >
             <div className="window-bar">
                 <span className="window-dot" aria-hidden="true" />

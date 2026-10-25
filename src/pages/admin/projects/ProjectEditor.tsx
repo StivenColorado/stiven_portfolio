@@ -206,7 +206,7 @@ export default function ProjectEditor() {
     return (
         <form className="min-w-0 space-y-6" onSubmit={(e) => { e.preventDefault(); void save(false); }} noValidate>
             <header className="space-y-2">
-                <button type="button" onClick={leave} className="eyebrow inline-flex items-center gap-1.5 hover:underline">
+                <button type="button" onClick={leave} className="eyebrow inline-flex min-h-10 items-center gap-1.5 hover:underline">
                     <ArrowLeft size={14} strokeWidth={2.5} aria-hidden /> {t("adminProjects.editor.backToList")}
                 </button>
                 <div className="flex flex-wrap items-center gap-3">

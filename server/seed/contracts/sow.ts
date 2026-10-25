@@ -62,7 +62,7 @@ La inversión total por el alcance descrito es de {{monto}} {{moneda}}, antes de
 
 ## Validez de la propuesta
 
-Esta propuesta tiene una validez de {{vigencia_dias}} días calendario contados desde su fecha. Vencido ese plazo, el valor, el cronograma y la disponibilidad podrán variar.
+Esta propuesta tiene una validez de {{vigencia_dias}} calendario contados desde su fecha. Vencido ese plazo, el valor, el cronograma y la disponibilidad podrán variar.
 
 ## Aceptación
 

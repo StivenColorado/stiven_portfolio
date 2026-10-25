@@ -72,7 +72,7 @@ function Shell({ email, onLogout }: { email: string; onLogout: () => void }) {
         };
     }, [open]);
 
-    const sq = "flex h-8 w-8 shrink-0 items-center justify-center border-2 border-ink bg-paper text-ink hover:bg-ink hover:text-paper lg:hidden";
+    const sq = "flex h-10 w-10 shrink-0 items-center justify-center border-2 border-ink bg-paper text-ink hover:bg-ink hover:text-paper lg:hidden";
 
     return (
         <div className="window">
@@ -93,9 +93,9 @@ function Shell({ email, onLogout }: { email: string; onLogout: () => void }) {
                 >
                     <Menu size={16} strokeWidth={2.5} aria-hidden />
                 </button>
-                <p className="min-w-0 flex-1 truncate text-sm" title={email}>{email}</p>
-                <LanguageSwitcher />
-                <button type="button" className="btn !min-h-8 !px-3 !py-1 !text-sm" onClick={onLogout}>
+                <p className="min-w-0 flex-1 break-all text-xs leading-tight sm:text-sm" title={email}>{email}</p>
+                <LanguageSwitcher className="!h-10 !w-10 !text-xs" />
+                <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-sm" onClick={onLogout}>
                     <LogOut size={14} strokeWidth={2.5} aria-hidden /> {t("admin.shell.logout")}
                 </button>
             </div>

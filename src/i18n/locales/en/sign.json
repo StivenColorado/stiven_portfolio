@@ -36,7 +36,7 @@
     },
     "errors": {
       "failed": "Could not sign. Please try again.",
-      "invalid": "Check your name and signature and try again.",
+      "invalid": "Check your details, name and signature and try again.",
       "tooMany": "Too many attempts. Wait a few minutes."
     },
     "error": {
@@ -62,6 +62,23 @@
       "signatures": "Signatures of the parties",
       "client": "Client",
       "sheet": "Sheet {{n}}"
+    },
+    "data": {
+      "title": "Complete your details",
+      "intro": "These details appear in the document you are about to sign. Review the text: it updates as you type.",
+      "legalName": "Full name or company name",
+      "docType": "Document type",
+      "docNumber": "Document number",
+      "contactName": "Legal representative or contact",
+      "city": "City",
+      "address": "Address",
+      "docNumberHint": "Letters, numbers, dot and hyphen only (4 to 30).",
+      "privacy": "Personal data processing (Colombian Law 1581 of 2012): we will use these details only to identify you as a party to the document, record the signature and meet legal obligations. They are kept in the provider's client file, who is responsible for them; you can ask to see, correct or delete them by writing to the provider.",
+      "required": "Required",
+      "tooShort": "Too short",
+      "docInvalid": "Use 4 to 30 characters: letters, numbers, dot or hyphen",
+      "chars": "Contains characters that are not allowed",
+      "fix": "Complete your details before signing."
     }
   }
 }

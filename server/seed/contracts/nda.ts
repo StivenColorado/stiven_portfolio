@@ -7,7 +7,7 @@ export const nda: SeedTemplate = {
   name: 'Acuerdo de confidencialidad (NDA)',
   variables: [
     v('objeto', 'Finalidad de la divulgación', 'textarea', { required: true }),
-    v('vigencia_meses', 'Duración de la reserva (meses)', 'number', { default: '24' }),
+    v('vigencia_meses', 'Duración de la reserva', 'text', { default: '24 meses' }),
     VARS.penalidad, VARS.jurisdiccion,
   ],
   body: `# ACUERDO DE CONFIDENCIALIDAD
@@ -42,7 +42,7 @@ La información confidencial sigue siendo de propiedad de la parte divulgante. E
 
 ## Duración y supervivencia
 
-Este acuerdo rige desde la fecha de su firma. Las obligaciones de confidencialidad se mantendrán durante {{vigencia_meses}} meses contados desde la terminación de la relación entre las PARTES o desde la última divulgación, lo que ocurra después. Respecto de los secretos empresariales, la reserva se mantendrá mientras conserven tal carácter.
+Este acuerdo rige desde la fecha de su firma. Las obligaciones de confidencialidad se mantendrán durante {{vigencia_meses}} contados desde la terminación de la relación entre las PARTES o desde la última divulgación, lo que ocurra después. Respecto de los secretos empresariales, la reserva se mantendrá mientras conserven tal carácter.
 
 ## Devolución o destrucción
 

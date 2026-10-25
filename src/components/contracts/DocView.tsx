@@ -107,10 +107,10 @@ export default function DocView({ blocks, title, cover, owner, client, className
 
     const render = (it: Item, i: number) => {
         if (it.kind === "h1") return <h2 key={i} className={`${SERIF} pt-2 text-2xl font-bold`}>{it.text}</h2>;
-        if (it.kind === "h2") return <h3 key={i} className={`break-words pt-3 text-base font-extrabold tracking-wide text-[#4A4636] ${SMALL_CAPS}`}>{it.n}. {it.text}</h3>;
+        if (it.kind === "h2") return <h3 key={i} className={`break-words mt-2 border-b border-[#4A4636]/25 pb-1 pt-3 text-base font-extrabold tracking-wide text-[#4A4636] ${SMALL_CAPS}`}>{it.n}. {it.text}</h3>;
         if (it.kind === "li") return <p key={i} className="flex gap-2 pl-4 sm:pl-8"><span aria-hidden="true">•</span><span className="min-w-0 break-words">{it.text}</span></p>;
         if (it.kind === "table") return <Table key={i} rows={it.rows} />;
-        return <p key={i} className="break-words text-justify"><span className="mr-2 font-extrabold text-[#4A4636]">{it.num}</span>{it.text}</p>;
+        return <p key={i} className="break-words text-left"><span className="mr-2 font-extrabold tabular-nums text-[#4A4636]">{it.num}</span>{it.text}</p>;
     };
 
     return (
@@ -134,7 +134,7 @@ export default function DocView({ blocks, title, cover, owner, client, className
                         <span className={`${SERIF} text-xl font-semibold`}>{t("sign.doc.contract")}</span>
                         <span className={`truncate text-sm text-[#4A4636] ${SMALL_CAPS}`}>{cover?.subtitle || heading}</span>
                     </header>
-                    <div className="flex-1 space-y-3 text-[15px] leading-[1.65]">
+                    <div className="flex-1 space-y-4 text-[15px] leading-[1.75]">
                         {items.map(render)}
                         {si === sheets.length - 1 && (
                             <div className="space-y-4 pt-8">

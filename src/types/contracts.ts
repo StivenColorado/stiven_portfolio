@@ -48,7 +48,11 @@ export interface ClientInput {
     defaults: Record<string, string>;
 }
 
+export type ClientField = "legalName" | "docType" | "docNumber" | "contactName" | "city" | "address";
+export type ClientData = Partial<Record<ClientField, string>>;
+
 export interface AdminClient extends ClientInput {
+    provided?: { at: number; ip: string; docId: number; fields: ClientField[] } | null;
     id: number;
     status: ClientStatus;
     createdAt: number;
@@ -62,6 +66,7 @@ export interface TemplateVar {
     type: VarType;
     required?: boolean;
     default?: string;
+    auto?: boolean;
 }
 
 export interface TemplateInput {
@@ -101,6 +106,9 @@ export interface ContractDoc {
     body: string;
     variables: Record<string, string>;
     varDefs?: TemplateVar[];
+    pendingClient?: string[];
+    clientData?: { fields: ClientField[]; ts: number; ip: string } | null;
+    sentHash?: string | null;
     rendered?: string;
     cover?: CoverInfo;
     contentHash: string | null;
@@ -157,6 +165,7 @@ export interface SignView {
     cover?: CoverInfo;
     clientName: string;
     contactName: string;
+    clientForm: { fields: ClientField[]; prefill: { legalName: string; docType: DocType } } | null;
     ownerName: string;
     ownerSignature: Strokes | null;
     clientSigned: { name: string; ts: number } | null;

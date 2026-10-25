@@ -39,7 +39,7 @@ beforeEach(() => {
 
 async function newClient(extra: Record<string, unknown> = {}) {
   const res = await app.call('POST', '/api/admin/contracts/clients', {
-    name: 'Acme', legalName: 'Acme S.A.S.', docType: 'NIT', docNumber: '900.123.456', contactName: 'Ana Gómez', email: 'ana@acme.co',
+    name: 'Acme', phone: '+57 300 123 4567', legalName: 'Acme S.A.S.', docType: 'NIT', docNumber: '900.123.456', contactName: 'Ana Gómez', email: 'ana@acme.co',
     city: 'Bogotá', defaults: { monto: '5000000', fecha_inicio: '2026-03-02', objeto: 'Sitio web', alcance: '- Cinco páginas' }, ...extra,
   })
   assert.equal(res.status, 201)
@@ -147,7 +147,7 @@ test('flujo completo: documento, envío con firma guardada, firma del cliente, P
   const row = docRow(doc.id)
   assert.equal(row.status, 'active')
   assert.ok((row.pdf as Uint8Array).length > 1000)
-  assert.equal(Buffer.from(row.pdf as Uint8Array).subarray(0, 8).toString(), '%PDF-1.4')
+  assert.equal(Buffer.from(row.pdf as Uint8Array).subarray(0, 5).toString(), '%PDF-')
   assert.equal(brevo.length, 3)
   const signedMails = brevo.slice(1)
   assert.deepEqual(signedMails.map((m) => m.to[0]!.email).sort(), ['ana@acme.co', 'owner@test.com'])
@@ -159,6 +159,7 @@ test('flujo completo: documento, envío con firma guardada, firma del cliente, P
   assert.equal(Buffer.from(await pdf.arrayBuffer()).subarray(0, 5).toString(), '%PDF-')
   const adminPdf = await app.call('GET', `/api/admin/contracts/docs/${doc.id}/pdf`)
   assert.equal(adminPdf.status, 200)
+  assert.match(adminPdf.headers.get('content-disposition')!, /^attachment;/)
 
   const after = (await app.json<{ item: Record<string, any> }>(await app.call('GET', `/api/admin/contracts/docs/${doc.id}`))).item
   assert.equal(after.status, 'active')
@@ -281,4 +282,104 @@ test('límites: 413 en cuerpos grandes, 404 en token inválido y 429 en el 11.º
   const codes: number[] = []
   for (let i = 0; i < 11; i++) codes.push((await pub('POST', ghost, { name: 'Ana', accepted: true, strokes: sig })).status)
   assert.deepEqual(codes, [...Array(10).fill(404), 429])
+})
+
+test('PDF embebible: ?inline=1 y vista previa sin X-Frame-Options ni CSP, y la vista previa no guarda nada', async () => {
+  const doc = await newDoc(await newClient())
+  const inline = await app.call('GET', `/api/admin/contracts/docs/${doc.id}/pdf?inline=1`)
+  assert.equal(inline.status, 200)
+  assert.match(inline.headers.get('content-disposition')!, /^inline; filename=/)
+  const preview = await app.call('POST', '/api/admin/contracts/preview-pdf', { docId: doc.id, title: 'Otro título', body: '## Hola\nTexto {{faltante}}' })
+  assert.equal(preview.status, 200)
+  assert.equal(preview.headers.get('content-type'), 'application/pdf')
+  assert.match(preview.headers.get('content-disposition')!, /^inline;/)
+  assert.equal(preview.headers.get('cache-control'), 'no-store')
+  for (const res of [inline, preview]) {
+    assert.equal(res.headers.get('x-frame-options'), null)
+    assert.equal(res.headers.get('content-security-policy'), null)
+    assert.equal(res.headers.get('x-content-type-options'), 'nosniff')
+  }
+  assert.equal(Buffer.from(await preview.arrayBuffer()).subarray(0, 5).toString(), '%PDF-')
+  assert.equal(docRow(doc.id).title, doc.title)
+  const sample = await app.call('POST', '/api/admin/contracts/preview-pdf', { body: '## Cláusula\nHola {{x}}', variables: { x: '1' }, lang: 'en' })
+  assert.equal(sample.status, 200)
+  assert.equal((await app.call('POST', '/api/admin/contracts/preview-pdf', { docId: 999999 })).status, 404)
+  assert.equal((await app.call('POST', '/api/admin/contracts/preview-pdf', { extra: 1 })).status, 400)
+  assert.equal((await app.call('POST', '/api/admin/contracts/preview-pdf', { body: 'x' }, { 'Content-Type': 'application/json', Cookie: app.cookie })).status, 403)
+})
+
+test('cliente con solo nombre y celular: se envía sin sus datos y los aporta al firmar', async () => {
+  const noPhone = await app.call('POST', '/api/admin/contracts/clients', { name: 'Sin celular' })
+  assert.equal(noPhone.status, 400)
+  assert.ok((await app.json<{ fields: Record<string, string> }>(noPhone)).fields.phone)
+  const res = await app.call('POST', '/api/admin/contracts/clients', { name: 'Solo Nombre', phone: '+57 311 222 3344' })
+  assert.equal(res.status, 201)
+  const clientId = (await app.json<{ item: { id: number } }>(res)).item.id
+
+  const doc = await newDoc(clientId)
+  assert.ok(doc.pendingClient.includes('cliente_documento'))
+  assert.ok(doc.missing.every((k: string) => !k.startsWith('cliente')), 'los datos del cliente no cuentan como faltantes')
+  const vars = { ...doc.variables, ...Object.fromEntries(doc.missing.map((k: string) => [k, 'valor'])) }
+  await app.call('PUT', `/api/admin/contracts/docs/${doc.id}`, { title: doc.title, body: doc.body, variables: vars, remindDays: 0, expiresAt: null })
+  const sent = await app.json<{ link: string; item: Record<string, any> }>(
+    await app.call('POST', `/api/admin/contracts/docs/${doc.id}/send`, { email: 'solo@x.co', expiresInDays: 10, signature: null, useSaved: false }),
+  )
+  const token = tokenOf(sent.link)
+  const sentHash = sent.item.contentHash as string
+
+  const view = await app.json<Record<string, any>>(await pub('GET', token))
+  assert.ok(view.clientForm.fields.includes('docNumber') && view.clientForm.fields.includes('legalName'))
+  assert.equal(view.clientForm.prefill.legalName, 'Solo Nombre')
+  assert.ok(JSON.stringify(view.blocks).includes('[[cliente_documento]]'))
+
+  const base = { name: 'Solo Nombre Pérez', accepted: true, strokes: sig }
+  assert.equal((await pub('POST', token, base)).status, 400)
+  const bad = async (clientData: unknown) => (await pub('POST', token, { ...base, clientData })).status
+  assert.equal(await bad({ legalName: 'Solo S.A.S.', docType: 'NIT', docNumber: '12' }), 400)
+  assert.equal(await bad({ legalName: 'Solo S.A.S.', docType: 'NIT', docNumber: '900 123 456' }), 400)
+  assert.equal(await bad({ legalName: '[[cliente]]', docType: 'NIT', docNumber: '900123456-7' }), 400)
+  assert.equal(await bad({ legalName: '# Título', docType: 'NIT', docNumber: '900123456-7' }), 400)
+  assert.equal(await bad({ legalName: 'Solo S.A.S.', docType: 'XX', docNumber: '900123456-7' }), 400)
+  assert.equal(await bad({ legalName: 'Solo S.A.S.', docType: 'NIT', docNumber: '900123456-7', otro: 'x' }), 400)
+  assert.equal(await bad({ legalName: 'Solo S.A.S.', docType: 'NIT' }), 400)
+  assert.equal(docRow(doc.id).status, 'sent')
+
+  const ok = await pub('POST', token, { ...base, clientData: { legalName: 'Solo S.A.S.', docType: 'NIT', docNumber: '900123456-7', city: 'Cali', address: 'Calle 10 # 5-20', contactName: 'Luis Solo' } })
+  assert.equal(ok.status, 200, await ok.clone().text())
+  const { hash } = await app.json<{ hash: string }>(ok)
+  assert.notEqual(hash, sentHash)
+
+  const after = (await app.json<{ item: Record<string, any> }>(await app.call('GET', `/api/admin/contracts/docs/${doc.id}`))).item
+  assert.equal(after.version, 2)
+  assert.equal(after.contentHash, hash)
+  assert.equal(after.sentHash, sentHash)
+  assert.equal(after.signatures.client.hash, hash)
+  assert.equal(after.versions.length, 2)
+  assert.ok(after.rendered.includes('900123456-7') && !after.rendered.includes('[[cliente'))
+  assert.deepEqual(after.clientData.fields, view.clientForm.fields)
+  assert.ok(after.clientData.ip)
+  assert.equal(after.variables.cliente_documento, '900123456-7')
+  const { createHash } = await import('node:crypto')
+  const expected = createHash('sha256')
+    .update(JSON.stringify({ id: doc.id, version: 2, kind: after.kind, lang: after.lang, title: after.title, rendered: after.rendered, prev: sentHash }))
+    .digest('hex')
+  assert.equal(hash, expected)
+
+  const client = (await app.json<{ item: Record<string, any> }>(await app.call('GET', `/api/admin/contracts/clients/${clientId}`))).item
+  assert.equal(client.docNumber, '900123456-7')
+  assert.equal(client.legalName, 'Solo S.A.S.')
+  assert.ok(view.clientForm.fields.every((f: string) => client[f] !== ''))
+  assert.equal(client.provided.docId, doc.id)
+  assert.ok(actions().some((a) => a.action === 'client_data' && a.email === null && a.entity === 'contracts'))
+
+  const editable = Object.fromEntries(['name', 'legalName', 'docType', 'docNumber', 'contactName', 'email', 'phone', 'address', 'city', 'country', 'lang', 'notes', 'defaults'].map((k) => [k, client[k]]))
+  assert.equal((await app.call('PUT', `/api/admin/contracts/clients/${clientId}`, { ...editable, docNumber: '999999999', legalName: 'Otra razón' })).status, 200)
+  const frozen = (await app.json<{ item: Record<string, any> }>(await app.call('GET', `/api/admin/contracts/docs/${doc.id}`))).item
+  assert.equal(frozen.rendered, after.rendered)
+  assert.equal(frozen.cover.clientName, 'Solo S.A.S.')
+  const kept = (await app.json<{ item: Record<string, any> }>(await app.call('GET', `/api/admin/contracts/clients/${clientId}`))).item
+  assert.equal(kept.provided.docId, doc.id)
+
+  const next = await newDoc(clientId, 'nda')
+  assert.equal(next.variables.cliente_documento, '999999999')
 })

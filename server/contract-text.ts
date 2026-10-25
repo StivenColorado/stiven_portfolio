@@ -48,8 +48,19 @@ export function fill(
   })
 }
 
-export const missingVars = (rendered: string): string[] =>
-  [...new Set([...rendered.matchAll(/\[\[([a-z][a-z0-9_]*)\]\]/g)].map((m) => m[1] as string))]
+/** Variables del cliente que completa él mismo al firmar: nunca bloquean el envío ni cuentan como faltantes para el prestador. */
+export const CLIENT_FIELD_VARS = {
+  legalName: 'cliente', docType: 'cliente_tipo_doc', docNumber: 'cliente_documento', contactName: 'cliente_representante',
+  city: 'cliente_ciudad', address: 'cliente_direccion',
+} as const
+export type ClientField = keyof typeof CLIENT_FIELD_VARS
+export const CLIENT_FIELDS = Object.keys(CLIENT_FIELD_VARS) as ClientField[]
+export const CLIENT_AUTO_KEYS: readonly string[] = [...Object.values(CLIENT_FIELD_VARS), 'ciudad_firma']
+
+export const missingVars = (rendered: string, ignoreClient = false): string[] => {
+  const keys = [...new Set([...rendered.matchAll(/\[\[([a-z][a-z0-9_]*)\]\]/g)].map((m) => m[1] as string))]
+  return ignoreClient ? keys.filter((k) => !CLIENT_AUTO_KEYS.includes(k)) : keys
+}
 
 const splitRow = (line: string) => line.replace(/^\||\|$/g, '').split('|').map((c) => c.trim())
 const isSeparator = (cells: string[]) => cells.every((c) => /^:?-{3,}:?$/.test(c))

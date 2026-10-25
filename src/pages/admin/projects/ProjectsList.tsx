@@ -103,13 +103,13 @@ export default function ProjectsList() {
                 )}
                 extraActions={(p) => (
                     <>
-                    <button type="button" className="btn !min-h-9 !gap-1.5 !px-3 !py-1 !text-sm" onClick={() => setSharing(p)}>
+                    <button type="button" className="btn !min-h-10 !gap-1.5 !px-3 !py-1 !text-sm" onClick={() => setSharing(p)}>
                         <Share2 size={14} strokeWidth={2.5} aria-hidden />
                         {t("adminProjects.share.open")}
                     </button>
                     <button
                         type="button"
-                        className="btn !min-h-9 !gap-1.5 !px-3 !py-1 !text-sm disabled:opacity-40"
+                        className="btn !min-h-10 !gap-1.5 !px-3 !py-1 !text-sm disabled:opacity-40"
                         aria-pressed={p.featured}
                         aria-label={t(p.featured ? "adminProjects.list.unfeatureAria" : "adminProjects.list.featureAria", { title: p.title })}
                         disabled={busyId === p.id}

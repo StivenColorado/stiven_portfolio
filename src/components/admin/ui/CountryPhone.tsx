@@ -20,10 +20,10 @@ export function CountrySelect({ label, value, onChange }: { label: string; value
     );
 }
 
-interface PhoneProps { label: string; value: string; onChange: (v: string) => void; countryName?: string; error?: string }
+interface PhoneProps { label: string; value: string; onChange: (v: string) => void; countryName?: string; error?: string; required?: boolean }
 
 /** El indicativo acompaña al país elegido arriba mientras el número esté vacío o no lo haya cambiado el usuario. */
-export function PhoneInput({ label, value, onChange, countryName = "", error }: PhoneProps) {
+export function PhoneInput({ label, value, onChange, countryName = "", error, required }: PhoneProps) {
     const { t } = useTranslation();
     const fallback = countryByName(countryName)?.iso ?? DEFAULT_ISO;
     const [iso, setIso] = useState(() => splitPhone(value, fallback).iso);
@@ -38,9 +38,9 @@ export function PhoneInput({ label, value, onChange, countryName = "", error }: 
     }, [fallback]);
 
     return (
-        <div className="grid grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)] items-start gap-2">
+        <div className="grid min-w-0 grid-cols-1 items-start gap-3 sm:col-span-2 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] labels-aligned">
             <Select label={t("adminContracts.common.dialCode")} options={dialOptions} value={iso} onChange={(v: string) => { setIso(v || iso); if (number) onChange(joinPhone(v || iso, number)); }} />
-            <Field label={label} type="text" value={number} maxLength={20} autoComplete="tel-national" placeholder="300 123 4567" error={error} onChange={(v) => onChange(joinPhone(iso, v.replace(/[^\d\s-]/g, "")))} />
+            <Field label={label} type="text" value={number} maxLength={20} required={required} autoComplete="tel-national" placeholder="300 123 4567" error={error} onChange={(v) => onChange(joinPhone(iso, v.replace(/[^\d\s-]/g, "")))} />
         </div>
     );
 }

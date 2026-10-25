@@ -29,6 +29,18 @@ export async function request<T>(path: string, method = "GET", body?: unknown): 
     return result;
 }
 
+export async function requestBlob(path: string, body: unknown, signal?: AbortSignal): Promise<Blob> {
+    const res = await fetch(`/api/admin/${path}`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal,
+    });
+    if (!res.ok) throw toError(res.status, res.headers.get("Retry-After"), (await res.json().catch(() => null)) as ErrorBody | null);
+    return res.blob();
+}
+
 const CONTENT_PATH = /^(projects|services|experience)(\/|$)/;
 
 async function send<T>(path: string, method: string, body?: unknown): Promise<T> {

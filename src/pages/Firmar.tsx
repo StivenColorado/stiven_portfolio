@@ -1,21 +1,50 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BadgeCheck, Download, PenLine } from "lucide-react";
 import { ApiError } from "../lib/api";
+import { CLIENT_FIELD_VARS } from "../lib/contractText";
 import { useDocumentMeta } from "../lib/seo";
 import { getSign, postSign, signPdfUrl } from "../lib/signApi";
+import Field from "../components/admin/ui/Field";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import DocView from "../components/contracts/DocView";
 import SignaturePad from "../components/contracts/SignaturePad";
-import type { SignResult, SignView, Strokes } from "../types/contracts";
+import { DOC_TYPES } from "../types/contracts";
+import type { ClientData, ClientField, DocBlock, SignResult, SignView, Strokes } from "../types/contracts";
 
 type State =
     | { kind: "loading" }
     | { kind: "error"; reason: "invalid" | "expired" | "cancelled" | "failed" }
     | { kind: "ready"; view: SignView }
     | { kind: "done"; view: SignView; result: SignResult | null };
+
+const FIELD_ORDER: ClientField[] = ["legalName", "docType", "docNumber", "contactName", "city", "address"];
+const LIMITS: Record<Exclude<ClientField, "docType" | "docNumber">, [number, number]> = { legalName: [2, 160], contactName: [2, 120], city: [2, 80], address: [5, 200] };
+const AUTOCOMPLETE: Record<ClientField, string> = { legalName: "name", docType: "off", docNumber: "off", contactName: "name", city: "address-level2", address: "street-address" };
+const DOC_NUMBER = /^[0-9A-Za-z][0-9A-Za-z.-]{3,29}$/;
+const clean = (v: string) => v.replace(/\s+/g, " ").trim();
+
+/** Mismas reglas que el servidor; devuelve la clave de i18n del error o null. */
+function fieldError(field: ClientField, raw: string): string | null {
+    const v = clean(raw);
+    if (field === "docType") return null;
+    if (v === "") return "required";
+    if (field === "docNumber") return DOC_NUMBER.test(v) ? null : "docInvalid";
+    const [min, max] = LIMITS[field];
+    if (v.length < min || v.length > max) return "tooShort";
+    return /[[\]{}|<>\\]/.test(v) || /^(#|- )/.test(v) ? "chars" : null;
+}
+
+/** Sustituye en vivo los huecos [[clave]] por lo que el cliente escribe, igual que hará el servidor al firmar. */
+function fillBlocks(blocks: DocBlock[], data: ClientData): DocBlock[] {
+    const values: Record<string, string> = {};
+    for (const f of FIELD_ORDER) values[CLIENT_FIELD_VARS[f]] = clean(data[f] ?? "");
+    values.ciudad_firma = values.cliente_ciudad ?? "";
+    const sub = (text: string) => text.replace(/\[\[([a-z][a-z0-9_]*)\]\]/g, (all, key: string) => (key in values ? values[key] || "________" : all));
+    return blocks.map((b) => (b.type === "table" ? { ...b, rows: b.rows.map((r) => r.map(sub)) } : { ...b, text: sub(b.text) }));
+}
 
 const fmt = (ts: number, lang: string) =>
     new Intl.DateTimeFormat(lang, { dateStyle: "long", timeStyle: "short" }).format(ts);
@@ -31,6 +60,8 @@ export default function Firmar() {
     const [accepted, setAccepted] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
+    const [data, setData] = useState<ClientData>({});
+    const [shown, setShown] = useState(false);
     const dialog = useRef<HTMLDialogElement>(null);
     const titleId = useId();
     const lang = i18n.resolvedLanguage ?? "es";
@@ -41,6 +72,7 @@ export default function Firmar() {
             .then((view) => {
                 if (!alive) return;
                 setName(view.contactName);
+                if (view.clientForm) setData({ legalName: view.clientForm.prefill.legalName, docType: view.clientForm.prefill.docType });
                 setState(view.clientSigned || view.status === "active" ? { kind: "done", view, result: null } : { kind: "ready", view });
             })
             .catch((e: unknown) => {
@@ -50,6 +82,22 @@ export default function Firmar() {
             });
         return () => { alive = false; };
     }, [token]);
+
+    const form = state.kind === "ready" ? state.view.clientForm : null;
+    const fields = useMemo(() => FIELD_ORDER.filter((f) => form?.fields.includes(f)), [form]);
+    const errors = Object.fromEntries(fields.map((f) => [f, fieldError(f, data[f] ?? "")])) as Record<ClientField, string | null>;
+    const blocks = useMemo(() => (state.kind === "ready" && form ? fillBlocks(state.view.blocks, data) : state.kind === "loading" || state.kind === "error" ? [] : state.view.blocks), [state, form, data]);
+
+    function openSign() {
+        setError("");
+        const bad = fields.find((f) => errors[f]);
+        if (bad) {
+            setShown(true);
+            document.getElementById(`sign-data-${bad}`)?.focus();
+            return;
+        }
+        setOpen(true);
+    }
 
     useEffect(() => {
         const d = dialog.current;
@@ -64,9 +112,11 @@ export default function Firmar() {
         setBusy(true);
         setError("");
         try {
-            const result = await postSign(token, { name: name.trim(), strokes, accepted: true });
+            const clientData = Object.fromEntries(fields.map((f) => [f, clean(data[f] ?? "")])) as ClientData;
+            const result = await postSign(token, { name: name.trim(), strokes, accepted: true, ...(fields.length ? { clientData } : {}) });
             setOpen(false);
-            setState({ kind: "done", view: state.view, result });
+            const view = await getSign(token).catch(() => state.view);
+            setState({ kind: "done", view, result });
         } catch (err) {
             const status = err instanceof ApiError ? err.status : 0;
             if (status === 409) { setOpen(false); setState({ kind: "done", view: state.view, result: null }); }
@@ -79,7 +129,7 @@ export default function Firmar() {
 
     const shell = (children: React.ReactNode) => (
         <div className="mx-auto w-full max-w-[860px] bg-paper px-2 pb-28 pt-6 sm:px-4 text-ink">
-            <div className="mb-4 flex justify-end"><LanguageSwitcher /></div>
+            <div className="mb-4 flex justify-end"><LanguageSwitcher className="!h-10 !w-10 !text-xs" /></div>
             {children}
         </div>
     );
@@ -121,8 +171,46 @@ export default function Firmar() {
                 </section>
             )}
 
+            {form && !done && (
+                <section aria-labelledby="sign-data-title" className="window">
+                    <div className="window-bar"><span className="window-dot" aria-hidden="true" /><span className="flex-1 truncate">datos.frm</span></div>
+                    <div className="window-body space-y-4">
+                        <div>
+                            <h2 id="sign-data-title" className="text-xl leading-tight">{t("sign.data.title")}</h2>
+                            <p className="mt-1 text-sm text-muted">{t("sign.data.intro")}</p>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            {fields.map((f) => {
+                                const id = `sign-data-${f}`;
+                                const err = shown && errors[f] ? t(`sign.data.${errors[f]}`) : null;
+                                const wide = f === "legalName" || f === "address";
+                                return (
+                                    <div key={f} className={`min-w-0 ${wide ? "sm:col-span-2" : ""}`}>
+                                        {f === "docType" ? (
+                                            <div className="space-y-1">
+                                                <label htmlFor={id} className="eyebrow">{t(`sign.data.${f}`)} *</label>
+                                                <select id={id} className="field h-11 py-0" value={data.docType ?? "CC"} onChange={(e) => setData({ ...data, docType: e.target.value })}>
+                                                    {DOC_TYPES.map((d) => <option key={d} value={d}>{d}</option>)}
+                                                </select>
+                                            </div>
+                                        ) : (
+                                            <Field
+                                                id={id} label={t(`sign.data.${f}`)} required value={data[f] ?? ""} maxLength={f === "docNumber" ? 30 : LIMITS[f][1]} autoComplete={AUTOCOMPLETE[f]}
+                                                error={err ?? undefined} hint={f === "docNumber" && !err ? t("sign.data.docNumberHint") : undefined}
+                                                onChange={(v) => setData({ ...data, [f]: v })} onBlur={() => setShown(true)}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <p className="border-t-2 border-dashed border-ink pt-3 text-xs text-muted">{t("sign.data.privacy")}</p>
+                    </div>
+                </section>
+            )}
+
             <DocView
-                blocks={view.blocks}
+                blocks={blocks}
                 title={view.title}
                 cover={{ clientName: view.clientName, ownerName: view.ownerName, ...view.cover }}
                 owner={{ name: view.ownerName, strokes: view.ownerSignature }}
@@ -133,7 +221,7 @@ export default function Firmar() {
                 <div className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink bg-paper p-3">
                     <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
                         {view.expiresAt && <p className="hidden text-xs text-muted sm:block">{t("sign.expires", { date: fmt(view.expiresAt, lang) })}</p>}
-                        <button type="button" className="btn btn-primary w-full sm:ml-auto sm:w-auto" onClick={() => { setError(""); setOpen(true); }}>
+                        <button type="button" className="btn btn-primary w-full sm:ml-auto sm:w-auto" onClick={openSign}>
                             <PenLine size={16} strokeWidth={2.5} aria-hidden /> {t("sign.cta")}
                         </button>
                     </div>
@@ -152,8 +240,7 @@ export default function Firmar() {
                     <form noValidate onSubmit={(e) => void submit(e)} className="space-y-4 p-4 sm:p-6">
                         <h2 id={titleId} className="text-xl leading-tight">{t("sign.dialog.title")}</h2>
                         <div className="space-y-1">
-                            <label htmlFor="sign-name" className="eyebrow">{t("sign.dialog.name")} *</label>
-                            <input id="sign-name" className="field h-11 py-0" value={name} maxLength={120} autoComplete="name" onChange={(e) => setName(e.target.value)} />
+                            <Field id="sign-name" label={t("sign.dialog.name")} required value={name} maxLength={120} autoComplete="name" onChange={setName} />
                         </div>
                         <div className="space-y-1">
                             <p className="eyebrow">{t("sign.dialog.signature")} *</p>

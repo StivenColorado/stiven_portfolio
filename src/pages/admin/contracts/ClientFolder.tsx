@@ -9,14 +9,15 @@ import { useToast } from "../../../components/admin/ui/toastContext";
 import Select from "../../../components/ui/Select";
 import DocStatusBadge from "../../../components/contracts/DocStatusBadge";
 import SendDialog from "../../../components/contracts/SendDialog";
+import ProcessTimeline from "../../../components/contracts/ProcessTimeline";
 import { fmtShort } from "../../../components/admin/format";
 import { isConflict, isUnauthorized } from "../../../lib/adminApi";
 import { clientsApi, docsApi, templatesApi } from "../../../lib/contractsApi";
 import { shortHash } from "../../../lib/contractVars";
 import { parseId } from "../services/useEditor";
-import type { AdminClient, ContractDoc, ContractTemplate } from "../../../types/contracts";
+import type { AdminClient, ContractDoc, ContractTemplate, DocKind } from "../../../types/contracts";
 
-const CHILD_KINDS = new Set(["change_order", "acceptance"]);
+const CHILD_KINDS = new Set(["change_order", "acceptance", "data_processing"]);
 const RESENDABLE = new Set(["sent"]);
 const CANCELLABLE = new Set(["draft", "sent", "client_signed", "active"]);
 
@@ -68,9 +69,9 @@ export default function ClientFolder() {
     }, [load]);
 
     useEffect(() => {
-        if (!creating || !client) return;
+        if (!client) return;
         templatesApi.list(client.lang).then(setTemplates).catch(() => setTemplates([]));
-    }, [creating, client]);
+    }, [client]);
 
     const roots = useMemo(() => docs.filter((d) => d.parentId === null || !docs.some((p) => p.id === d.parentId)), [docs]);
     const kids = (parent: number) => docs.filter((d) => d.parentId === parent);
@@ -79,6 +80,16 @@ export default function ClientFolder() {
     const parents = docs.filter((d) => !CHILD_KINDS.has(d.kind) && d.status !== "cancelled");
 
     const openCreate = () => { setTplId(""); setTitle(""); setParentId(""); setCreating(true); };
+
+    const openCreateFor = (kind: DocKind) => {
+        const found = templates.find((x) => x.kind === kind);
+        if (!found) return openCreate();
+        const contract = docs.find((d) => d.kind === "services" && d.status !== "cancelled");
+        setTplId(String(found.id));
+        setTitle(found.name);
+        setParentId(CHILD_KINDS.has(kind) && contract ? String(contract.id) : "");
+        setCreating(true);
+    };
 
     const create = async () => {
         if (id === null || !tpl) return;
@@ -134,10 +145,10 @@ export default function ClientFolder() {
                     {d.link?.expired && d.status === "sent" ? ` · ${t("adminContracts.docs.linkExpired")}` : ""}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                    <Link to={`/admin/contratos/${client.id}/documentos/${d.id}`} className="btn !min-h-8 !px-3 !py-1 !text-xs"><FolderOpen size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.open")}</Link>
-                    <a href={docsApi.pdfUrl(d.id)} target="_blank" rel="noopener" className="btn !min-h-8 !px-3 !py-1 !text-xs"><Download size={13} strokeWidth={2.5} aria-hidden /> PDF</a>
-                    {RESENDABLE.has(d.status) && <button type="button" className="btn !min-h-8 !px-3 !py-1 !text-xs" onClick={() => setResendTarget(d)}><Send size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.docs.resend")}</button>}
-                    {CANCELLABLE.has(d.status) && <button type="button" className="btn !min-h-8 !px-3 !py-1 !text-xs" onClick={() => setCancelTarget(d)}><Ban size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.docs.cancel")}</button>}
+                    <Link to={`/admin/contratos/${client.id}/documentos/${d.id}`} className="btn !min-h-10 !px-3 !py-1 !text-xs"><FolderOpen size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.open")}</Link>
+                    <a href={docsApi.pdfUrl(d.id)} target="_blank" rel="noopener" className="btn !min-h-10 !px-3 !py-1 !text-xs"><Download size={13} strokeWidth={2.5} aria-hidden /> PDF</a>
+                    {RESENDABLE.has(d.status) && <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-xs" onClick={() => setResendTarget(d)}><Send size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.docs.resend")}</button>}
+                    {CANCELLABLE.has(d.status) && <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-xs" onClick={() => setCancelTarget(d)}><Ban size={13} strokeWidth={2.5} aria-hidden /> {t("adminContracts.docs.cancel")}</button>}
                 </div>
             </div>
             {kids(d.id).length > 0 && <ul className="mt-2 space-y-2">{kids(d.id).map((k) => row(k, depth + 1))}</ul>}
@@ -147,7 +158,7 @@ export default function ClientFolder() {
     return (
         <div className="min-w-0 space-y-6">
             <header className="space-y-2">
-                <Link to="/admin/contratos" className="inline-flex items-center gap-1 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper">
+                <Link to="/admin/contratos" className="inline-flex min-h-10 items-center gap-1 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper">
                     <ArrowLeft size={14} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.backToList")}
                 </Link>
                 <p className="eyebrow">{t("adminContracts.title")}</p>
@@ -165,19 +176,23 @@ export default function ClientFolder() {
                 <div className="window-body flex flex-wrap items-start justify-between gap-4">
                     <dl className="grid min-w-0 gap-x-8 gap-y-1 text-sm sm:grid-cols-2">
                         {([
-                            ["docNumber", client.docNumber && `${client.docType} ${client.docNumber}`],
-                            ["contactName", client.contactName], ["email", client.email], ["phone", client.phone],
-                            ["city", [client.city, client.country].filter(Boolean).join(", ")], ["lang", t(`adminContracts.lang.${client.lang}`)],
-                        ] as const).filter(([, v]) => v).map(([k, v]) => (
+                            ["legalName", client.legalName, true],
+                            ["docNumber", client.docNumber && `${client.docType} ${client.docNumber}`, true],
+                            ["contactName", client.contactName, true], ["email", client.email, false], ["phone", client.phone, false],
+                            ["city", client.city && [client.city, client.country].filter(Boolean).join(", "), true], ["lang", t(`adminContracts.lang.${client.lang}`), false],
+                        ] as const).filter(([, v, later]) => v || later).map(([k, v]) => (
                             <div key={k} className="min-w-0">
                                 <dt className="eyebrow">{t(`adminContracts.clients.${k}`)}</dt>
-                                <dd className="break-words text-ink">{v}</dd>
+                                <dd className={`break-words ${v ? "text-ink" : "text-muted underline decoration-dashed"}`}>{v || t("adminContracts.clients.pending")}</dd>
                             </div>
                         ))}
+                        {client.provided && <p role="status" className="text-xs font-extrabold sm:col-span-2">{t("adminContracts.clients.providedBy", { date: fmtShort.format(client.provided.at) })}</p>}
                     </dl>
                     <Link to={`/admin/contratos/${client.id}/editar`} className="btn"><Pencil size={16} strokeWidth={2.5} aria-hidden /> {t("adminContracts.common.edit")}</Link>
                 </div>
             </section>
+
+            <ProcessTimeline docs={docs} clientId={client.id} onCreate={openCreateFor} />
 
             <section className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -191,6 +206,7 @@ export default function ClientFolder() {
 
             <ConfirmDialog
                 open={creating}
+                wide
                 title={t("adminContracts.docs.newTitle")}
                 busy={busy}
                 confirmDisabled={!tpl || (needsParent && !parentId)}

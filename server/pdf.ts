@@ -1,4 +1,4 @@
-import { deflateSync } from 'node:zlib'
+import PDFDocument from 'pdfkit'
 import type { Block } from './contract-text.ts'
 
 export type PdfStrokes = { w: number; h: number; strokes: number[][] }
@@ -6,6 +6,7 @@ export type PdfSignature = { label: string; name: string; docLine: string; dateL
 export type PdfCover = {
   date: string; subtitle: string; clientLabel: string; clientName: string; tagline: string
   owner: { name: string; phone: string; email: string; city: string }; ownerLabels: [string, string, string, string]
+  labels?: { preparedFor: string; by: string }
 }
 export type PdfDoc = {
   title: string
@@ -22,378 +23,467 @@ export type PdfDoc = {
   thanks?: { heading: string; lines: string[] }
 }
 
-type Font = 'F1' | 'F2' | 'F3'
-type Rgb = [number, number, number]
-const PAGE_W = 612
-const PAGE_H = 792
-const MARGIN = 64
-const CONTENT_W = PAGE_W - MARGIN * 2
-const BOTTOM = 72
-const TOP = PAGE_H - 96
-const INK: Rgb = [0.169, 0.165, 0.141]
-const ACCENT: Rgb = [0.29, 0.275, 0.212]
-const MUTED: Rgb = [0.45, 0.44, 0.4]
-const CREAM: Rgb = [0.929, 0.922, 0.867]
-const HAIR: Rgb = [0.72, 0.71, 0.66]
+const FONT_DIR = new URL('./assets/fonts/', import.meta.url)
+const FONTS = {
+  serifM: 'cormorant-garamond-latin-500-normal.woff',
+  serif: 'cormorant-garamond-latin-600-normal.woff',
+  serifB: 'cormorant-garamond-latin-700-normal.woff',
+  serifI: 'cormorant-garamond-latin-600-italic.woff',
+  sans: 'nunito-latin-400-normal.woff',
+  sansI: 'nunito-latin-400-italic.woff',
+  sansS: 'nunito-latin-600-normal.woff',
+  sansB: 'nunito-latin-700-normal.woff',
+} as const
+type FontKey = keyof typeof FONTS
 
-const W_SERIF = [
-  250, 333, 408, 500, 500, 833, 778, 180, 333, 333, 500, 564, 250, 333, 250, 278, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
-  278, 278, 564, 564, 564, 444, 921, 722, 667, 667, 722, 611, 556, 722, 722, 333, 389, 722, 611, 889, 722, 722, 556, 722, 667, 556,
-  611, 722, 722, 944, 722, 722, 611, 333, 278, 333, 469, 500, 333, 444, 500, 444, 500, 444, 333, 500, 500, 278, 278, 500, 278, 778,
-  500, 500, 500, 500, 333, 389, 278, 500, 500, 722, 500, 500, 444, 480, 200, 480, 541,
-]
-const W_REG = [
-  278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556,
-  278, 278, 584, 584, 584, 556, 1015, 667, 667, 722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833, 722, 778, 667, 778, 722, 667,
-  611, 722, 667, 944, 667, 667, 611, 278, 278, 278, 469, 556, 333, 556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833,
-  556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500, 334, 260, 334, 584,
-]
-const W_BOLD = [
-  278, 333, 474, 556, 556, 889, 722, 238, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556,
-  333, 333, 584, 584, 584, 611, 975, 722, 722, 722, 722, 667, 611, 778, 722, 278, 556, 722, 611, 833, 722, 778, 667, 778, 722, 667,
-  611, 722, 667, 944, 667, 667, 611, 333, 278, 333, 584, 556, 333, 556, 611, 556, 611, 556, 333, 611, 611, 278, 278, 556, 278, 889,
-  611, 611, 611, 611, 389, 556, 333, 611, 556, 778, 556, 556, 500, 389, 280, 389, 584,
-]
+const W = 612
+const H = 792
+const M = 64
+const CW = W - M * 2
+const TOP = 96
+const BOTTOM = H - 84
+const CREAM = '#F4F1E8'
+const INK = '#1F1D18'
+const ACCENT = '#4A4636'
+const LINE = '#CFC9B8'
+const MUTED = '#6B6657'
+const WARN_BG = '#EADFC0'
+const WARN_FG = '#8A5A1E'
 
-const CP1252: Record<number, number> = {
-  0x20ac: 0x80, 0x2026: 0x85, 0x2018: 0x91, 0x2019: 0x92, 0x201c: 0x93, 0x201d: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x2122: 0x99,
-}
-const ACCENTED = 'ÀÁÂÃÄÅàáâãäå'
-const BASE_OF: Record<string, string> = {}
-for (const [chars, base] of [
-  [ACCENTED.slice(0, 6), 'A'], [ACCENTED.slice(6), 'a'], ['ÈÉÊË', 'E'], ['èéêë', 'e'], ['ÌÍÎÏ', 'I'], ['ìíîï', 'i'],
-  ['ÒÓÔÕÖ', 'O'], ['òóôõö', 'o'], ['ÙÚÛÜ', 'U'], ['ùúûü', 'u'], ['Ñ', 'N'], ['ñ', 'n'], ['Ç', 'C'], ['ç', 'c'], ['Ýý', 'y'],
-] as const) for (const c of chars) BASE_OF[c] = base
-const EXTRA: Record<string, [number, number]> = {
-  '¡': [333, 333], '¿': [611, 611], 'º': [365, 365], 'ª': [370, 370], '«': [556, 556], '»': [556, 556], '©': [737, 737],
-  '®': [737, 737], '°': [400, 400], '±': [584, 584], '×': [584, 584], '·': [278, 278], '½': [834, 834], '•': [350, 350],
-  '–': [556, 556], '—': [1000, 1000], '…': [1000, 1000], '‘': [222, 278], '’': [222, 278], '“': [333, 500], '”': [333, 500],
-  '€': [556, 556], '™': [1000, 1000],
-}
+const BODY = 9.8
+const BODY_LH = BODY * 1.55
+const PLACEHOLDER = /(\[\[[a-z][a-z0-9_]*\]\])/
 
+type Token = { t: string; hl: boolean; x: number }
+type Style = { font: FontKey; size: number; cs?: number }
 
-const TABLE_OF: Record<Font, number[]> = { F1: W_REG, F2: W_BOLD, F3: W_SERIF }
+const clean = (s: string) => [...s].filter((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) !== 127).join('').replaceAll('\u00a0', ' ')
 
-function charWidth(ch: string, font: Font): number {
-  const code = ch.charCodeAt(0)
-  if (code >= 32 && code <= 126) return TABLE_OF[font][code - 32] as number
-  const extra = EXTRA[ch]
-  if (extra) return extra[font === 'F2' ? 1 : 0]
-  const base = BASE_OF[ch]
-  if (base) return charWidth(base, font)
-  return font === 'F3' ? 500 : 556
-}
-
-const textWidth = (text: string, font: Font, size: number, tc = 0) => {
-  let w = 0
-  for (const ch of text) w += charWidth(ch, font)
-  return (w * size) / 1000 + tc * [...text].length
-}
-
-function winAnsiHex(text: string): string {
-  let out = ''
-  for (const ch of text) {
-    const cp = ch.codePointAt(0) as number
-    let byte = CP1252[cp] ?? (cp < 0x100 && !(cp >= 0x80 && cp < 0xa0) ? cp : 0x3f)
-    if (cp < 32) byte = 0x20
-    out += byte.toString(16).padStart(2, '0')
-  }
-  return `<${out}>`
-}
-
-const utf16Hex = (text: string) => `<FEFF${Buffer.from(text, 'utf16le').swap16().toString('hex')}>`
-const num = (n: number) => (Math.round(n * 100) / 100).toString()
-const rgb = (c: Rgb) => c.map(num).join(' ')
-
-function wrap(text: string, font: Font, size: number, maxW: number): string[] {
-  const lines: string[] = []
-  let line = ''
-  const limit = maxW * 0.985
-  for (const word of text.split(/\s+/).filter(Boolean)) {
-    let rest = word
-    while (textWidth(rest, font, size) > limit) {
-      let cut = rest.length
-      while (cut > 1 && textWidth(rest.slice(0, cut), font, size) > limit) cut--
-      if (line) {
-        lines.push(line)
-        line = ''
-      }
-      lines.push(rest.slice(0, cut))
-      rest = rest.slice(cut)
-    }
-    const candidate = line ? `${line} ${rest}` : rest
-    if (textWidth(candidate, font, size) <= limit) line = candidate
-    else {
-      lines.push(line)
-      line = rest
-    }
-  }
-  if (line) lines.push(line)
-  return lines
-}
-
-type PageKind = 'cover' | 'body' | 'thanks'
-type Style = { font?: Font; size?: number; color?: Rgb; tc?: number; align?: 'left' | 'center' | 'right' }
-
-class Layout {
-  pages: { kind: PageKind; ops: string[] }[] = []
-  y = 0
-  private cur!: { kind: PageKind; ops: string[] }
-
-  newPage(kind: PageKind = 'body'): void {
-    this.cur = { kind, ops: [] }
-    this.pages.push(this.cur)
-    this.y = kind === 'body' ? TOP : PAGE_H - MARGIN
-  }
-
-  ensure(h: number): void {
-    if (this.y - h < BOTTOM) this.newPage()
-  }
-
-  /** x es el borde izquierdo, el centro o el borde derecho según align. */
-  text(str: string, x: number, y: number, st: Style = {}): void {
-    const font = st.font ?? 'F1'
-    const size = st.size ?? 10
-    const tc = st.tc ?? 0
-    const w = textWidth(str, font, size, tc)
-    const px = st.align === 'center' ? x - w / 2 : st.align === 'right' ? x - w : x
-    this.cur.ops.push(`q ${rgb(st.color ?? INK)} rg BT /${font} ${size} Tf ${tc ? `${num(tc)} Tc ` : ''}${num(px)} ${num(y)} Td ${winAnsiHex(str)} Tj ET Q`)
-  }
-
-  line(x1: number, x2: number, y: number, width = 0.5, color: Rgb = HAIR): void {
-    this.cur.ops.push(`q ${rgb(color)} RG ${width} w ${num(x1)} ${num(y)} m ${num(x2)} ${num(y)} l S Q`)
-  }
-
-  raw(op: string): void {
-    this.cur.ops.push(op)
-  }
-
-  lines(text: string, o: { x: number; width: number; font?: Font; size: number; leading: number; color?: Rgb; align?: 'left' | 'center' }): void {
-    for (const line of wrap(text, o.font ?? 'F1', o.size, o.width)) {
-      this.ensure(o.leading)
-      this.y -= o.leading
-      this.text(line, o.align === 'center' ? o.x + o.width / 2 : o.x, this.y, { font: o.font, size: o.size, color: o.color, align: o.align })
-    }
-  }
-}
-
-const upper = (s: string) => s.toLocaleUpperCase('es')
-
-function drawCover(l: Layout, c: PdfCover, title: string): void {
-  l.newPage('cover')
-  l.text(upper(c.date), PAGE_W - MARGIN, PAGE_H - 70, { size: 7.5, tc: 1.6, color: ACCENT, align: 'right' })
-  l.y = 560
-  l.lines(title, { x: MARGIN + 30, width: CONTENT_W - 60, font: 'F3', size: 34, leading: 40, align: 'center' })
-  l.y -= 34
-  l.text(upper(c.subtitle), PAGE_W / 2, l.y, { size: 8.5, tc: 3, color: ACCENT, align: 'center' })
-  l.y -= 34
-  l.line(PAGE_W / 2 - 40, PAGE_W / 2 + 40, l.y, 0.8, ACCENT)
-  l.y -= 30
-  l.text(`${c.clientLabel}: ${c.clientName}`, PAGE_W / 2, l.y, { font: 'F3', size: 14, align: 'center' })
-  l.y -= 10
-  l.lines(c.tagline, { x: PAGE_W / 2 - 160, width: 320, size: 9, leading: 14, color: MUTED, align: 'center' })
-
-  const rows = [c.owner.name, c.owner.phone, c.owner.email, c.owner.city].map((v, i) => [c.ownerLabels[i] as string, v] as const).filter(([, v]) => v)
-  let y = 150 + rows.length * 22
-  const width = 230
-  l.line(MARGIN, MARGIN + width, y, 0.8, ACCENT)
-  for (const [label, value] of rows) {
-    l.text(upper(label), MARGIN, y - 14, { size: 6.5, tc: 1.4, color: MUTED })
-    l.text(value, MARGIN + 70, y - 14, { size: 9 })
-    y -= 22
-    l.line(MARGIN, MARGIN + width, y, 0.4)
-  }
-}
-
-function drawThanks(l: Layout, t: NonNullable<PdfDoc['thanks']>): void {
-  l.newPage('thanks')
-  l.text(t.heading, PAGE_W / 2, 470, { font: 'F3', size: 48, align: 'center' })
-  l.line(PAGE_W / 2 - 40, PAGE_W / 2 + 40, 440, 0.8, ACCENT)
-  let y = 410
-  for (const line of t.lines) {
-    l.text(line, PAGE_W / 2, y, { size: 10, color: ACCENT, align: 'center' })
-    y -= 18
-  }
-}
-
-function drawTable(l: Layout, rows: string[][], o: { header: boolean; widths?: number[]; alignLast?: boolean }): void {
-  const cols = Math.max(...rows.map((r) => r.length))
-  const grid = rows.map((r) => Array.from({ length: cols }, (_, i) => r[i] ?? ''))
-  const padX = 6
-  const padY = 6
-  const size = 9
-  const leading = 12.5
-  const natural = Array.from({ length: cols }, (_, i) => Math.min(260, Math.max(40, ...grid.map((r, idx) => (o.header && idx === 0 ? textWidth(upper(r[i] as string), 'F2', 7.5, 0.8) + 4 : textWidth(r[i] as string, 'F1', size)) + padX * 2))))
-  const total = natural.reduce((a, b) => a + b, 0)
-  const widths = o.widths ?? natural.map((n) => (n * CONTENT_W) / total)
-  const alignLast = o.alignLast ?? cols > 1
-  l.y -= 4
-  grid.forEach((row, idx) => {
-    const head = o.header && idx === 0
-    const bold = head || /^total/i.test(row[0] as string)
-    const font: Font = bold ? 'F2' : 'F1'
-    const sz = head ? 7.5 : size
-    const cells = row.map((cell, i) => wrap(head ? upper(cell) : cell, font, sz, (widths[i] as number) - padX * 2 - (head ? 4 : 0)))
-    const h = Math.max(...cells.map((c) => c.length), 1) * leading + padY * 2
-    l.ensure(h)
-    const top = l.y
-    if (idx === 0) l.line(MARGIN, MARGIN + CONTENT_W, top, 0.9, ACCENT)
-    let x = MARGIN
-    cells.forEach((lines, i) => {
-      const right = alignLast && i === cols - 1
-      lines.forEach((line, k) => {
-        const base = top - padY - sz * 0.9 - k * leading
-        l.text(line, right ? x + (widths[i] as number) - padX : x + padX, base, { font, size: sz, color: head ? ACCENT : INK, tc: head ? 0.8 : 0, align: right ? 'right' : 'left' })
-      })
-      x += widths[i] as number
-    })
-    l.y = top - h
-    l.line(MARGIN, MARGIN + CONTENT_W, l.y, head || idx === grid.length - 1 ? 0.9 : 0.4, head || idx === grid.length - 1 ? ACCENT : HAIR)
+/** Dibuja con pdfkit llevando el cursor vertical a mano: así controlamos viudas, huérfanas y bloques que no se parten. */
+export function buildPdf(d: PdfDoc): Promise<Buffer> {
+  const doc = new PDFDocument({
+    size: 'LETTER', margins: { top: 0, bottom: 0, left: 0, right: 0 }, bufferPages: true, autoFirstPage: false, compress: true,
+    info: { Title: d.title, Author: d.cover.owner.name, Subject: d.cover.subtitle, Creator: 'stiven_portfolio' },
   })
-  l.y -= 12
-}
+  const chunks: Buffer[] = []
+  doc.on('data', (c: Buffer) => chunks.push(c))
+  const done = new Promise<Buffer>((resolve, reject) => {
+    doc.on('end', () => resolve(Buffer.concat(chunks)))
+    doc.on('error', reject)
+  })
+  for (const [key, file] of Object.entries(FONTS)) doc.registerFont(key, new URL(file, FONT_DIR).pathname)
 
-function drawSignature(l: Layout, sig: PdfSignature, x: number, top: number, width: number): void {
-  const area = 64
-  const base = top - area
-  l.text(upper(sig.label), x, top + 8, { size: 7, tc: 1.4, color: ACCENT })
-  l.line(x, x + width, base, 0.8, INK)
-  if (sig.strokes) {
-    const { w, h, strokes } = sig.strokes
-    const k = Math.min((width - 8) / w, (area - 6) / h)
-    const ox = x + (width - w * k) / 2
-    const oy = base + 3
-    const paths: string[] = []
-    for (const s of strokes) {
-      if (s.length < 2) continue
-      const pts: string[] = []
-      for (let i = 0; i + 1 < s.length; i += 2) pts.push(`${num(ox + (s[i] as number) * k)} ${num(oy + (h - (s[i + 1] as number)) * k)}`)
-      const [first, ...tail] = pts as [string, ...string[]]
-      paths.push(`${first} m ${(tail.length > 0 ? tail : [first]).map((p) => `${p} l`).join(' ')} S`)
-    }
-    l.raw(`q 0.08 0.08 0.1 RG 1.3 w 1 J 1 j ${paths.join(' ')} Q`)
+  const interior: number[] = []
+  let y = TOP
+
+  const width = (t: string, s: Style) => doc.font(s.font).fontSize(s.size).widthOfString(t, { characterSpacing: s.cs ?? 0 })
+  const put = (t: string, x: number, yy: number, s: Style, color = INK) => {
+    doc.font(s.font).fontSize(s.size).fillColor(color).text(t, x, yy + 0.5, { lineBreak: false, characterSpacing: s.cs ?? 0 })
   }
-  l.text(sig.name, x, base - 14, { font: 'F2', size: 9.5 })
-  l.text(sig.docLine, x, base - 26, { size: 8, color: MUTED })
-  l.text(sig.dateLine, x, base - 37, { size: 8, color: MUTED })
-}
+  const hline = (x1: number, x2: number, yy: number, color = LINE, w = 0.5) => {
+    doc.save().lineWidth(w).strokeColor(color).moveTo(x1, yy).lineTo(x2, yy).stroke().restore()
+  }
 
-function drawBlocks(l: Layout, blocks: Block[]): void {
-  const numW = 30
-  for (const b of blocks) {
-    if (b.type === 'table') {
-      drawTable(l, b.rows, { header: b.header })
-    } else if (b.type === 'h1') {
-      l.lines(b.text, { x: MARGIN, width: CONTENT_W, font: 'F3', size: 19, leading: 24, align: 'center' })
-      l.y -= 14
-      l.line(MARGIN + CONTENT_W / 2 - 30, MARGIN + CONTENT_W / 2 + 30, l.y, 0.8, ACCENT)
-      l.y -= 16
-    } else if (b.type === 'h2') {
-      l.ensure(70)
-      l.y -= 12
-      const label = upper(b.text)
-      l.y -= 12
-      if (b.num) l.text(`${b.num}.`, MARGIN, l.y, { font: 'F2', size: 9.5, tc: 1.2, color: ACCENT })
-      for (const [i, line] of wrap(label, 'F2', 9.5, CONTENT_W - numW).entries()) {
-        if (i > 0) {
-          l.ensure(14)
-          l.y -= 13
+  function watermark() {
+    if (!d.watermark) return
+    doc.save().rotate(-35, { origin: [W / 2, H / 2] }).fillOpacity(0.055).fillColor(INK).font('serifB').fontSize(d.watermark.length > 10 ? 64 : 110)
+    const w = doc.widthOfString(d.watermark)
+    doc.text(d.watermark, (W - w) / 2, H / 2 - 40, { lineBreak: false }).restore()
+  }
+
+  function frame(cream: boolean) {
+    if (cream) doc.rect(0, 0, W, H).fill(CREAM)
+    doc.save().lineWidth(0.6).strokeOpacity(0.55).strokeColor(ACCENT).rect(28, 28, W - 56, H - 56).stroke().restore()
+  }
+
+  function newPage() {
+    doc.addPage()
+    interior.push(doc.bufferedPageRange().count - 1)
+    watermark()
+    y = TOP
+  }
+
+  const ensure = (h: number) => {
+    if (y + h > BOTTOM) newPage()
+  }
+
+  function wrap(text: string, maxW: number, s: Style): Token[][] {
+    const hlStyle: Style = s.font === 'sans' ? { ...s, font: 'sansS' } : s
+    const sp = width('x x', s) - width('xx', s)
+    const toks: { t: string; hl: boolean; sp: boolean }[] = []
+    let prev = ''
+    for (const piece of clean(text).split(PLACEHOLDER)) {
+      if (piece === '') continue
+      const spaced = /\s$/.test(prev)
+      prev = piece
+      if (PLACEHOLDER.test(piece)) toks.push({ t: piece, hl: true, sp: spaced })
+      else for (const m of piece.matchAll(/\S+/g)) toks.push({ t: m[0], hl: false, sp: m.index > 0 ? /\s/.test(piece[m.index - 1] as string) : /^\s/.test(piece) })
+    }
+    const lines: Token[][] = [[]]
+    let x = 0
+    for (const tk of toks) {
+      const st = tk.hl ? hlStyle : s
+      let parts = [tk.t]
+      if (width(tk.t, st) > maxW) {
+        parts = []
+        let cur = ''
+        for (const ch of tk.t) {
+          if (cur !== '' && width(cur + ch, st) > maxW) {
+            parts.push(cur)
+            cur = ch
+          } else cur += ch
         }
-        l.text(line, MARGIN + numW, l.y, { font: 'F2', size: 9.5, tc: 1.2, color: ACCENT })
+        if (cur) parts.push(cur)
       }
-      l.line(MARGIN, MARGIN + CONTENT_W, l.y - 5, 0.4)
-      l.y -= 9
-    } else if (b.type === 'li') {
-      const top = l.y
-      l.lines(b.text, { x: MARGIN + numW + 14, width: CONTENT_W - numW - 14, size: 10, leading: 14.5 })
-      l.text('–', MARGIN + numW + 2, top - 14.5, { color: ACCENT })
-      l.y -= 3
-    } else {
-      l.ensure(30)
-      const top = l.y
-      l.lines(b.text, { x: MARGIN + (b.num ? numW : 0), width: CONTENT_W - (b.num ? numW : 0), size: 10, leading: 14.5 })
-      if (b.num) l.text(b.num, MARGIN, top - 14.5, { font: 'F2', size: 8.5, color: ACCENT })
-      l.y -= 6
+      parts.forEach((p, i) => {
+        const tw = width(p, st)
+        let line = lines[lines.length - 1] as Token[]
+        const gap = line.length > 0 && tk.sp && i === 0 ? sp : 0
+        if (line.length > 0 && (x + gap + tw > maxW || i > 0)) {
+          line = []
+          lines.push(line)
+          x = 0
+        } else x += gap
+        line.push({ t: p, hl: tk.hl, x })
+        x += tw
+      })
     }
-  }
-}
-
-function finishPages(doc: PdfDoc, l: Layout): string[] {
-  const total = l.pages.length
-  const mark = doc.watermark
-  return l.pages.map((p, i) => {
-    const out: string[] = []
-    if (p.kind !== 'body') out.push(`${rgb(CREAM)} rg 0 0 ${PAGE_W} ${PAGE_H} re f`)
-    if (mark) {
-      const w0 = textWidth(mark, 'F2', 90)
-      const size = Math.min(90, (90 * 620) / w0)
-      const w = textWidth(mark, 'F2', size)
-      out.push(`q ${p.kind === 'body' ? '0.93 g' : '0.89 0.88 0.83 rg'} 0.7071 0.7071 -0.7071 0.7071 ${PAGE_W / 2} ${PAGE_H / 2} cm BT /F2 ${num(size)} Tf ${num(-w / 2)} -30 Td ${winAnsiHex(mark)} Tj ET Q`)
-    }
-    out.push(...p.ops)
-    if (p.kind === 'body') {
-      out.push(`q ${rgb(INK)} rg BT /F3 13 Tf ${MARGIN} ${PAGE_H - 52} Td ${winAnsiHex(doc.headerLabel)} Tj ET Q`)
-      out.push(`q ${rgb(MUTED)} rg BT /F1 6.5 Tf 1.4 Tc ${MARGIN} ${PAGE_H - 63} Td ${winAnsiHex(upper(doc.cover.subtitle))} Tj ET Q`)
-      out.push(`q ${rgb(HAIR)} RG 0.5 w ${MARGIN} ${PAGE_H - 70} m ${PAGE_W - MARGIN} ${PAGE_H - 70} l S ${MARGIN} 54 m ${PAGE_W - MARGIN} 54 l S Q`)
-      const page = doc.pageLabel.replace('{page}', String(i + 1)).replace('{pages}', String(total))
-      const pw = textWidth(page, 'F1', 7)
-      out.push(`q ${rgb(MUTED)} rg BT /F1 7 Tf ${MARGIN} 40 Td ${winAnsiHex(`${doc.ref} · SHA-256 ${doc.hash.slice(0, 12)}`)} Tj ET BT /F1 7 Tf ${num(PAGE_W - MARGIN - pw)} 40 Td ${winAnsiHex(page)} Tj ET Q`)
-    }
-    return out.join('\n')
-  })
-}
-
-export function buildPdf(doc: PdfDoc): Buffer {
-  const l = new Layout()
-  drawCover(l, doc.cover, doc.title)
-  l.newPage()
-  drawBlocks(l, doc.blocks)
-
-  if (doc.signatures.length > 0) {
-    l.ensure(190)
-    l.y -= 20
-    l.text(upper(doc.signaturesHeading), MARGIN, l.y, { font: 'F2', size: 9.5, tc: 1.2, color: ACCENT })
-    l.line(MARGIN, MARGIN + CONTENT_W, l.y - 5, 0.4)
-    const width = 210
-    const top = l.y - 62
-    doc.signatures.slice(0, 2).forEach((sig, i) => drawSignature(l, sig, MARGIN + i * (CONTENT_W - width), top, width))
-    l.y = top - 64 - 40
+    return lines.filter((l) => l.length > 0)
   }
 
-  if (doc.evidence) {
-    l.newPage()
-    l.lines(doc.evidence.heading, { x: MARGIN, width: CONTENT_W, font: 'F3', size: 18, leading: 22 })
-    l.y -= 6
-    drawTable(l, doc.evidence.rows.map(([a, b]) => [a, b]), { header: false, widths: [150, CONTENT_W - 150], alignLast: false })
+  function drawLine(line: Token[], x: number, yy: number, lh: number, s: Style, color = INK, align: 'left' | 'right' = 'left', boxW = 0) {
+    const hlStyle: Style = s.font === 'sans' ? { ...s, font: 'sansS' } : s
+    const last = line[line.length - 1] as Token
+    const total = last.x + width(last.t, last.hl ? hlStyle : s)
+    const shift = align === 'right' ? boxW - total : 0
+    const top = yy + (lh - s.size * 1.3) / 2
+    for (const tk of line) {
+      const st = tk.hl ? hlStyle : s
+      const tx = x + shift + tk.x
+      if (tk.hl) {
+        const tw = width(tk.t, st)
+        doc.save().roundedRect(tx - 1.5, top - 0.5, tw + 3, s.size * 1.3 + 1, 2).fill(WARN_BG).restore()
+      }
+      put(tk.t, tx, top, st, tk.hl ? WARN_FG : color)
+    }
   }
-  if (doc.thanks) drawThanks(l, doc.thanks)
 
-  const streams = finishPages(doc, l).map((s) => deflateSync(Buffer.from(s, 'latin1')))
-  const objs: Buffer[] = []
-  const add = (s: string | Buffer) => objs.push(Buffer.isBuffer(s) ? s : Buffer.from(s, 'latin1'))
-  const kids = streams.map((_, i) => `${6 + i * 2} 0 R`).join(' ')
-  add('<< /Type /Catalog /Pages 2 0 R >>')
-  add(`<< /Type /Pages /Kids [${kids}] /Count ${streams.length} >>`)
-  add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>')
-  add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>')
-  add('<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding /WinAnsiEncoding >>')
-  streams.forEach((s, i) => {
-    add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${7 + i * 2} 0 R >>`)
-    add(Buffer.concat([Buffer.from(`<< /Length ${s.length} /Filter /FlateDecode >>\nstream\n`, 'latin1'), s, Buffer.from('\nendstream', 'latin1')]))
-  })
-  const infoId = objs.length + 1
-  add(`<< /Title ${utf16Hex(doc.title)} /Producer ${utf16Hex('Portafolio · Contratos')} >>`)
+  /** Párrafo con sangría colgante; evita dejar una sola línea sola arriba o abajo de una página. */
+  function flow(text: string, x: number, maxW: number, s: Style, lh: number, color = INK, lead?: (yy: number) => void) {
+    const lines = wrap(text, maxW, s)
+    let i = 0
+    let first = true
+    while (i < lines.length) {
+      const left = lines.length - i
+      let fit = Math.floor((BOTTOM - y) / lh)
+      if (fit < left) {
+        if (left - fit < 2) fit = left - 2
+        if (fit < 2) {
+          newPage()
+          continue
+        }
+      }
+      const n = Math.min(fit, left)
+      for (let k = 0; k < n; k++) {
+        if (first && k === 0) lead?.(y)
+        drawLine(lines[i + k] as Token[], x, y + k * lh, lh, s, color)
+      }
+      y += n * lh
+      i += n
+      first = false
+      if (i < lines.length) newPage()
+    }
+  }
 
-  const parts: Buffer[] = [Buffer.from('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n', 'latin1')]
-  const offsets: number[] = []
-  let pos = parts[0]!.length
-  objs.forEach((o, i) => {
-    offsets.push(pos)
-    const chunk = Buffer.concat([Buffer.from(`${i + 1} 0 obj\n`, 'latin1'), o, Buffer.from('\nendobj\n', 'latin1')])
-    parts.push(chunk)
-    pos += chunk.length
-  })
-  const xref = ['xref', `0 ${objs.length + 1}`, '0000000000 65535 f ', ...offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n `)]
-  parts.push(Buffer.from(`${xref.join('\n')}\ntrailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info ${infoId} 0 R >>\nstartxref\n${pos}\n%%EOF\n`, 'latin1'))
-  return Buffer.concat(parts)
+  function diamond(cx: number, cy: number, r: number, color = ACCENT) {
+    doc.save().fillColor(color).moveTo(cx, cy - r).lineTo(cx + r, cy).lineTo(cx, cy + r).lineTo(cx - r, cy).closePath().fill().restore()
+  }
+
+  function heading(text: string, num?: string) {
+    const s: Style = { font: 'serif', size: 15.5, cs: 0.9 }
+    const lines = wrap(text.toUpperCase(), CW - 30, s)
+    const lh = 20
+    ensure(26 + lines.length * lh + 10 + BODY_LH * 2)
+    if (y > TOP + 4) y += 14
+    const x = num ? M + 30 : M
+    if (num) put(num, M, y + 4, { font: 'sansB', size: 11 }, ACCENT)
+    lines.forEach((l, i) => drawLine(l, x, y + i * lh, lh, s))
+    y += lines.length * lh + 5
+    hline(M, M + CW, y)
+    y += 12
+  }
+
+  function table(rows: string[][], header: boolean) {
+    const n = Math.max(...rows.map((r) => r.length))
+    const body: Style = { font: 'sans', size: 8.8 }
+    const head: Style = { font: 'sansB', size: 6.8, cs: 1 }
+    const cell = (r: string[], c: number) => clean(r[c] ?? '')
+    const GAP = 16
+    const avail = CW - GAP * (n - 1)
+    const nat: number[] = []
+    const min: number[] = []
+    for (let c = 0; c < n; c++) {
+      let a = 0
+      let b = 0
+      rows.forEach((r, ri) => {
+        const st = header && ri === 0 ? head : body
+        const t = header && ri === 0 ? cell(r, c).toUpperCase() : cell(r, c)
+        a = Math.max(a, width(t, st))
+        for (const w of t.split(/\s+/)) b = Math.max(b, width(w, st))
+      })
+      nat.push(a + 1)
+      min.push(Math.min(b + 1, avail / n))
+    }
+    const sumNat = nat.reduce((p, q) => p + q, 0)
+    const sumMin = min.reduce((p, q) => p + q, 0)
+    const cw = nat.map((v, i) => {
+      if (sumNat <= avail) return v + ((avail - sumNat) * v) / sumNat
+      const room = sumNat - sumMin
+      return (min[i] as number) + (room > 0 ? ((avail - sumMin) * (v - (min[i] as number))) / room : 0)
+    })
+    const xs: number[] = []
+    let acc = M
+    for (const w of cw) {
+      xs.push(acc)
+      acc += w + GAP
+    }
+    const lh = 12.6
+    const PAD = 6.5
+    const layout = (r: string[], st: Style, upper: boolean) =>
+      Array.from({ length: n }, (_, c) => wrap(upper ? cell(r, c).toUpperCase() : cell(r, c), cw[c] as number, st))
+    const headRows = header ? layout(rows[0] as string[], head, true) : null
+    const headH = headRows ? Math.max(...headRows.map((l) => l.length)) * 10 + 11 : 0
+
+    const drawHead = () => {
+      if (!headRows) return
+      headRows.forEach((ls, c) => ls.forEach((l, i) => drawLine(l, xs[c] as number, y + 3 + i * 10, 10, head, MUTED, c === n - 1 && n > 1 ? 'right' : 'left', cw[c] as number)))
+      y += headH
+      hline(M, M + CW, y, INK, 1)
+    }
+    ensure(headH + 40)
+    drawHead()
+    const data = header ? rows.slice(1) : rows
+    data.forEach((r, ri) => {
+      const total = /^(total|subtotal)\b/i.test(cell(r, 0))
+      const st: Style = total ? { font: 'sansB', size: 8.8 } : body
+      const ls = layout(r, st, false)
+      const h = Math.max(...ls.map((l) => l.length), 1) * lh + PAD * 2
+      if (y + h > BOTTOM) {
+        newPage()
+        drawHead()
+      }
+      if (total) hline(M, M + CW, y, INK, 1)
+      ls.forEach((l, c) => l.forEach((ln, i) => drawLine(ln, xs[c] as number, y + PAD + i * lh, lh, st, INK, c === n - 1 && n > 1 ? 'right' : 'left', cw[c] as number)))
+      y += h
+      if (!total && ri < data.length - 1) hline(M, M + CW, y)
+    })
+    hline(M, M + CW, y, LINE, 0.5)
+    y += 14
+  }
+
+  function block(b: Block) {
+    if (b.type === 'h2') return heading(b.text, b.num)
+    if (b.type === 'table') return table(b.rows, b.header)
+    if (b.type === 'h1') {
+      const s: Style = { font: 'serifB', size: 22, cs: 0.4 }
+      const lines = wrap(b.text, CW, s)
+      ensure(lines.length * 27 + 30)
+      lines.forEach((l, i) => drawLine(l, M, y + i * 27, 27, s))
+      y += lines.length * 27 + 12
+      return
+    }
+    const s: Style = { font: 'sans', size: BODY }
+    if (b.type === 'li') {
+      flow(b.text, M + 20, CW - 20, s, BODY_LH, INK, (yy) => diamond(M + 8, yy + BODY_LH / 2, 2))
+      y += 4.5
+      return
+    }
+    if (b.num) {
+      flow(b.text, M + 30, CW - 30, s, BODY_LH, INK, (yy) => put(b.num as string, M, yy + (BODY_LH - BODY * 1.3) / 2, { font: 'sansB', size: BODY - 0.6 }, ACCENT))
+    } else flow(b.text, M, CW, s, BODY_LH)
+    y += 7
+  }
+
+  function strokesIn(sig: PdfStrokes, x: number, top: number, bw: number, bh: number) {
+    const k = Math.min(bw / sig.w, bh / sig.h)
+    const ox = x + (bw - sig.w * k) / 2
+    const oy = top + (bh - sig.h * k)
+    doc.save().lineWidth(1.4).lineCap('round').lineJoin('round').strokeColor(INK).fillColor(INK)
+    for (const s of sig.strokes) {
+      const pts: [number, number][] = []
+      for (let i = 0; i + 1 < s.length; i += 2) pts.push([ox + (s[i] as number) * k, oy + (s[i + 1] as number) * k])
+      if (pts.length === 0) continue
+      if (pts.length === 1 || (pts.length === 2 && pts[0]![0] === pts[1]![0] && pts[0]![1] === pts[1]![1])) {
+        doc.circle(pts[0]![0], pts[0]![1], 0.8).fill()
+        continue
+      }
+      doc.moveTo(pts[0]![0], pts[0]![1])
+      for (let i = 1; i < pts.length - 1; i++) {
+        const p = pts[i] as [number, number]
+        const q = pts[i + 1] as [number, number]
+        doc.quadraticCurveTo(p[0], p[1], (p[0] + q[0]) / 2, (p[1] + q[1]) / 2)
+      }
+      const last = pts[pts.length - 1] as [number, number]
+      doc.lineTo(last[0], last[1]).stroke()
+    }
+    doc.restore()
+  }
+
+  function signatures() {
+    if (d.signatures.length === 0) return
+    const boxH = 84
+    ensure(60 + boxH + 70)
+    heading(d.signaturesHeading)
+    y += 8
+    const gap = 36
+    const colW = (CW - gap) / 2
+    const label: Style = { font: 'sansB', size: 6.8, cs: 1.6 }
+    d.signatures.slice(0, 2).forEach((sg, i) => {
+      const x = M + i * (colW + gap)
+      put(sg.label.toUpperCase(), x, y, label, ACCENT)
+      if (sg.strokes) strokesIn(sg.strokes, x, y + 16, colW, boxH)
+      const ly = y + 16 + boxH + 4
+      hline(x, x + colW, ly, INK, 0.7)
+      let ty = ly + 8
+      for (const [t, s, c] of [[sg.name, { font: 'sansB', size: 10 }, INK], [sg.docLine, { font: 'sans', size: 8.6 }, MUTED], [sg.dateLine, { font: 'sans', size: 8.6 }, MUTED]] as [string, Style, string][]) {
+        if (!t) continue
+        const ls = wrap(t, colW, s)
+        ls.forEach((l, k) => drawLine(l, x, ty + k * 13, 13, s, c))
+        ty += ls.length * 13
+      }
+    })
+    y += 16 + boxH + 4 + 8 + 13 * 3 + 10
+  }
+
+  function evidence(ev: { heading: string; rows: [string, string][] }) {
+    newPage()
+    heading(ev.heading)
+    const labelW = 128
+    const lab: Style = { font: 'sansB', size: 6.8, cs: 1 }
+    ev.rows.forEach(([k, v]) => {
+      const mono = /^[0-9a-f]{64}$/i.test(v)
+      const st: Style = mono ? { font: 'sansS', size: 8.2, cs: 0.7 } : { font: 'sans', size: 8.8 }
+      const ls = wrap(v, CW - labelW - 12, st)
+      const lh = 12.6
+      const h = ls.length * lh + 13
+      if (y + h > BOTTOM) newPage()
+      const kl = wrap(k.toUpperCase(), labelW - 8, lab)
+      kl.forEach((l, i) => drawLine(l, M, y + 6.5 + i * 10, 10, lab, MUTED))
+      ls.forEach((l, i) => drawLine(l, M + labelW + 12, y + 6.5 + i * lh, lh, st))
+      y += Math.max(h, kl.length * 10 + 13)
+      hline(M, M + CW, y)
+    })
+  }
+
+  function ornament(cx: number, yy: number, half = 64) {
+    hline(cx - half, cx - 9, yy, ACCENT, 0.6)
+    hline(cx + 9, cx + half, yy, ACCENT, 0.6)
+    diamond(cx, yy, 3.4)
+  }
+
+  const centered = (t: string, yy: number, s: Style, color = INK) => put(t, (W - width(t, s) + (s.cs ?? 0)) / 2, yy, s, color)
+
+  function cover() {
+    const c = d.cover
+    doc.addPage()
+    frame(true)
+    watermark()
+    const dateS: Style = { font: 'sansS', size: 7.2, cs: 1.6 }
+    const date = c.date.toUpperCase()
+    put(date, W - 52 - width(date, dateS) + 1.6, 54, dateS, MUTED)
+
+    let size = 46
+    while (size > 20 && wrap(d.title, 440, { font: 'serif', size }).length > 3) size -= 2
+    const lines = wrap(d.title, 440, { font: 'serif', size })
+    const lh = size * 1.06
+    let ty = 235 - ((lines.length - 1) * lh) / 2
+    const ts: Style = { font: 'serif', size }
+    for (const l of lines) {
+      const last = l[l.length - 1] as Token
+      const w = last.x + width(last.t, ts)
+      drawLine(l, (W - w) / 2, ty, lh, ts)
+      ty += lh
+    }
+    ty += 22
+    ornament(W / 2, ty)
+    ty += 26
+    centered(c.subtitle.toUpperCase(), ty, { font: 'sansS', size: 8, cs: 3 }, ACCENT)
+
+    const lab: Style = { font: 'sansB', size: 6.6, cs: 2 }
+    const labels = c.labels ?? { preparedFor: c.clientLabel, by: c.ownerLabels[0] }
+    let by = 456
+    centered(labels.preparedFor.toUpperCase(), by, lab, MUTED)
+    by += 20
+    const cs: Style = { font: 'serif', size: 22 }
+    const cl = wrap(c.clientName, 400, cs).slice(0, 2)
+    for (const l of cl) {
+      const last = l[l.length - 1] as Token
+      drawLine(l, (W - last.x - width(last.t, cs)) / 2, by, 26, cs)
+      by += 26
+    }
+    by += 18
+    centered(labels.by.toUpperCase(), by, lab, MUTED)
+    by += 18
+    centered(c.owner.name, by, { font: 'serifM', size: 15 }, ACCENT)
+
+    centered(c.tagline, 628, { font: 'sansI', size: 8, cs: 0.2 }, MUTED)
+    const cols: [string, string][] = [[c.ownerLabels[1], c.owner.phone], [c.ownerLabels[2], c.owner.email], [c.ownerLabels[3], c.owner.city]]
+    const g = 22
+    const colW = (CW - g * 2) / 3
+    cols.forEach(([k, v], i) => {
+      const x = M + i * (colW + g)
+      put(k.toUpperCase(), x, 672, { font: 'sansB', size: 6, cs: 1.4 }, MUTED)
+      const vs: Style = { font: 'sans', size: 8.8 }
+      const ls = wrap(v || '—', colW, vs).slice(0, 2)
+      ls.forEach((l, j) => drawLine(l, x, 685 + j * 12, 12, vs))
+    })
+  }
+
+  function thanks(t: { heading: string; lines: string[] }) {
+    doc.addPage()
+    frame(true)
+    centered(t.heading, 285, { font: 'serifI', size: 66 }, INK)
+    ornament(W / 2, 392)
+    let ty = 424
+    t.lines.forEach((l, i) => {
+      if (i === 0) {
+        centered(l, ty, { font: 'serif', size: 20 }, ACCENT)
+        ty += 30
+      } else {
+        centered(l, ty, { font: 'sans', size: 9.5, cs: 0.8 }, MUTED)
+        ty += 17
+      }
+    })
+  }
+
+  function decorate() {
+    const pages = doc.bufferedPageRange().count
+    for (const idx of interior) {
+      doc.switchToPage(idx)
+      const sub = d.cover.subtitle.toUpperCase()
+      const subS: Style = { font: 'sansS', size: 6.8, cs: 1.5 }
+      const subW = width(sub, subS)
+      put(sub, W - M - subW + 1.5, 46, subS, MUTED)
+      const hs: Style = { font: 'serif', size: 12 }
+      let title = clean(d.title || d.headerLabel)
+      while (title.length > 1 && width(title, hs) > CW - subW - 24) title = `${title.slice(0, -2).trimEnd()}…`
+      put(title, M, 41, hs, ACCENT)
+      hline(M, M + CW, 64, LINE, 0.5)
+      const fs: Style = { font: 'sans', size: 7, cs: 0.3 }
+      put(`${d.ref}  ·  SHA-256 ${d.hash.slice(0, 12)}`, M, H - 52, fs, MUTED)
+      const pl = d.pageLabel.replace('{page}', String(idx + 1)).replace('{pages}', String(pages))
+      put(pl, W - M - width(pl, fs), H - 52, fs, MUTED)
+    }
+  }
+
+  cover()
+  newPage()
+  for (const b of d.blocks) block(b)
+  y += 10
+  signatures()
+  if (d.evidence) evidence(d.evidence)
+  if (d.thanks) thanks(d.thanks)
+  decorate()
+  doc.end()
+  return done
 }

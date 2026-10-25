@@ -8,7 +8,7 @@ export const services: SeedTemplate = {
   variables: [
     VARS.objeto, VARS.alcance, VARS.monto, VARS.moneda, VARS.hitos, VARS.plazo, VARS.fecha_inicio, VARS.garantia_dias,
     VARS.penalidad, VARS.jurisdiccion, VARS.rondas_revision,
-    v('preaviso_dias', 'Días de preaviso para terminar', 'number', { default: '15' }),
+    v('preaviso_dias', 'Preaviso para terminar', 'text', { default: '15 días' }),
   ],
   body: `# CONTRATO DE PRESTACIÓN DE SERVICIOS DE DESARROLLO DE SOFTWARE
 
@@ -88,7 +88,7 @@ La responsabilidad total de EL PRESTADOR frente a EL CLIENTE por cualquier causa
 
 ## Terminación
 
-El contrato termina por cumplimiento del objeto, por mutuo acuerdo o por decisión unilateral de cualquiera de las partes con un preaviso escrito de {{preaviso_dias}} días. También podrá terminarse por incumplimiento grave de la otra parte que no se subsane dentro de los cinco (5) días hábiles siguientes al requerimiento escrito. En caso de terminación anticipada, EL CLIENTE pagará el trabajo ejecutado y los gastos incurridos hasta la fecha, proporcionalmente al avance, y los derechos de que trata la sección 8 solo se cederán sobre lo efectivamente pagado.
+El contrato termina por cumplimiento del objeto, por mutuo acuerdo o por decisión unilateral de cualquiera de las partes con un preaviso escrito de {{preaviso_dias}}. También podrá terminarse por incumplimiento grave de la otra parte que no se subsane dentro de los cinco (5) días hábiles siguientes al requerimiento escrito. En caso de terminación anticipada, EL CLIENTE pagará el trabajo ejecutado y los gastos incurridos hasta la fecha, proporcionalmente al avance, y los derechos de que trata la sección 8 solo se cederán sobre lo efectivamente pagado.
 
 ## Cláusula penal
 

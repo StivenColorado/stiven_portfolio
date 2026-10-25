@@ -34,7 +34,7 @@ interface Props<T extends EntityItem> {
 const FILTER_VALUES = ["all", "published", "hidden", "archived"];
 
 const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-const act = "btn !min-h-9 !gap-1.5 !px-3 !py-1 !text-sm disabled:opacity-40";
+const act = "btn !min-h-10 !gap-1.5 !px-3 !py-1 !text-sm disabled:opacity-40";
 
 export default function EntityList<T extends EntityItem>({
     items, loading, error, noun, nounPlural, newTo, editTo, getTitle, getSubtitle, renderExtra, extraActions, onOpen,
@@ -104,7 +104,7 @@ export default function EntityList<T extends EntityItem>({
                                         <div className="min-w-0 flex-1 basis-56 space-y-1">
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <h3 className="break-words text-lg leading-tight">
-                                                    {onOpen ? <button type="button" className="text-left hover:underline" onClick={() => onOpen(it)}>{getTitle(it)}</button> : getTitle(it)}
+                                                    {onOpen ? <button type="button" className="min-h-10 py-2 text-left hover:underline" onClick={() => onOpen(it)}>{getTitle(it)}</button> : getTitle(it)}
                                                 </h3>
                                                 <StatusBadge status={it.status} />
                                                 {renderExtra?.(it)}

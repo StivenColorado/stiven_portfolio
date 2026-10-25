@@ -3,6 +3,17 @@
     "title": "Contratos",
     "legal": "Esto no es asesoría legal: las plantillas son un punto de partida. Revísalas con un abogado antes de usarlas con clientes.",
     "markup": "Marcado: «# » título, «## » sección (numerada), «- » viñeta, línea en blanco = párrafo, {{variable}} para valores. Tablas: «| celda | celda |» y una línea «|---|---|» tras el encabezado.",
+    "pdfPreview": {
+      "title": "Vista previa del PDF",
+      "loading": "Generando vista previa…",
+      "error": "No se pudo generar la vista previa.",
+      "enlarge": "Ampliar",
+      "enlargeLabel": "Ampliar vista previa del PDF",
+      "newTab": "Abrir en pestaña nueva",
+      "download": "Descargar",
+      "footer": "Vista previa del PDF real · se actualiza al escribir",
+      "fillProfile": "Completar en Mis datos"
+    },
     "tabs": {
       "label": "Secciones de contratos",
       "clients": "Expedientes",
@@ -66,12 +77,9 @@
       "moneda": "Moneda",
       "plazo": "Plazo de ejecución",
       "fecha_inicio": "Fecha de inicio",
-      "garantia_dias": "Garantía (días)",
+      "garantia_dias": "Garantía",
       "hitos": "Hitos de pago",
-      "alcance": "Alcance",
-      "plazoHint": "Tiempo total que tomará entregar el proyecto, contado desde la fecha de inicio. Es la fecha límite de entrega del contrato.",
-      "plazoPlaceholder": "Ej.: 45 días calendario",
-      "garantiaHint": "Días después de la entrega en los que corriges errores sin costo."
+      "alcance": "Alcance"
     },
     "clients": {
       "new": "Nuevo expediente",
@@ -121,7 +129,14 @@
       "extras": "Otros valores",
       "extraKey": "variable_clave",
       "extraValue": "Valor",
-      "addExtra": "Añadir valor"
+      "addExtra": "Añadir valor",
+      "groupPrice": "Precio",
+      "groupTiming": "Inicio y plazo",
+      "groupWarranty": "Garantía",
+      "groupContent": "Contenido",
+      "optionalHint": "Solo el nombre y el celular son obligatorios. Los demás datos de identificación los completará el cliente al firmar; si ya los tienes, puedes escribirlos aquí.",
+      "pending": "Pendiente: lo completa el cliente al firmar",
+      "providedBy": "Datos aportados por el cliente al firmar el {{date}}."
     },
     "docs": {
       "title": "Documentos",
@@ -173,7 +188,29 @@
       "noVars": "Este texto no tiene variables.",
       "preview": "Vista previa",
       "readonly": "Documento enviado: es de solo lectura. Para editarlo, vuelve a borrador.",
-      "readonlyCancelled": "Documento cancelado: es de solo lectura."
+      "readonlyCancelled": "Documento cancelado: es de solo lectura.",
+      "group": {
+        "content": "Contenido",
+        "tables": "Tablas",
+        "money": "Precio",
+        "timing": "Fechas y plazos",
+        "other": "Otros datos",
+        "auto": "Datos automáticos",
+        "own": "Tus datos (prestador)",
+        "client": "Datos del cliente"
+      },
+      "autoHint": "Se llenan solos con los datos del expediente del cliente y de «Mis datos». Si algo falta, complétalo ahí.",
+      "autoMissing": "faltan {{count}}",
+      "autoEmpty": "Falta",
+      "editMyData": "Completar en Mis datos",
+      "advancedBody": "Editar el texto completo del documento (avanzado)",
+      "advancedBodyHint": "Solo si necesitas cambiar la redacción de este contrato para este cliente. Los cambios aquí no afectan la plantilla.",
+      "ownHint": "Salen de «Mis datos». Si falta alguno, complétalo ahí antes de enviar.",
+      "clientHint": "No los pides tú: el cliente los completa en la página de firma, justo antes de firmar. Aquí ves los que ya existen.",
+      "clientPending": "{{count}} por completar por el cliente",
+      "clientEmpty": "Pendiente: lo llena el cliente",
+      "editClientData": "Ver o editar datos del cliente",
+      "clientProvided": "El cliente aportó sus datos al firmar: {{fields}} ({{date}}, IP {{ip}})."
     },
     "send": {
       "file": "enviar.dlg",
@@ -250,7 +287,14 @@
       "insertHint": "Pulsa una variable para insertarla donde está el cursor.",
       "undeclared": "Sin declarar:",
       "declare": "Declarar variable",
-      "previewSample": "Vista previa con valores de ejemplo"
+      "previewSample": "Vista previa con valores de ejemplo",
+      "autoVars": "Insertar un dato automático (cliente, prestador, fecha…)",
+      "varsHint": "Se detectan solas a partir del texto: cada variable que escribas entre llaves dobles aparece aquí. Abre una para cambiar su etiqueta, tipo o valor por defecto.",
+      "noVars": "Todavía no hay variables. Escribe una entre llaves dobles en el texto o agrega una abajo.",
+      "unused": "No se usa en el texto",
+      "varDefaultHint": "Se rellena al crear un documento nuevo; puedes cambiarlo en cada cliente.",
+      "newVar": "Nueva variable",
+      "newVarHint": "Solo letras, números y guion bajo. Se inserta en el texto donde tengas el cursor."
     },
     "settings": {
       "profile": "Mis datos",
@@ -265,6 +309,286 @@
     "currency": {
       "COP": "COP · Pesos colombianos",
       "USD": "USD · Dólares"
+    },
+    "plazo": {
+      "hint": "¿En cuánto tiempo entregas el proyecto? La fecha de entrega se calcula desde la fecha de inicio.",
+      "qty": "Cantidad",
+      "unit": "Unidad",
+      "kind": "Tipo de días",
+      "units": {
+        "day": "Días",
+        "week": "Semanas",
+        "month": "Meses"
+      },
+      "kinds": {
+        "business": "Hábiles",
+        "calendar": "Calendario"
+      },
+      "businessNote": "Hábiles: lunes a viernes, sin festivos de Colombia.",
+      "legacy": "El plazo actual es un texto libre (\"{{value}}\"). Elige cantidad, unidad y tipo para reemplazarlo.",
+      "result": "Plazo: {{plazo}} · Entrega estimada: {{date}}",
+      "needStart": "Plazo: {{plazo}} · Indica la fecha de inicio para calcular la entrega."
+    },
+    "garantia": {
+      "hint": "Tiempo después de la entrega en el que corriges errores sin costo.",
+      "result": "Equivale a {{days}} días calendario (así aparece en el contrato)."
+    },
+    "timeline": {
+      "title": "Proceso con el cliente",
+      "hint": "El orden recomendado para trabajar con un cliente, de la primera conversación al mantenimiento. Crea cada documento desde aquí y el sistema elige la plantilla y el contrato padre.",
+      "next": "Siguiente paso: {{name}}",
+      "create": "Crear",
+      "another": "Crear otro",
+      "continue": "Continuar",
+      "open": "Abrir",
+      "optional": "Opcional",
+      "required": "Obligatorio",
+      "allDone": "Todos los pasos obligatorios están completos.",
+      "locked": "Primero crea el contrato de prestación de servicios.",
+      "phases": {
+        "start": "1 · Antes de empezar",
+        "formalize": "2 · Formalización",
+        "build": "3 · Durante el desarrollo",
+        "close": "4 · Entrega y cierre",
+        "keep": "5 · Después de la entrega"
+      },
+      "why": {
+        "nda": "Úsalo antes de hablar del proyecto si el cliente va a compartirte información sensible.",
+        "sow": "Lo que ofreces: alcance, entregables, tiempos y precio. Es la base que el cliente acepta.",
+        "services": "El contrato formal con pagos, propiedad intelectual y garantía. Se firma antes de empezar a trabajar.",
+        "data_processing": "Si el sistema maneja datos personales de los usuarios del cliente (Ley 1581).",
+        "change_order": "Cada vez que el cliente pide algo fuera del alcance: registra el cambio, el costo y el tiempo extra.",
+        "acceptance": "El cliente confirma que recibió todo conforme. Habilita el cobro final y empieza la garantía.",
+        "sla": "Define el soporte: qué cubre, tiempos de respuesta y qué se cobra aparte.",
+        "retainer": "Mantenimiento mensual con horas incluidas, cuando termina la garantía."
+      }
+    },
+    "remind": {
+      "label": "Recordar al cliente por correo si no firma",
+      "every": "Enviar cada (días)",
+      "onHint": "Se envía un correo con el enlace para firmar cada tantos días hasta que el cliente firme (máximo 3 recordatorios). Cada correo reemplaza el enlace del anterior.",
+      "offHint": "No se enviarán recordatorios: el cliente solo recibe el correo inicial."
+    },
+    "table": {
+      "header": "Encabezado de la columna {{n}}",
+      "cell": "Fila {{row}}, columna {{col}}",
+      "addRow": "Agregar fila",
+      "addCol": "Agregar columna",
+      "removeRow": "Quitar fila",
+      "removeCol": "Quitar columna",
+      "newCol": "Nueva columna",
+      "fill": "Llenar tabla",
+      "save": "Guardar tabla",
+      "fillHint": "Escribe los datos en cada celda. Enter baja a la fila siguiente y, en la última, agrega una nueva."
+    },
+    "varHelp": {
+      "summary": "¿Para qué se pide esto?",
+      "example": "Ejemplo:",
+      "useExample": "Usar este ejemplo",
+      "objeto": {
+        "why": "Describe en una frase qué le vas a entregar al cliente. Es la base del contrato: lo que no esté dentro del objeto se puede tratar como un cambio con costo extra.",
+        "example": "Diseño, desarrollo y puesta en producción del sitio web corporativo del cliente."
+      },
+      "alcance": {
+        "why": "Lista qué incluye el trabajo: módulos, pantallas, integraciones. Es lo que el cliente acepta al firmar y tu defensa si luego pide cosas que no se acordaron.",
+        "example": "Sitio web de 5 páginas responsive, formulario de contacto, panel para editar textos y publicación en el servidor del cliente."
+      },
+      "entregables": {
+        "why": "Los productos concretos que recibirá el cliente (código, diseños, accesos, manuales). Permite que ambos sepan cuándo el trabajo está terminado.",
+        "example": "Código fuente, sitio publicado y manual de uso en PDF."
+      },
+      "monto": {
+        "why": "Valor total del trabajo. El contrato lo cita junto con la moneda y el plan de pagos; es la base para cobrar y para calcular penalidades.",
+        "example": "5.000.000"
+      },
+      "moneda": {
+        "why": "Define en qué moneda se paga y evita confusiones entre pesos y dólares al cobrar.",
+        "example": "COP"
+      },
+      "hitos": {
+        "why": "Cómo y cuándo se paga: anticipo, pagos intermedios y pago final, cada uno con su condición. El anticipo te protege si el cliente desaparece, y atar cada pago a una entrega evita cobros discutibles.",
+        "example": "50 % a la firma del contrato y 50 % contra la entrega final."
+      },
+      "plazo": {
+        "why": "Cuánto tiempo tienes para entregar, contado desde la fecha de inicio. Fija la fecha límite para ambos; si el cliente demora contenidos o respuestas, el plazo se corre.",
+        "example": "45 días hábiles"
+      },
+      "fecha_inicio": {
+        "why": "Desde cuándo empieza a contar el plazo. Normalmente es la fecha de la firma o la del primer pago (anticipo).",
+        "example": "15 de enero de 2027"
+      },
+      "garantia_dias": {
+        "why": "Tiempo después de la entrega en el que corriges errores sin costo (no incluye cambios nuevos). Da tranquilidad al cliente y limita tu responsabilidad en el tiempo.",
+        "example": "60 días"
+      },
+      "penalidad": {
+        "why": "Lo que paga quien incumple, normalmente un porcentaje del valor del contrato. Desincentiva incumplimientos y evita tener que probar cuánto daño causó.",
+        "example": "El 10 % del valor total del contrato."
+      },
+      "jurisdiccion": {
+        "why": "Ciudad cuyos jueces resolverían una disputa si no hay acuerdo. Elige una donde puedas atender el proceso sin viajar.",
+        "example": "Medellín"
+      },
+      "rondas_revision": {
+        "why": "Cuántas veces el cliente puede pedir ajustes sobre un entregable antes de que se cobre extra. Evita revisiones interminables.",
+        "example": "2"
+      },
+      "vigencia_dias": {
+        "why": "Cuántos días sigue válida tu propuesta y su precio. Pasado ese plazo puedes recotizar.",
+        "example": "15"
+      },
+      "vigencia_meses": {
+        "why": "Cuántos meses dura el acuerdo desde su inicio.",
+        "example": "12"
+      },
+      "preaviso_dias": {
+        "why": "Días de aviso que debe dar quien quiere terminar el contrato. Evita terminaciones de un día para otro.",
+        "example": "30"
+      },
+      "contexto": {
+        "why": "Situación y necesidad del cliente: de dónde parte el proyecto. Deja constancia de por qué se contrata.",
+        "example": "El cliente vende en tienda física y quiere comenzar a recibir pedidos en línea."
+      },
+      "objetivos": {
+        "why": "Qué quiere lograr el cliente con el proyecto. Sirve para medir si el trabajo cumplió su propósito.",
+        "example": "Recibir pedidos en línea y reducir las llamadas de atención manual."
+      },
+      "fuera_alcance": {
+        "why": "Lo que NO incluye el proyecto. Es tu mejor protección contra pedidos «obvios» que no se cotizaron.",
+        "example": "Redacción de contenidos, campañas de publicidad, hosting y dominio."
+      },
+      "supuestos": {
+        "why": "Lo que debe cumplir el cliente para que los tiempos se mantengan: entregar contenidos y accesos, y responder a tiempo.",
+        "example": "El cliente entregará textos e imágenes en la primera semana y responderá en máximo 3 días hábiles."
+      },
+      "pruebas": {
+        "why": "Qué verificaste junto al cliente antes de entregar. Deja constancia de que el trabajo se probó.",
+        "example": "Navegación, formularios, pagos de prueba y visualización en celular y escritorio."
+      },
+      "observaciones": {
+        "why": "Pendientes menores o reservas del cliente al recibir. Si no hay, escribe «Ninguna».",
+        "example": "Ninguna."
+      },
+      "tipo_aceptacion": {
+        "why": "Aceptación total (todo conforme) o con reservas (acepta pero deja pendientes). Determina si ya puedes cobrar el saldo final.",
+        "example": "Aceptación total"
+      },
+      "saldo_pendiente": {
+        "why": "Lo que aún falta por pagar tras esta entrega, normalmente el último pago. Queda por escrito para poder cobrarlo.",
+        "example": "$ 2.500.000 contra la firma de esta acta."
+      },
+      "cambio_descripcion": {
+        "why": "Qué pidió el cliente exactamente. Debe ser claro para que no haya discusión sobre qué incluye el cambio.",
+        "example": "Agregar un módulo de reportes en PDF que no estaba en el alcance original."
+      },
+      "cambio_costo": {
+        "why": "Cuánto se suma (o resta) al valor del contrato por este cambio.",
+        "example": "$ 800.000"
+      },
+      "cambio_plazo": {
+        "why": "Cuántos días adicionales necesita el cambio. Mueve la fecha de entrega.",
+        "example": "5 días hábiles adicionales."
+      },
+      "finalidades": {
+        "why": "Para qué se usarán los datos personales; la ley exige informarlo al titular, y solo podrás tratarlos para eso.",
+        "example": "Registrar pedidos, enviar confirmaciones y gestionar el soporte."
+      },
+      "categorias_datos": {
+        "why": "Qué datos personales maneja el sistema y de quiénes. Define el alcance del cuidado que debes tener.",
+        "example": "Nombre, correo, teléfono y dirección de clientes finales del cliente."
+      },
+      "subencargados": {
+        "why": "Terceros que tocan los datos por ti (hosting, correo, base de datos). El cliente debe conocerlos.",
+        "example": "DigitalOcean (alojamiento) y Brevo (envío de correos)."
+      },
+      "duracion": {
+        "why": "Cuánto tiempo conservas los datos; al terminar se devuelven o se eliminan.",
+        "example": "Durante la vigencia del contrato y hasta 30 días después de terminado."
+      },
+      "plazo_incidentes": {
+        "why": "En cuántas horas avisas al cliente si hay una fuga o un acceso no autorizado. Lo habitual es entre 24 y 72 horas.",
+        "example": "48"
+      },
+      "servicios_incluidos": {
+        "why": "Qué tareas cubre la mensualidad. Lo que no esté aquí se cobra aparte, así evitas pedidos sin límite.",
+        "example": "Actualizaciones de seguridad, respaldos semanales y corrección de errores."
+      },
+      "horas_mensuales": {
+        "why": "Horas de trabajo incluidas cada mes. Normalmente las que no se usan no se acumulan.",
+        "example": "5"
+      },
+      "tarifa_hora": {
+        "why": "Precio de cada hora adicional cuando el cliente supera las horas incluidas.",
+        "example": "$ 80.000"
+      },
+      "sistema": {
+        "why": "El producto o sitio al que aplica el soporte.",
+        "example": "Sitio web y panel de administración de ejemplo.com"
+      },
+      "canal_soporte": {
+        "why": "Por dónde reporta problemas el cliente. Solo se atienden los reportes hechos por ese canal.",
+        "example": "Correo soporte@ejemplo.com o WhatsApp."
+      },
+      "sla_horario": {
+        "why": "Días y horas en que atiendes. Fuera de ese horario el tiempo de respuesta no corre.",
+        "example": "Lunes a viernes, de 8:00 a. m. a 6:00 p. m."
+      },
+      "sla_respuesta_horas": {
+        "why": "Tiempo máximo para responder un fallo crítico (sistema caído). Responder no es lo mismo que resolver.",
+        "example": "4"
+      },
+      "sla_resolucion_horas": {
+        "why": "Tiempo máximo para dejar solucionado un fallo crítico. Promete solo lo que puedas cumplir.",
+        "example": "24"
+      },
+      "disponibilidad": {
+        "why": "Porcentaje del tiempo en que el sistema debe estar funcionando; 99 % equivale a unas 7 horas caído al mes.",
+        "example": "99 %"
+      },
+      "credito": {
+        "why": "Descuento para el cliente si incumples el tiempo prometido. Es la consecuencia pactada, no una indemnización ilimitada.",
+        "example": "5 % de la mensualidad por cada incumplimiento."
+      },
+      "nda": {
+        "objeto": {
+          "why": "Para qué se van a compartir la información y los documentos confidenciales. Delimita el uso permitido: solo se puede usar para esa finalidad, y cualquier otro uso incumple el acuerdo.",
+          "example": "Evaluar y cotizar el desarrollo de una plataforma web de gestión de pedidos para el cliente."
+        },
+        "vigencia_meses": {
+          "why": "Meses durante los cuales las partes deben mantener la reserva, contados desde la firma. Lo habitual es entre 12 y 36.",
+          "example": "24"
+        }
+      },
+      "sla": {
+        "vigencia_meses": {
+          "why": "Cuántos meses dura el acuerdo de soporte desde su inicio.",
+          "example": "12"
+        }
+      },
+      "sow": {
+        "entregables": {
+          "why": "Una fila por cada cosa que entregas, con una breve descripción y su estado. Evita discusiones sobre qué se entregó.",
+          "example": "Sitio web | Cinco páginas responsive | Pendiente"
+        }
+      },
+      "acceptance": {
+        "entregables": {
+          "why": "Lo que el cliente recibe y acepta con esta acta. Debe coincidir con lo prometido en el contrato.",
+          "example": "Sitio web publicado | Cinco páginas responsive | Entregado"
+        }
+      },
+      "retainer": {
+        "monto": {
+          "why": "Lo que paga el cliente cada mes por el mantenimiento.",
+          "example": "$ 600.000"
+        }
+      },
+      "change_order": {
+        "monto": {
+          "why": "El nuevo valor total del contrato incluyendo este cambio: el valor anterior más el costo del cambio.",
+          "example": "$ 5.800.000"
+        }
+      }
     }
   }
 }

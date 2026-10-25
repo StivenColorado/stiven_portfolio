@@ -125,6 +125,7 @@
         "send": "Sent",
         "resend": "Resent",
         "sign": "Signature",
+        "client_data": "Client data",
         "revoke": "Back to draft",
         "cancel": "Cancellation",
         "expire": "Expiry",

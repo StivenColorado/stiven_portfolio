@@ -1,6 +1,6 @@
 import Field from "./Field";
 
-const group = (raw: string) => (raw ? new Intl.NumberFormat("es-CO").format(Number(raw)) : "");
+const group = (raw: string) => { const d = raw.replace(/\D/g, ""); return d ? new Intl.NumberFormat("es-CO").format(Number(d)) : ""; };
 const currencyName = (code: string) => new Intl.DisplayNames(["es"], { type: "currency" }).of(code) ?? code;
 
 /** Guarda solo dígitos (ej. "1500000") y muestra el valor con puntos de miles (1.500.000). */

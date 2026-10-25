@@ -23,7 +23,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
         }
     };
     return (
-        <button type="button" className="btn !min-h-8 !gap-1.5 !px-2.5 !py-0.5 !text-xs disabled:opacity-40" disabled={!text} aria-label={label} onClick={() => void copy()}>
+        <button type="button" className="btn !min-h-10 !gap-1.5 !px-2.5 !py-0.5 !text-xs disabled:opacity-40" disabled={!text} aria-label={label} onClick={() => void copy()}>
             {done ? <Check size={13} strokeWidth={2.5} aria-hidden /> : <Copy size={13} strokeWidth={2.5} aria-hidden />}
             {done ? t("adminProjects.share.copied") : t("adminProjects.share.copy")}
         </button>
@@ -108,7 +108,7 @@ export default function ProjectShareDialog({ project, onClose }: { project: Full
                             {hasEn && (
                                 <div className="flex" role="group" aria-label={t("adminProjects.share.language")}>
                                     {(["es", "en"] as const).map((l) => (
-                                        <button key={l} type="button" aria-pressed={lang === l} className={`btn !min-h-8 !px-3 !py-0.5 !text-xs ${lang === l ? "btn-primary" : ""}`} onClick={() => setLang(l)}>{l.toUpperCase()}</button>
+                                        <button key={l} type="button" aria-pressed={lang === l} className={`btn !min-h-10 !px-3 !py-0.5 !text-xs ${lang === l ? "btn-primary" : ""}`} onClick={() => setLang(l)}>{l.toUpperCase()}</button>
                                     ))}
                                 </div>
                             )}
@@ -120,7 +120,7 @@ export default function ProjectShareDialog({ project, onClose }: { project: Full
                         <div className="space-y-2">
                             <div className="flex items-center justify-between gap-3">
                                 <span className="eyebrow">{t("adminProjects.share.images", { count: project.images.length })}</span>
-                                <button type="button" className="btn !min-h-8 !gap-1.5 !px-2.5 !py-0.5 !text-xs disabled:opacity-40" disabled={downloading} onClick={() => void downloadAll()}>
+                                <button type="button" className="btn !min-h-10 !gap-1.5 !px-2.5 !py-0.5 !text-xs disabled:opacity-40" disabled={downloading} onClick={() => void downloadAll()}>
                                     <Download size={13} strokeWidth={2.5} aria-hidden />
                                     {downloading ? t("adminProjects.share.downloading") : t("adminProjects.share.downloadAll")}
                                 </button>
@@ -129,7 +129,7 @@ export default function ProjectShareDialog({ project, onClose }: { project: Full
                                 {project.images.map((url, i) => (
                                     <li key={url} className="group relative border-[length:var(--line)] border-ink">
                                         <img src={url} alt={t("adminProjects.share.imageAlt", { title, n: i + 1 })} loading="lazy" className="aspect-[16/10] w-full object-cover" />
-                                        <a href={url} download={fileName(project.slug, i, url)} aria-label={t("adminProjects.share.downloadOne", { n: i + 1 })} className="btn absolute bottom-1 right-1 !min-h-7 !px-1.5 !py-0.5"><Download size={13} strokeWidth={2.5} aria-hidden /></a>
+                                        <a href={url} download={fileName(project.slug, i, url)} aria-label={t("adminProjects.share.downloadOne", { n: i + 1 })} className="btn absolute bottom-1 right-1 !min-h-10 !px-1.5 !py-0.5"><Download size={13} strokeWidth={2.5} aria-hidden /></a>
                                     </li>
                                 ))}
                             </ul>

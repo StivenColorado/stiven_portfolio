@@ -17,8 +17,8 @@ export const VARS = {
   penalidad: v('penalidad', 'Penalidad por incumplimiento', 'text', { default: 'el diez por ciento (10 %) del valor total del contrato' }),
   jurisdiccion: v('jurisdiccion', 'Ciudad de domicilio contractual', 'text', { default: 'Bogotá D. C.' }),
   rondas_revision: v('rondas_revision', 'Rondas de revisión incluidas', 'number', { default: '2' }),
-  vigencia_dias: v('vigencia_dias', 'Validez de la propuesta (días)', 'number', { default: '15' }),
-  vigencia_meses: v('vigencia_meses', 'Vigencia (meses)', 'number', { default: '12' }),
+  vigencia_dias: v('vigencia_dias', 'Validez de la propuesta', 'text', { default: '15 días' }),
+  vigencia_meses: v('vigencia_meses', 'Vigencia', 'text', { default: '12 meses' }),
 } satisfies Record<string, TemplateVar>
 
 export type SeedTemplate = {

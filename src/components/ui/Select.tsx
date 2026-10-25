@@ -129,9 +129,9 @@ export default function Select({
     let summary: React.ReactNode = <span className="text-muted">{placeholder}</span>;
     if (chosen.length === 1) {
         const Icon = chosen[0].icon;
-        summary = <span className="flex min-w-0 items-center gap-2">{Icon && <Icon className="size-4 shrink-0" />}<span className="truncate">{chosen[0].label}</span></span>;
+        summary = <span className="flex min-w-0 items-center gap-2">{Icon && <Icon className="size-4 shrink-0" />}<span className="break-words">{chosen[0].label}</span></span>;
     }
-    else if (chosen.length > 1 && !multiple) summary = <span className="truncate">{chosen[0].label}</span>;
+    else if (chosen.length > 1 && !multiple) summary = <span className="break-words">{chosen[0].label}</span>;
     else if (chosen.length > 1) summary = <span className="truncate">{chosen.length} seleccionados</span>;
 
     const motion = "motion-safe:animate-[select-in_120ms_ease-out]";
@@ -149,7 +149,7 @@ export default function Select({
                 aria-labelledby={`${baseId}-label ${baseId}`}
                 onClick={() => (open ? close(false) : openPanel())}
                 onKeyDown={onTriggerKey}
-                className="flex min-h-11 w-full items-center justify-between gap-2 border-[length:var(--line)] border-ink bg-paper px-3 py-2 text-left text-sm font-bold text-ink shadow-hard-sm focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-lens"
+                className="flex min-h-11 w-full items-center justify-between gap-2 border-[length:var(--line)] border-ink bg-paper px-3 py-2 text-left text-sm font-bold leading-snug text-ink shadow-hard-sm focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-lens"
             >
                 <span className="flex min-w-0 flex-1 items-center">{summary}</span>
                 <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`} />
@@ -219,7 +219,7 @@ export default function Select({
                                         </span>
                                     )}
                                     {Icon && <Icon className="size-4 shrink-0" />}
-                                    <span className="min-w-0 flex-1 truncate">{opt.label}</span>
+                                    <span className="min-w-0 flex-1 break-words">{opt.label}</span>
                                     {!multiple && on && <Check aria-hidden="true" className="size-4 shrink-0" />}
                                 </li>
                             );
@@ -227,9 +227,9 @@ export default function Select({
                     </ul>
                     <div className="flex shrink-0 items-center justify-between gap-2 border-t-[length:var(--line)] border-ink bg-grey p-2">
                         {clearable ? (
-                            <button type="button" onClick={clear} disabled={!selected.length} className="btn !min-h-8 !px-3 !py-1 text-xs disabled:opacity-40">Limpiar</button>
+                            <button type="button" onClick={clear} disabled={!selected.length} className="btn !min-h-10 !px-3 !py-1 text-xs disabled:opacity-40">Limpiar</button>
                         ) : <span />}
-                        <button type="button" onClick={() => close(true)} className="btn btn-primary !min-h-8 !px-3 !py-1 text-xs">Listo</button>
+                        <button type="button" onClick={() => close(true)} className="btn btn-primary !min-h-10 !px-3 !py-1 text-xs">Listo</button>
                     </div>
                 </div>
             )}

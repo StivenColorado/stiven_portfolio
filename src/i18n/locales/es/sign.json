@@ -36,7 +36,7 @@
     },
     "errors": {
       "failed": "No se pudo firmar. Inténtalo de nuevo.",
-      "invalid": "Revisa tu nombre y tu firma e inténtalo de nuevo.",
+      "invalid": "Revisa tus datos, tu nombre y tu firma e inténtalo de nuevo.",
       "tooMany": "Demasiados intentos. Espera unos minutos."
     },
     "error": {
@@ -62,6 +62,23 @@
       "signatures": "Firmas de las partes",
       "client": "Cliente",
       "sheet": "Hoja {{n}}"
+    },
+    "data": {
+      "title": "Completa tus datos",
+      "intro": "Estos datos aparecen en el documento que vas a firmar. Revisa el texto: se actualiza mientras escribes.",
+      "legalName": "Nombre completo o razón social",
+      "docType": "Tipo de documento",
+      "docNumber": "Número de documento",
+      "contactName": "Representante legal o contacto",
+      "city": "Ciudad",
+      "address": "Dirección",
+      "docNumberHint": "Solo letras, números, punto y guion (4 a 30).",
+      "privacy": "Tratamiento de datos personales (Ley 1581 de 2012): usaremos estos datos solo para identificarte como parte del documento, dejar constancia de la firma y cumplir obligaciones legales. Quedan guardados en el expediente del prestador, que es el responsable; puedes pedir conocerlos, corregirlos o eliminarlos escribiéndole.",
+      "required": "Obligatorio",
+      "tooShort": "Es muy corto",
+      "docInvalid": "Usa de 4 a 30 caracteres: letras, números, punto o guion",
+      "chars": "Contiene caracteres no permitidos",
+      "fix": "Completa tus datos antes de firmar."
     }
   }
 }

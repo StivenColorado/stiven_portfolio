@@ -134,7 +134,7 @@ export default function SignaturePad({ onChange, ariaLabel }: Props) {
             />
             <div className="flex items-center justify-between gap-3">
                 <p className="text-xs text-muted">{t("sign.pad.hint")}</p>
-                <button type="button" className="btn !min-h-9 !px-3 !py-1 !text-sm" onClick={clear}>
+                <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-sm" onClick={clear}>
                     <Eraser size={14} strokeWidth={2.5} aria-hidden /> {t("sign.pad.clear")}
                 </button>
             </div>

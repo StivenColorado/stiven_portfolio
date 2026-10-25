@@ -66,7 +66,7 @@ export default function SettingsTab() {
                     <p className="text-xs text-muted">{t("adminContracts.settings.profileHint")}</p>
                 </div>
                 <Field label={t("adminContracts.settings.name")} value={profile.name} onChange={set("name")} maxLength={120} required error={errors.name} />
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2 labels-aligned">
                     <Select label={t("adminContracts.clients.docType")} options={docTypeOptions} value={profile.docType} onChange={(v: string) => setProfile((p) => ({ ...p, docType: (v || p.docType) as DocType }))} searchable={false} />
                     <Field label={t("adminContracts.clients.docNumber")} value={profile.docNumber} onChange={set("docNumber")} maxLength={30} error={errors.docNumber} />
                     <Field label={t("adminContracts.clients.email")} type="email" value={profile.email} onChange={set("email")} maxLength={254} error={errors.email} />

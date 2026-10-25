@@ -15,7 +15,7 @@ export const retainer: SeedTemplate = {
     VARS.moneda,
     v('tarifa_hora', 'Tarifa por hora adicional', 'money', { required: true }),
     VARS.fecha_inicio,
-    v('preaviso_dias', 'Días de preaviso para terminar o no renovar', 'number', { default: '30' }),
+    v('preaviso_dias', 'Preaviso para terminar o no renovar', 'text', { default: '30 días' }),
     VARS.jurisdiccion,
   ],
   body: `# CONTRATO DE MANTENIMIENTO MENSUAL
@@ -49,7 +49,7 @@ La tarifa mensual es de {{monto}} {{moneda}}, antes de impuestos. EL PRESTADOR l
 
 ## Vigencia, renovación y terminación
 
-El contrato rige desde el {{fecha_inicio}} por un periodo inicial de un (1) mes y se renovará automáticamente por periodos iguales. Cualquiera de las partes podrá darlo por terminado, sin penalidad, con un preaviso escrito de {{preaviso_dias}} días. Si EL CLIENTE no usa los servicios, la tarifa se sigue causando hasta que termine el contrato.
+El contrato rige desde el {{fecha_inicio}} por un periodo inicial de un (1) mes y se renovará automáticamente por periodos iguales. Cualquiera de las partes podrá darlo por terminado, sin penalidad, con un preaviso escrito de {{preaviso_dias}}. Si EL CLIENTE no usa los servicios, la tarifa se sigue causando hasta que termine el contrato.
 
 ## Obligaciones del cliente
 

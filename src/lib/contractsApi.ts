@@ -1,4 +1,4 @@
-import { request } from "./adminApi";
+import { request, requestBlob } from "./adminApi";
 import type {
     AdminClient, ClientInput, ClientStatus, ContractDoc, ContractLang, ContractTemplate, DocInput, NewDocInput,
     OwnerProfile, SendInput, Strokes, TemplateInput,
@@ -30,6 +30,18 @@ export const templatesApi = {
     remove: (id: number) => request<void>(`${base}/templates/${id}`, "DELETE"),
     restore: async (id: number) => (await request<Item<ContractTemplate>>(`${base}/templates/${id}/restore`, "POST", {})).item,
 };
+
+export interface PreviewPayload {
+    docId?: number;
+    title?: string;
+    body?: string;
+    variables?: Record<string, string>;
+    kind?: string;
+    lang?: ContractLang;
+    clientId?: number;
+}
+
+export const previewPdf = (payload: PreviewPayload, signal?: AbortSignal) => requestBlob(`${base}/preview-pdf`, payload, signal);
 
 export interface SendResult { item: ContractDoc; link: string }
 

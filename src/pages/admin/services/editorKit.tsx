@@ -61,7 +61,7 @@ export function EditorFrame({ eyebrow, heading, backTo, backLabel, status, savin
     return (
         <form noValidate onSubmit={(e) => { e.preventDefault(); onSave(false); }} className="min-w-0 space-y-6">
             <header className="space-y-2">
-                <Link to={backTo} className="inline-flex items-center gap-1 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper">
+                <Link to={backTo} className="inline-flex min-h-10 items-center gap-1 text-sm underline underline-offset-4 hover:bg-ink hover:text-paper">
                     <ArrowLeft size={14} strokeWidth={2.5} aria-hidden /> {backLabel}
                 </Link>
                 <p className="eyebrow">{eyebrow}</p>
