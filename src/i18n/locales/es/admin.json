@@ -29,7 +29,8 @@
         "services": "Servicios",
         "experience": "Experiencia",
         "account": "Cuenta",
-        "contracts": "Contratos"
+        "contracts": "Contratos",
+        "prospects": "Prospectos"
       }
     },
     "auth": {
@@ -142,7 +143,8 @@
         "auth": "Acceso",
         "clients": "Expedientes",
         "contract_templates": "Plantillas de contrato",
-        "contracts": "Contratos"
+        "contracts": "Contratos",
+        "prospects": "Prospectos"
       }
     },
     "visitors": {

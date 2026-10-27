@@ -22,6 +22,7 @@ import { geoReady, lookup } from './geo.ts'
 import { createGithub } from './github.ts'
 import { clientIp } from './ip.ts'
 import { createContractRoutes } from './contracts-routes.ts'
+import { createProspectRoutes } from './prospects.ts'
 import { seedTemplates } from './contracts.ts'
 import { sendResetMail } from './mail.ts'
 import {
@@ -67,6 +68,7 @@ export function createApp(config: Config, db: DatabaseSync): Server {
     recordAudit(db, { email, ip, action, entity, entityId, summary })
 
   const contracts = createContractRoutes(db, config, audit)
+  const prospects = createProspectRoutes(db, audit)
 
   async function track(req: IncomingMessage, res: ServerResponse, ip: string): Promise<void> {
     const body = await readJson(req)
@@ -465,6 +467,13 @@ export function createApp(config: Config, db: DatabaseSync): Server {
       const email = sessionEmail(db, readSid(req.headers.cookie))
       if (email === null) return send(res, 401, { error: 'unauthorized' })
       return contracts.admin(req, res, email, ip, url)
+    }
+
+    if (url.pathname === '/api/admin/prospects' || url.pathname.startsWith('/api/admin/prospects/')) {
+      if (!hit(`admin:prospects:${ip}`, 120, MINUTE)) return send(res, 429, { error: 'too_many_requests' })
+      const email = sessionEmail(db, readSid(req.headers.cookie))
+      if (email === null) return send(res, 401, { error: 'unauthorized' })
+      return prospects(req, res, email, ip, url)
     }
 
     const admin = new Set(['POST /api/admin/logout', 'POST /api/admin/password', 'GET /api/admin/me', 'GET /api/admin/visits', 'GET /api/admin/visitors', 'GET /api/admin/visitors/:ip/visits', 'POST /api/admin/visits/delete', 'GET /api/admin/stats', 'POST /api/admin/media', 'GET /api/admin/audit', 'GET /api/admin/github/repos', 'GET /api/admin/:entity', 'POST /api/admin/:entity', 'GET /api/admin/:entity/:id', 'PUT /api/admin/:entity/:id', 'DELETE /api/admin/:entity/:id', 'POST /api/admin/:entity/reorder', 'POST /api/admin/:entity/:id/status', 'POST /api/admin/:entity/:id/featured'])

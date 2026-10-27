@@ -29,7 +29,8 @@
         "services": "Services",
         "experience": "Experience",
         "account": "Account",
-        "contracts": "Contracts"
+        "contracts": "Contracts",
+        "prospects": "Prospects"
       }
     },
     "auth": {
@@ -142,7 +143,8 @@
         "auth": "Access",
         "clients": "Client files",
         "contract_templates": "Contract templates",
-        "contracts": "Contracts"
+        "contracts": "Contracts",
+        "prospects": "Prospects"
       }
     },
     "visitors": {

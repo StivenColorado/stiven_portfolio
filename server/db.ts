@@ -45,6 +45,13 @@ export function openDb(path: string): DatabaseSync {
       id INTEGER PRIMARY KEY, name TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'active',
       created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, data TEXT NOT NULL);
     CREATE INDEX IF NOT EXISTS clients_status ON clients(status, name);
+    CREATE TABLE IF NOT EXISTS prospects (
+      id INTEGER PRIMARY KEY, business TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', last_contact INTEGER,
+      created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, data TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS prospects_status ON prospects(status, updated_at);
+    CREATE TABLE IF NOT EXISTS prospect_notes (
+      id INTEGER PRIMARY KEY, prospect_id INTEGER NOT NULL, text TEXT NOT NULL, ts INTEGER NOT NULL);
+    CREATE INDEX IF NOT EXISTS prospect_notes_p ON prospect_notes(prospect_id, ts);
     CREATE TABLE IF NOT EXISTS contract_templates (
       id INTEGER PRIMARY KEY, kind TEXT NOT NULL, lang TEXT NOT NULL DEFAULT 'es', name TEXT NOT NULL,
       body TEXT NOT NULL, variables TEXT NOT NULL DEFAULT '[]', seed_key TEXT,
