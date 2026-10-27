@@ -10,7 +10,7 @@ import { prospectsApi } from "../../../lib/prospectsApi";
 import { PROSPECT_STATUSES } from "../../../types/prospects";
 import type { ProspectNote, ProspectStatus } from "../../../types/prospects";
 
-export default function ProspectTracking({ id, initialStatus }: { id: number; initialStatus: ProspectStatus }) {
+export default function ProspectTracking({ id, initialStatus, onStatus }: { id: number; initialStatus: ProspectStatus; onStatus?: (s: ProspectStatus) => void }) {
     const { t } = useTranslation();
     const { toast } = useToast();
     const [status, setStatus] = useState(initialStatus);
@@ -31,7 +31,9 @@ export default function ProspectTracking({ id, initialStatus }: { id: number; in
     const move = async (next: ProspectStatus) => {
         if (next === status) return;
         try {
-            setStatus((await prospectsApi.setStatus(id, next)).status);
+            const saved = (await prospectsApi.setStatus(id, next)).status;
+            setStatus(saved);
+            onStatus?.(saved);
             toast(t("adminProspects.statusChanged"));
         } catch (e) { fail(e); }
     };

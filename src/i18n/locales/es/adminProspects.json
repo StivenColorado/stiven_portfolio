@@ -54,6 +54,13 @@
       "proposal": "Propuesta",
       "won": "Ganado",
       "lost": "Descartado"
-    }
+    },
+    "edit": "Editar",
+    "backToDetail": "Volver al detalle",
+    "createdAt": "Creado: {{date}}",
+    "noContact": "Sin datos de contacto.",
+    "sourceLinks": "Enlaces de origen",
+    "sourceLinksHint": "Instagram, Facebook, Google Maps, LinkedIn… Se abren desde el detalle.",
+    "noSourceLinks": "Sin enlaces de origen."
   }
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Globe, Mail, Pencil, Phone, Plus, Trash2, User } from "lucide-react";
+import { Eye, Globe, Mail, Pencil, Phone, Plus, Trash2, User } from "lucide-react";
 import ConfirmDialog from "../../../components/admin/ui/ConfirmDialog";
 import EmptyState from "../../../components/admin/ui/EmptyState";
 import { useToast } from "../../../components/admin/ui/toastContext";
@@ -11,6 +11,7 @@ import { isUnauthorized } from "../../../lib/adminApi";
 import { prospectsApi } from "../../../lib/prospectsApi";
 import { PROSPECT_STATUSES } from "../../../types/prospects";
 import type { Prospect, ProspectStatus } from "../../../types/prospects";
+import ProspectLinks from "./ProspectLinks";
 import ProspectStatusBadge from "./ProspectStatusBadge";
 
 type Filter = ProspectStatus | "all";
@@ -136,6 +137,7 @@ export default function ProspectsList() {
                                     {p.emails.map((v) => <li key={v} className="flex items-center gap-1.5 break-all"><Mail size={14} strokeWidth={2.5} aria-hidden className="shrink-0" /><a href={`mailto:${v}`} className="underline underline-offset-4">{v}</a></li>)}
                                     {p.websites.map((v) => <li key={v} className="flex items-center gap-1.5 break-all"><Globe size={14} strokeWidth={2.5} aria-hidden className="shrink-0" /><a href={v} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">{host(v)}</a></li>)}
                                 </ul>
+                                {p.sourceLinks.length > 0 && <ProspectLinks links={p.sourceLinks} size="sm" />}
                                 <p className="text-xs text-muted">
                                     {p.lastContactAt ? t("adminProspects.lastContact", { date: fmtShort.format(p.lastContactAt) }) : t("adminProspects.neverContacted")}
                                     {" · "}{t("adminProspects.notesCount", { count: p.noteCount })}
@@ -144,7 +146,8 @@ export default function ProspectsList() {
                                     <div className="w-40">
                                         <Select label={t("adminProspects.changeStatus")} options={statusOptions} value={p.status} onChange={(v: string) => void move(p, (v || p.status) as ProspectStatus)} searchable={false} />
                                     </div>
-                                    <Link to={`/admin/prospectos/${p.id}`} className="btn !min-h-10 !px-3 !py-1 !text-sm btn-primary"><Pencil size={14} strokeWidth={2.5} aria-hidden /> {t("adminProspects.open")}</Link>
+                                    <Link to={`/admin/prospectos/${p.id}`} className="btn !min-h-10 !px-3 !py-1 !text-sm btn-primary"><Eye size={14} strokeWidth={2.5} aria-hidden /> {t("adminProspects.open")}</Link>
+                                    <Link to={`/admin/prospectos/${p.id}/editar`} className="btn !min-h-10 !px-3 !py-1 !text-sm"><Pencil size={14} strokeWidth={2.5} aria-hidden /> {t("adminProspects.edit")}</Link>
                                     <button type="button" className="btn !min-h-10 !px-3 !py-1 !text-sm" onClick={() => setTarget(p)}>
                                         <Trash2 size={14} strokeWidth={2.5} aria-hidden /> {t("adminProspects.delete")}
                                     </button>

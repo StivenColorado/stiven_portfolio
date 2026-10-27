@@ -16,11 +16,12 @@ test('prospectos: ciclo de vida completo', async () => {
   assert.equal(bad.status, 400)
 
   const created = await app.json(await app.call('POST', '/api/admin/prospects', {
-    business: 'Panadería Sol', owner: 'Ana', phones: ['+57 300 123 4567'], emails: ['ANA@sol.co'], websites: ['sol.co'],
+    business: 'Panadería Sol', owner: 'Ana', phones: ['+57 300 123 4567'], emails: ['ANA@sol.co'], websites: ['sol.co'], sourceLinks: ['instagram.com/panaderiasol'],
   }))
   assert.equal(created.item.status, 'new')
   assert.deepEqual(created.item.emails, ['ana@sol.co'])
   assert.deepEqual(created.item.websites, ['https://sol.co'])
+  assert.deepEqual(created.item.sourceLinks, ['https://instagram.com/panaderiasol'])
   const id = created.item.id
 
   const moved = await app.json(await app.call('POST', `/api/admin/prospects/${id}/status`, { status: 'contacted' }))

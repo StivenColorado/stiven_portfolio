@@ -8,7 +8,7 @@ export const PROSPECT_STATUSES = ['new', 'contacted', 'replied', 'meeting', 'pro
 export type ProspectStatus = (typeof PROSPECT_STATUSES)[number]
 
 export type ProspectInput = {
-  business: string; owner: string; phones: string[]; emails: string[]; websites: string[]; source: string
+  business: string; owner: string; phones: string[]; emails: string[]; websites: string[]; sourceLinks: string[]; source: string
 }
 export type Prospect = ProspectInput & {
   id: number; status: ProspectStatus; lastContactAt: number | null; createdAt: number; updatedAt: number; noteCount: number
@@ -43,30 +43,32 @@ function strings(r: ReturnType<typeof reader>, body: Record<string, unknown>, ke
 }
 
 export function validateProspect(body: Record<string, unknown>): Result<ProspectInput> {
-  const r = reader(body, ['business', 'owner', 'phones', 'emails', 'websites', 'source'])
+  const r = reader(body, ['business', 'owner', 'phones', 'emails', 'websites', 'sourceLinks', 'source'])
   const business = r.text('business', 120)
   const owner = r.text('owner', 120, false)
   const source = r.text('source', 120, false)
   const phones = strings(r, body, 'phones', 5, 30, (v) => (PHONE.test(v) ? v : null), 'Teléfono inválido')
   const emails = strings(r, body, 'emails', 5, 254, (v) => (EMAIL.test(v) ? v.toLowerCase() : null), 'Correo inválido')
-  const websites = strings(r, body, 'websites', 5, 300, (v) => {
+  const link = (v: string) => {
     const url = /^https?:\/\//i.test(v) ? v : `https://${v}`
     return /^https?:\/\/[^\s/]+\.[^\s/]+\S*$/i.test(url) ? url : null
-  }, 'Enlace inválido')
+  }
+  const websites = strings(r, body, 'websites', 5, 300, link, 'Enlace inválido')
+  const sourceLinks = strings(r, body, 'sourceLinks', 8, 500, link, 'Enlace inválido')
   const fields: Fields = r.fields
-  return Object.keys(fields).length > 0 ? { ok: false, fields } : { ok: true, value: { business, owner, phones, emails, websites, source } }
+  return Object.keys(fields).length > 0 ? { ok: false, fields } : { ok: true, value: { business, owner, phones, emails, websites, sourceLinks, source } }
 }
 
 function toProspect(row: Row): Prospect {
   const d = JSON.parse(row.data) as Partial<ProspectInput>
   return {
     id: row.id, business: row.business, status: row.status, owner: d.owner ?? '', phones: d.phones ?? [], emails: d.emails ?? [],
-    websites: d.websites ?? [], source: d.source ?? '', lastContactAt: row.last_contact, createdAt: row.created_at,
+    websites: d.websites ?? [], sourceLinks: d.sourceLinks ?? [], source: d.source ?? '', lastContactAt: row.last_contact, createdAt: row.created_at,
     updatedAt: row.updated_at, noteCount: row.note_count ?? 0,
   }
 }
 
-const dataOf = (i: ProspectInput) => JSON.stringify({ owner: i.owner, phones: i.phones, emails: i.emails, websites: i.websites, source: i.source })
+const dataOf = (i: ProspectInput) => JSON.stringify({ owner: i.owner, phones: i.phones, emails: i.emails, websites: i.websites, sourceLinks: i.sourceLinks, source: i.source })
 const SELECT = 'SELECT p.*, (SELECT COUNT(*) FROM prospect_notes n WHERE n.prospect_id = p.id) AS note_count FROM prospects p'
 
 export function listProspects(db: DatabaseSync, status: string, q: string): Prospect[] {

@@ -19,6 +19,7 @@ const ServiceEditor = lazy(() => import('./pages/admin/services/ServiceEditor'))
 const ExperienceList = lazy(() => import('./pages/admin/experience/ExperienceList'));
 const ExperienceEditor = lazy(() => import('./pages/admin/experience/ExperienceEditor'));
 const ProspectsList = lazy(() => import('./pages/admin/prospects/ProspectsList'));
+const ProspectDetail = lazy(() => import('./pages/admin/prospects/ProspectDetail'));
 const ProspectEditor = lazy(() => import('./pages/admin/prospects/ProspectEditor'));
 const Contratos = lazy(() => import('./pages/admin/contracts/Contratos'));
 const ClientEditor = lazy(() => import('./pages/admin/contracts/ClientEditor'));
@@ -52,7 +53,8 @@ const App: React.FC = () => (
         <Route path="experiencia/:id" element={<ExperienceEditor />} />
         <Route path="prospectos" element={<ProspectsList />} />
         <Route path="prospectos/nuevo" element={<ProspectEditor />} />
-        <Route path="prospectos/:id" element={<ProspectEditor />} />
+        <Route path="prospectos/:id" element={<ProspectDetail />} />
+        <Route path="prospectos/:id/editar" element={<ProspectEditor />} />
         <Route path="contratos" element={<Contratos />} />
         <Route path="contratos/nuevo" element={<ClientEditor />} />
         <Route path="contratos/plantillas/nueva" element={<TemplateEditor />} />

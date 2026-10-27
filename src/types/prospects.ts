@@ -7,6 +7,7 @@ export interface ProspectInput {
     phones: string[];
     emails: string[];
     websites: string[];
+    sourceLinks: string[];
     source: string;
 }
 
